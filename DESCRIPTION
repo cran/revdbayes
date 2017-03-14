@@ -1,7 +1,7 @@
 Package: revdbayes
 Title: Ratio-of-Uniforms Sampling for Bayesian Extreme Value Analysis
-Version: 1.0.0
-Date: 2016-11-22
+Version: 1.1.0
+Date: 2017-03-14
 Authors@R: person(c("Paul", "J."), "Northrop", email = "p.northrop@ucl.ac.uk",
   role = c("aut", "cre", "cph"))
 Description: Provides functions for the Bayesian analysis of extreme value
@@ -9,18 +9,21 @@ Description: Provides functions for the Bayesian analysis of extreme value
     used to simulate a random sample from the required posterior distribution.
     The functionality of 'revdbayes' is similar to the 'evdbayes' package
     <https://cran.r-project.org/package=evdbayes>, which uses Markov Chain
-    Monte Carlo (MCMC) methods for posterior simulation.  See the 'revdbayes' 
+    Monte Carlo ('MCMC') methods for posterior simulation.  See the 'revdbayes' 
     website for more information, documentation and examples.
-Imports: stats, graphics, methods, spatstat, rust (>= 1.1.0)
+Imports: stats, graphics, methods, utils, rust (>= 1.1.0), bayesplot
+        (>= 1.1.0)
 License: GPL (>= 2)
 LazyData: TRUE
-Depends: R (>= 3.3.1)
-RoxygenNote: 5.0.1
-Suggests: knitr, rmarkdown, testthat, devtools, evdbayes
+Depends: R (>= 3.3.3),
+RoxygenNote: 6.0.1
+Suggests: knitr, rmarkdown, devtools, evdbayes, ggplot2 (>= 2.2.1)
 VignetteBuilder: knitr
+URL: http://github.com/paulnorthrop/revdbayes
+BugReports: http://github.com/paulnorthrop/revdbayes/issues
 NeedsCompilation: no
-Packaged: 2016-11-23 11:15:37 UTC; paul
+Packaged: 2017-03-14 13:58:01 UTC; paul
 Author: Paul J. Northrop [aut, cre, cph]
 Maintainer: Paul J. Northrop <p.northrop@ucl.ac.uk>
 Repository: CRAN
-Date/Publication: 2016-11-23 14:09:45
+Date/Publication: 2017-03-14 15:13:09

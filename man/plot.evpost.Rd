@@ -5,19 +5,23 @@
 \title{Plot diagnostics for an evpost object}
 \usage{
 \method{plot}{evpost}(x, y, ..., n = ifelse(x$d == 1, 1001, 101),
-  prob = c(0.1, 0.25, 0.5, 0.75, 0.95, 0.99), ru_scale = FALSE,
-  rows = NULL, xlabs = NULL, ylabs = NULL)
+  prob = c(0.5, 0.1, 0.25, 0.75, 0.95, 0.99), ru_scale = FALSE,
+  rows = NULL, xlabs = NULL, ylabs = NULL, pu_only = FALSE,
+  add_pu = FALSE, use_bayesplot = FALSE, fun_name = c("areas",
+  "intervals", "dens", "hist"))
 }
 \arguments{
-\item{x}{an object of class "evpost", a result of a call to
+\item{x}{An object of class "evpost", a result of a call to
 \code{\link{rpost}}.}
 
 \item{y}{Not used.}
 
 \item{...}{Additional arguments passed on to \code{hist}, \code{lines},
-\code{contour} or \code{points}.}
+\code{contour}, \code{points} or functions from the \strong{bayesplot}
+package.}
 
-\item{n}{A number.  The meaning depends on the value of x$d.
+\item{n}{A numeric scalar.  Only relevant if \code{x$d = 1} or
+  \code{x$d = 2}. The meaning depends on the value of x$d.
 \itemize{
   \item {For d = 1 : n + 1 is the number of abscissae in the trapezium
      method used to normalize the density.}
@@ -37,8 +41,33 @@ rows of plots.  If the user doesn't provide this then it is set
 internally.}
 
 \item{xlabs, ylabs}{Numeric vectors.  When \code{d} > 2 these set the labels
-on the x and y axes respectively.  if the use doesn't provide these then
+on the x and y axes respectively.  If the user doesn't provide these then
 the column names of the simulated data matrix to be plotted are used.}
+
+\item{pu_only}{Only produce a plot relating to the posterior distribution
+for the threshold exceedance probability \eqn{p}. Only relevant when
+\code{model == "bingp"} was used in the call to \code{rpost}.}
+
+\item{add_pu}{Before producing the plots add the threshold exceedance
+probability \eqn{p} to the parameters of the extreme value model. Only
+relevant when \code{model == "bingp"} was used in the call to
+\code{rpost}.}
+
+\item{use_bayesplot}{A logical scalar. If \code{TRUE} the bayesplot
+function indicated by \code{fun_name} is called.  In principle \emph{any}
+bayesplot function (that starts with \code{mcmc_}) can be called but
+this may not always be successful because, for example, some of the
+bayesplot functions work only with multiple MCMC simulations.}
+
+\item{fun_name}{A character scalar.  The name of the bayesplot function,
+with the initial \code{mcmc_} part removed.  See
+\link[bayesplot]{MCMC-overview} and links therein for the names of these
+functions. Some examples are given below.}
+}
+\value{
+Nothing is returned unless \code{use_bayesplot = TRUE} when a
+  ggplot object, which can be further customized using the
+  \strong{ggplot2} package, is returned.
 }
 \description{
 \code{plot} method for class "evpost".  For \code{d = 1} a histogram of the
@@ -46,24 +75,66 @@ the column names of the simulated data matrix to be plotted are used.}
   The density is normalized crudely using the trapezium rule.  For
   \code{d = 2} a scatter plot of the simulated values is produced with
   density contours superimposed.  For \code{d > 2} pairwise plots of the
-  simulated values are produced using \code{pairs()}.
+  simulated values are produced.
+  An interface is also provided to the functions in the \strong{bayesplot}
+  package that produce plots of Markov chain Monte Carlo (MCMC)
+  simulations.  See \link[bayesplot]{MCMC-overview} for details of these
+  functions.
 }
 \details{
 Note that \code{suppressWarnings} is used to avoid potential benign warnings
   caused by passing unused graphical parameters to \code{hist} and
   \code{lines} via \code{...}.
+
+For details of the \strong{bayesplot} functions available when
+  \code{use_bayesplot = TRUE} see \link[bayesplot]{MCMC-overview} and
+  the \strong{bayesplot} vignette
+  \href{https://CRAN.R-project.org/package=bayesplot}{Plotting MCMC draws}.
 }
 \examples{
-# GP posterior
+## GP posterior
 data(gom)
 u <- stats::quantile(gom, probs = 0.65)
 fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
 gpg <- rpost(n = 1000, model = "gp", prior = fp, thresh = u, data = gom)
 plot(gpg)
 
+# Using the bayesplot package
+plot(gpg, use_bayesplot = TRUE)
+plot(gpg, use_bayesplot = TRUE, pars = "xi", prob = 0.95)
+plot(gpg, use_bayesplot = TRUE, fun_name = "intervals", pars = "xi")
+plot(gpg, use_bayesplot = TRUE, fun_name = "hist")
+plot(gpg, use_bayesplot = TRUE, fun_name = "dens")
+plot(gpg, use_bayesplot = TRUE, fun_name = "scatter")
+
+## bin-GP posterior
+data(gom)
+u <- quantile(gom, probs = 0.65)
+fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
+bp <- set_bin_prior(prior = "jeffreys")
+npy_gom <- length(gom)/105
+bgpg <- rpost(n = 1000, model = "bingp", prior = fp, thresh = u, data = gom,
+             bin_prior = bp, npy = npy_gom)
+plot(bgpg)
+plot(bgpg, pu_only = TRUE)
+plot(bgpg, add_pu = TRUE)
+
+# Using the bayesplot package
+dimnames(bgpg$bin_sim_vals)
+plot(bgpg, use_bayesplot = TRUE)
+plot(bgpg, use_bayesplot = TRUE, fun_name = "hist")
+plot(bgpg, use_bayesplot = TRUE, pars = "p[u]")
+}
+\references{
+Jonah Gabry (2016). bayesplot: Plotting for Bayesian
+Models. R package version 1.1.0.
+\url{https://CRAN.R-project.org/package=bayesplot}
 }
 \seealso{
 \code{\link{summary.evpost}} for summaries of the simulated values
   and properties of the ratio-of-uniforms algorithm.
-}
 
+\code{\link[bayesplot]{MCMC-overview}},
+  \code{\link[bayesplot]{MCMC-intervals}},
+  \code{\link[bayesplot]{MCMC-distributions}}.
+}

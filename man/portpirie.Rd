@@ -8,7 +8,7 @@
 \source{
 Coles, S. G. (2001) \emph{An Introduction to Statistical Modelling
   of Extreme Values}. London: Springer.
-  doi:\href{https://doi.org/10.1007/978-1-4471-3675-0}{10.1007/978-1-4471-3675-0}.
+  \url{https://doi.org/10.1007/978-1-4471-3675-0}
 }
 \usage{
 portpirie
@@ -18,4 +18,3 @@ A numeric vector of length 65 containing annual maximum sea levels,
 in metres, from 1923 to 1987 at Port Pirie, South Australia.
 }
 \keyword{datasets}
-

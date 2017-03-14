@@ -15,19 +15,36 @@
 #'   See \code{vignette("revdbayes-vignette", package = "revdbayes")} for an
 #'   overview of the package.
 #'
-#' @references Northrop, P. (2016). rust: Ratio-of-Uniforms Simulation with
-#'   Transformation. R package version 1.0.0.
+#' @references Northrop, P. J. (2016). rust: Ratio-of-Uniforms Simulation with
+#'   Transformation. R package version 1.1.0.
 #'   \url{https://cran.r-project.org/package=rust}.
 #'
-#' @seealso \code{\link{rpost}} to perform ratio-of-uniforms sampling.
-#' @seealso \code{\link{set_prior}} to set a prior density.
+#' @seealso \code{\link{set_prior}} to set a prior density for extreme value
+#'   parameters.
+#' @seealso \code{\link{rpost}} to perform ratio-of-uniforms sampling from
+#'   an extreme value posterior distribution.
 #' @seealso The \code{\link[rust]{ru}} function in the \code{\link{rust}}
-#'   package for details of the arguments that can be passed to \code{ru} and
-#'   the form of the object of class "ru" returned by \code{rpost}.
+#'   package for details of the arguments that can be passed to \code{ru}
+#'   via \code{rpost} and for the form of the object (of class "evprior")
+#'   returned from \code{rpost}, which has the same structure as an object
+#'   (of class "ru") returned by \code{ru}.
 #' @docType package
 #' @name revdbayes
 #' @import methods
-#' @importFrom stats runif
+#' @importFrom bayesplot ppc_stat
+#' @importFrom bayesplot ppc_stat_2d
+#' @importFrom bayesplot ppc_dens_overlay
+#' @importFrom bayesplot ppc_ecdf_overlay
+#' @importFrom bayesplot ppc_dens
+#' @importFrom bayesplot ppc_hist
+#' @importFrom bayesplot ppc_boxplot
+#' @importFrom bayesplot ppc_intervals
+#' @importFrom bayesplot ppc_ribbon
+#' @importFrom bayesplot pp_check
+#' @importFrom bayesplot mcmc_areas
+#' @importFrom bayesplot mcmc_intervals
+#' @importFrom bayesplot mcmc_dens
+#' @importFrom bayesplot mcmc_hist
 NULL
 
 #' Annual Maximum Sea Levels at Port Pirie, South Australia
@@ -38,7 +55,7 @@ NULL
 #' @format A numeric vector containing 65 observations.
 #' @source Coles, S. G. (2001) \emph{An Introduction to Statistical Modelling
 #'   of Extreme Values}. London: Springer.
-#'   doi:\href{https://doi.org/10.1007/978-1-4471-3675-0}{10.1007/978-1-4471-3675-0}.
+#'   \url{https://doi.org/10.1007/978-1-4471-3675-0}
 "portpirie"
 
 #' Annual Maximum Temperatures at Oxford
@@ -70,11 +87,12 @@ NULL
 #'
 #'@format A vector containing 315 observations.
 #'@source Oceanweather Inc. (2005) GOMOS -- Gulf of Mexico hindcast study.
-#'@references Northrop, P. J., N. Attalides, and P. Jonathan. (2016).
-#'  Cross-Validatory Extreme Value Threshold Selection and Uncertainty with
-#'  Application to Ocean Storm Severity. \emph{Journal of the Royal
-#'  Statistical Society: Series C (Applied Statistics)}.
-#'  doi:\href{https://doi.org/10.1111/rssc.12159}{10.1111/rssc.12159}.
+#' @references Northrop, P. J., Attalides, N. and Jonathan, P. (2017)
+#'   Cross-validatory extreme value threshold selection and uncertainty
+#'   with application to ocean storm severity.
+#'   \emph{Journal of the Royal Statistical Society Series C: Applied
+#'   Statistics}, \emph{66}(1), 93-120.
+#'   \url{http://dx.doi.org/10.1111/rssc.12159}
 "gom"
 
 #' Largest Sea Levels in Venice
@@ -88,9 +106,8 @@ NULL
 #' @format A data frame with 51 rows and 10 columns.
 #' @source Smith, R. L. (1986) Extreme value theory based on the \emph{r}
 #'   largest annual events. \emph{Journal of Hydrology}, \strong{86}, 27-43.
-#'   doi:\href{https://doi.org/10.1016/0022-1694(86)90004-1}{10.1016/0022-1694(86)90004-1}.
-#'
+#'   \url{https://doi.org/10.1016/0022-1694(86)90004-1}
 #' @references Coles, S. G. (2001) \emph{An Introduction to Statistical
 #'   Modelling of Extreme Values}. London: Springer.
-#'   doi:\href{https://doi.org/10.1007/978-1-4471-3675-0}{10.1007/978-1-4471-3675-0}.
+#'   \url{https://doi.org/10.1007/978-1-4471-3675-0}
 "venice"

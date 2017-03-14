@@ -2,14 +2,13 @@
 
 process_data <- function(model, data, thresh, noy, use_noy, ros) {
   #
-  # Removes missings, extracts sample summaries, calculates constants with
-  # which to shift and scale the data to have approximate location 0 and
-  # scale 1.
+  # Removes missings, extracts sample summaries.
   #
   # Args:
   #   model      : character string specifying the extreme value model.
   #   data       : sample data, of a format appropriate for the model.
   #     "gp"     : vector of raw data (or, if thresh = 0, threshold excesses).
+  #     "bingp"  : vector of raw data.
   #     "gev"    : vector of block maxima.
   #     "pp"     : vector of raw data.
   #     "os"     : matrix of order statistics.
@@ -23,9 +22,12 @@ process_data <- function(model, data, thresh, noy, use_noy, ros) {
   #   lik_args   : basic sample summaries to add to lik_args in rpost().
   #
   lik_args <- list()
-  if (model == "gp") {
+  if (model == "gp" | model == "bingp") {
     nas <- is.na(data)
     data <- data[!nas]
+    if (model == "bingp") {
+      lik_args$n_raw <- length(data)              # number of raw observations
+    }
     lik_args$data <- data[data > thresh] - thresh # sample threshold excesses
     if (length(lik_args$data) == 0) {
       stop("There are no data above the threshold.")
@@ -195,17 +197,20 @@ set_range_phi <- function(model, phi_mid, se_phi, mult) {
 
 # =========================== box_cox ===========================
 
-box_cox <- function (x, lambda = 1, gm = 1, lambda_tol = 1e-6) {
+box_cox <- function (x, lambda = 1, gm = 1, lambda_tol = 1e-6,
+                     poly_order = 3) {
   #
   # Computes the Box-Cox transformation of a vector.
   #
   # Args:
   #   x          : A numeric vector. (Positive) values to be Box-Cox
   #                transformed.
-  #   lambda     : A numeric vector.  Transformation parameter.
-  #   gm         : A numeric vector.  Optional scaling parameter.
+  #   lambda     : A numeric scalar.  Transformation parameter.
+  #   gm         : A numeric scalar.  Optional scaling parameter.
   #   lambda_tol : A numeric scalar.  For abs(lambda) < lambda.tol use
   #                a Taylor series expansion.
+  #   poly_order : order of Taylor series polynomial in lambda used as
+  #                an approximation if abs(lambda) < lambda.tol
   #
   # Returns:
   #   A numeric vector.  The transformed value
@@ -213,17 +218,30 @@ box_cox <- function (x, lambda = 1, gm = 1, lambda_tol = 1e-6) {
   #
   if (abs(lambda) > lambda_tol) {
     retval <- (x ^ lambda - 1) / lambda / gm ^ (lambda - 1)
+  } else if (lambda == 0) {
+    retval <- log(x)
+  } else if (is.infinite(x)) {
+    retval <- ifelse(lambda < 0, -1 / lambda, Inf)
+  } else if (x == 0) {
+    retval <- ifelse(lambda > 0, -1 / lambda, -Inf)
   } else {
-    i <- 0:3
+    i <- 0:poly_order
     retval <- sum(log(x) ^ (i+1) * lambda ^ i / factorial(i + 1))
     retval <- retval / gm ^ (lambda - 1)
   }
   return(retval)
 }
 
+# =========================== box_cox_vec ===========================
+
+# Version of box_cox vectorized for lambda and gm.
+
+box_cox_vec <- Vectorize(box_cox, vectorize.args = c("x", "lambda", "gm"))
+
 # ====================== box_cox_deriv ==========================
 
-box_cox_deriv <- function (x, lambda = 1, lambda_tol = 1e-6) {
+box_cox_deriv <- function (x, lambda = 1, lambda_tol = 1e-6,
+                           poly_order = 3) {
   #
   # Computes the derivative with respect to lambda the Box-Cox
   # transformation.
@@ -231,9 +249,11 @@ box_cox_deriv <- function (x, lambda = 1, lambda_tol = 1e-6) {
   # Args:
   #   x          : A numeric vector. (Positive) values to be Box-Cox
   #                transformed.
-  #   lambda     : A numeric vector.  Transformation parameter.
+  #   lambda     : A numeric scalar.  Transformation parameter.
   #   lambda_tol : A numeric scalar.  For abs(lambda) < lambda.tol use
   #                a Taylor series expansion.
+  #   poly_order : order of Taylor series polynomial in lambda used as
+  #                an approximation if abs(lambda) < lambda.tol
   #
   # Returns:
   #   A numeric vector.  The transformed value
@@ -242,7 +262,7 @@ box_cox_deriv <- function (x, lambda = 1, lambda_tol = 1e-6) {
   if (abs(lambda) > lambda_tol) {
     retval <- (lambda * x ^ lambda * log(x) - x ^ lambda + 1) / lambda ^ 2
   } else {
-    i <- 0:3
+    i <- 0:poly_order
     retval <- sum(log(x) ^ (i + 2) * lambda ^ i / ((i + 2) * factorial(i)))
   }
   return(retval)
