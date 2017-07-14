@@ -69,11 +69,18 @@ process_data <- function(model, data, thresh, noy, use_noy, ros) {
   if (model == "os") {
     # Each row contains order statistics for a given block.
     # Remove any row that has only missing values.
+    data <- as.matrix(data)
+    data_col <- dim(data)[2]
     nas <- !apply(is.na(data), 1, all)
     data <- data[nas, , drop = FALSE]
     # Sort each row of the data so that the first columns contains the
     # largest values, the second column the second largest, and so on.
     data <- t(apply(data, 1, sort, decreasing = TRUE, na.last = TRUE))
+    # If the original data had a single column then we need to transpose the
+    # vector returned from apply to create a one-column matrix.
+    if (data_col == 1) {
+      data <- t(data)
+    }
     if (is.null(ros)) {
       ros <- ncol(data)
     } else if (ncol(data) < ros) {
@@ -102,8 +109,9 @@ process_data <- function(model, data, thresh, noy, use_noy, ros) {
 
 create_ru_list <- function(model, trans, rotate, min_xi, max_xi) {
   #
-  # Creates a list of arguments to pass to the function rou() to perform
-  # ratio-of-uniforms sampling from a posterior density.
+  # Creates a list of arguments to pass to the functions ru() or ru_rcpp()
+  # in the rust package to perform ratio-of-uniforms sampling from a
+  # posterior density.
   #
   # Args:
   #   model     : character string specifying the extreme value model.
@@ -122,19 +130,31 @@ create_ru_list <- function(model, trans, rotate, min_xi, max_xi) {
   #
   if (model == "gp") {
     d <- 2L
-    lower <- c(0, min_xi)
-    upper <- c(Inf, max_xi)
+    if (trans == "none") {
+      lower <- c(0, min_xi)
+      upper <- c(Inf, max_xi)
+    } else if (trans == "BC") {
+      lower <- c(0, 0)
+      upper <- c(Inf, Inf)
+    } else {
+      lower <- rep(-Inf, 2)
+      upper <- rep(Inf, 2)
+    }
     var_names <- c("sigma[u]", "xi")
   }
   if (model == "gev" | model == "os" | model == "pp") {
     d <- 3L
-    lower <- c(-Inf, 0, min_xi)
-    upper <- c(Inf, Inf, max_xi)
+    if (trans == "none") {
+      lower <- c(-Inf, 0, min_xi)
+      upper <- c(Inf, Inf, max_xi)
+    } else if (trans == "BC") {
+      lower <- c(-Inf, 0, 0)
+      upper <- c(Inf, Inf, Inf)
+    } else {
+      lower <- rep(-Inf, 3)
+      upper <- rep(Inf, 3)
+    }
     var_names = c("mu","sigma", "xi")
-  }
-  if (rotate | trans == "BC") {
-    lower <- rep(-Inf, d)
-    upper <- rep(Inf, d)
   }
   return(list(d = d, lower = lower, upper = upper, var_names = var_names))
 }
@@ -203,7 +223,7 @@ box_cox <- function (x, lambda = 1, gm = 1, lambda_tol = 1e-6,
   # Computes the Box-Cox transformation of a vector.
   #
   # Args:
-  #   x          : A numeric vector. (Positive) values to be Box-Cox
+  #   x          : A numeric vector. (Non-negative) values to be Box-Cox
   #                transformed.
   #   lambda     : A numeric scalar.  Transformation parameter.
   #   gm         : A numeric scalar.  Optional scaling parameter.
@@ -234,9 +254,35 @@ box_cox <- function (x, lambda = 1, gm = 1, lambda_tol = 1e-6,
 
 # =========================== box_cox_vec ===========================
 
-# Version of box_cox vectorized for lambda and gm.
-
-box_cox_vec <- Vectorize(box_cox, vectorize.args = c("x", "lambda", "gm"))
+box_cox_vec <- function(x, lambda = 1, lambda_tol = 1e-6) {
+  #
+  # Computes the Box-Cox transformation of a vector.  If lambda is very close
+  # to zero then a first order Taylor series approximation is used.
+  #
+  # Args:
+  #   x          : A numeric vector. (Non-negative) values to be Box-Cox
+  #                transformed.
+  #   lambda     : A numeric scalar.  Transformation parameter.
+  #   lambda_tol : A numeric scalar.  For abs(lambda) < lambda.tol use
+  #                a Taylor series expansion.
+  # Returns:
+  #   A numeric vector.  The transformed value
+  #     (x^lambda - 1) / lambda
+  #
+  if (any(x < 0)) {
+    stop("Invalid x: x must be non-negative")
+  }
+  max_len <- max(length(x), length(lambda))
+  x <- rep_len(x, max_len)
+  lambda <- rep_len(lambda, max_len)
+  retval <- ifelse(abs(lambda) > lambda_tol, (x ^ lambda - 1) / lambda,
+                   ifelse(lambda == 0, log(x),
+                          ifelse(is.infinite(x),
+                                 ifelse(lambda < 0, -1 / lambda, Inf),
+                          ifelse(x == 0, ifelse(lambda > 0, -1 / lambda, -Inf),
+                                 log(x) * (1 + lambda / 2)))))
+  return(retval)
+}
 
 # ====================== box_cox_deriv ==========================
 

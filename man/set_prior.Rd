@@ -5,12 +5,15 @@
 \title{Construction of prior distributions for extreme value model parameters}
 \usage{
 set_prior(prior = c("norm", "loglognorm", "mdi", "flat", "flatflat",
-  "jeffreys", "beta"), model = c("gev", "gp", "pp", "os"), ...)
+  "jeffreys", "beta", "prob", "quant"), model = c("gev", "gp", "pp", "os"),
+  ...)
 }
 \arguments{
 \item{prior}{Either
 \itemize{
-  \item {A function that returns the value of the prior, or}
+  \item {An R function, or a pointer to a user-supplied compiled
+  C++ function, that returns the value of the prior
+  (see \strong{Examples}), or}
   \item {A character string giving the name of the prior.
     See \strong{Details} for a list of priors available for each model.}
 }}
@@ -24,7 +27,15 @@ so that in the subsequent call to \code{rpost}, consistency of the
 prior and extreme value model parameterisations can be checked.}
 
 \item{...}{Further arguments to be passed to the user-supplied or
-in-built prior function.  For details of the latter see \strong{Details}.}
+in-built prior function.  For details of the latter see \strong{Details}
+and/or the relevant underlying function: \code{\link{gp_norm}},
+\code{\link{gp_mdi}}, \code{\link{gp_flat}}, \code{\link{gp_flatflat}},
+\code{\link{gp_jeffreys}}, \code{\link{gp_beta}},
+\code{\link{gev_norm}}, \code{\link{gev_loglognorm}},
+\code{\link{gev_mdi}}, \code{\link{gev_flat}}, \code{\link{gev_flatflat}},
+\code{\link{gev_beta}}, \code{\link{gev_prob}}, \code{\link{gev_quant}}.
+All these priors have the arguments \code{min_xi} (prior lower bound on
+\eqn{\xi}) and \code{max_xi} (prior upper bound on \eqn{\xi}).}
 }
 \value{
 A list with class \code{"evprior"}.  The first component is the
@@ -34,27 +45,29 @@ A list with class \code{"evprior"}.  The first component is the
 }
 \description{
 Constructs a prior distribution for use as the argument \code{prior} in
-\code{\link{rpost}}.  The user can either specify their own prior function
+\code{\link{rpost}} and \code{\link{rpost_rcpp}}.
+The user can either specify their own prior function
+(using an R function or an external pointer to a compiled C++ function)
 and arguments for hyperparameters or choose from a list of in-built
 model-specific priors.  Note that the arguments \code{model = "gev"},
 \code{model = "pp"} and \code{model =="os"} are equivalent because
 a prior is specified is the GEV parameterisation in each of these cases.
 Note also that for \code{model = "pp"} the prior GEV parameterisation
 relates to the value of \code{noy} subsequently supplied to
-\code{\link{rpost}}.  The argument \code{model} is used for consistency
-with \code{rpost}.
+\code{\link{rpost}} or \code{\link{rpost_rcpp}}.
+The argument \code{model} is used for consistency with \code{rpost}.
 }
 \details{
 Of the in-built named priors available in revdbayes only
-  those specified using \code{prior = "norm"} or
-  \code{prior = "loglognorm"} are proper.  Other proper
-  priors are available from the package evdbayes, via the
-  functions \code{\link[evdbayes]{prior.prob}},
+  those specified using \code{prior = "prob"} (\code{\link{gev_prob}}),
+  \code{prior = "quant"} (\code{\link{gev_quant}})
+  \code{prior = "norm"} (\code{\link{gev_norm}}) or
+  \code{prior = "loglognorm"} (\code{\link{gev_loglognorm}}) are proper.
+  If \code{model = "gev"} these priors are equivalent to priors available
+  in the evdbayes package, namely \code{\link[evdbayes]{prior.prob}},
   \code{\link[evdbayes]{prior.quant}},
-  \code{\link[evdbayes]{prior.loglognorm}} and
-  \code{\link[evdbayes]{prior.norm}}.  The latter is equivalent to
-  using \code{model = "gev"} and \code{prior = "norm"} in
-  \code{set_prior}.
+  \code{\link[evdbayes]{prior.norm}} and
+  \code{\link[evdbayes]{prior.loglognorm}}.
 
   The other in-built priors are improper, that is, the integral of the
   prior function over its support is not finite.  Such priors do not
@@ -66,15 +79,26 @@ Of the in-built named priors available in revdbayes only
   parameter of the GP distribution by \eqn{\sigma}, whereas we use
   \eqn{\sigma_u} in the revdbayes vignette.
 
-  For all in-bulit priors the arguments \code{min_xi} and \code{max_xi} may
+  For all in-built priors the arguments \code{min_xi} and \code{max_xi} may
   be supplied by the user.  The prior density is set to zero for any value
   of the shape parameter \eqn{\xi} that is outside
   (\code{min_xi}, \code{max_xi}).  This will override the default values
   of \code{min_xi} and \code{max_xi} in the named priors detailed above.
 
-  \strong{Extreme value priors.} The names of the extreme value priors
-  set using \code{prior} and details of hyperparameters are:
+  \strong{Extreme value priors.} It is typical to use either
+  \code{prior = "prob"} (\code{\link{gev_prob}}) or
+  \code{prior = "quant"} (\code{\link{gev_quant}}) to set an informative
+  prior and one of the other prior (or a user-supplied function) otherwise.
+  The names of the in-built extreme value priors set using \code{prior}
+  and details of hyperparameters are:
 \itemize{
+  \item{\code{"prob"}.  A prior for GEV parameters \eqn{(\mu, \sigma, \xi)}
+    based on Crowder (1992).  See \code{\link{gev_prob}} for details.
+    See also Northrop et al. (2017) and Stephenson (2016).
+  }
+  \item{\code{"quant"}.  A prior for GEV parameters \eqn{(\mu, \sigma, \xi)}
+    based on Coles and Tawn (1996). See \code{\link{gev_quant}} for details.
+  }
   \item {\code{"norm"}.
 
   For \code{model = "gp"}:
@@ -185,12 +209,25 @@ u_prior_fn <- function(x, ab) {
          (ab[2] - 1) * log(1 - x[2]))
 }
 up <- set_prior(prior = u_prior_fn, ab = c(2, 2))
+
+# A user-defined prior using a pointer to a C++ function
+ptr_gp_flat <- create_prior_xptr("gp_flat")
+u_prior_ptr <- set_prior(prior = ptr_gp_flat, model = "gp")
 }
 \references{
 Castellanos, E. M. and Cabras, S. (2007) A default Bayesian
   procedure for the generalized Pareto distribution.
   \emph{Journal of Statistical Planning and Inference} \strong{137(2)},
   473-483. \url{http://dx.doi.org/10.1016/j.jspi.2006.01.006}.
+
+Coles, S. G. and Tawn, J. A. (1996) A Bayesian analysis of
+  extreme rainfall data. \emph{Appl. Statist.}, \strong{45}, 463-478.
+  \url{http://dx.doi.org/10.2307/2986068}.
+
+Crowder, M. (1992) Bayesian priors based on parameter
+  transformation using the distribution function
+  \emph{Ann. Inst. Statist. Math.}, \strong{44}, 405-416.
+  \url{https://link.springer.com/article/10.1007/BF00050695}.
 
 Grimshaw, S. D. (1993) Computing Maximum Likelihood Estimates
   for the Generalized Pareto Distribution.  \emph{Technometrics},
@@ -201,7 +238,7 @@ Quantile Estimation for the Generalized Pareto Distribution. Technometrics,
 29(3), 339-349. \url{http://dx.doi.org/10.2307/1269343}.
 
 Martins, E. S. and Stedinger, J. R. (2000) Generalized maximum
-  likelihood generalized extreme value quantlie estimators for hydrologic
+  likelihood generalized extreme value quantile estimators for hydrologic
   data, \emph{Water Resources Research}, \strong{36(3)}, 737-744.
   \url{http://dx.doi.org/10.1029/1999WR900330}.
 
@@ -212,12 +249,40 @@ Martins, E. S. and Stedinger, J. R. (2001) Generalized maximum
 
 Northrop, P.J. and Attalides, N. (2016) Posterior propriety in
   Bayesian extreme value analyses using reference priors
-  \emph{Statistica Sinica}, \strong{26(2)}, 721--743
+  \emph{Statistica Sinica}, \strong{26}(2), 721--743
   \url{http://dx.doi.org/10.5705/ss.2014.034}.
+
+Northrop, P. J., Attalides, N. and Jonathan, P. (2017)
+  Cross-validatory extreme value threshold selection and uncertainty
+  with application to ocean storm severity.
+  \emph{Journal of the Royal Statistical Society Series C: Applied
+  Statistics}, \strong{66}(1), 93-120.
+  \url{http://dx.doi.org/10.1111/rssc.12159}
+
+Stephenson, A. (2016) Bayesian inference for extreme value
+  modelling.  In \emph{Extreme Value Modeling and Risk Analysis: Methods
+  and Applications} (eds D. K. Dey and J. Yan), 257-280, Chapman and Hall,
+  London. \url{http://dx.doi.org/10.1201/b19721-14}.
 }
 \seealso{
-\code{\link{rpost}} for sampling from an extreme value posterior
-  distribution.
+\code{\link{rpost}} and \code{\link{rpost_rcpp}} for sampling
+  from an extreme value posterior distribution.
+
+\code{\link{create_prior_xptr}} for creating an external
+  pointer to a C++ function to evaluate the log-prior density.
+
+\code{\link{rprior_prob}} and \code{\link{rprior_quant}} for
+  sampling from informative prior distributions for GEV parameters.
+
+\code{\link{gp_norm}}, \code{\link{gp_mdi}},
+  \code{\link{gp_flat}}, \code{\link{gp_flatflat}},
+  \code{\link{gp_jeffreys}}, \code{\link{gp_beta}} to see the arguments
+  for priors for GP parameters.
+
+\code{\link{gev_norm}}, \code{\link{gev_loglognorm}},
+  \code{\link{gev_mdi}}, \code{\link{gev_flat}}, \code{\link{gev_flatflat}},
+  \code{\link{gev_beta}}, \code{\link{gev_prob}}, \code{\link{gev_quant}}
+  to see the arguments for priors for GEV parameters.
 
 \code{\link[evdbayes]{prior.prob}},
   \code{\link[evdbayes]{prior.quant}}, \code{\link[evdbayes]{prior.norm}}

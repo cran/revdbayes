@@ -7,8 +7,11 @@
 #' \strong{bayesplot} package.  See \link[bayesplot]{PPC-overview} for
 #' details of these functions.
 #'
+#' @aliases pp_check
+#'
 #' @param object An object of class "evpost", a result of a call to
-#'   \code{\link{rpost}}.  Currently \code{object$model = "gev"},
+#'   \code{\link{rpost}} or \code{\link{rpost_rcpp}}.
+#'   Currently \code{object$model = "gev"},
 #'   \code{"gp"}, \code{"bingp"} and \code{"pp"} are supported.
 #' @param ... Additional arguments passed on to bayesplot functions.
 #' @param type A character vector.  The type of bayesplot plot required:
@@ -70,8 +73,8 @@
 #'   only their sample maxima.
 #' @return A ggplot object that can be further customized using the
 #'   \strong{ggplot2} package.
-#' @seealso \code{\link{rpost}} for sampling from an extreme value posterior
-#'   distribution.
+#' @seealso \code{\link{rpost}} and \code{\link{rpost_rcpp}}for sampling
+#'   from an extreme value posterior distribution.
 #' @seealso \strong{bayesplot} functions \link[bayesplot]{PPC-overview},
 #'   \link[bayesplot]{PPC-distributions},
 #'   \link[bayesplot]{PPC-test-statistics},
@@ -85,13 +88,14 @@
 #' Chapman & Hall/CRC Press, London, third edition. (Chapter 6)
 #' \url{www.stat.columbia.edu/~gelman/book}
 #' @examples
+#' \dontrun{
 #' # GEV model
 #' data(portpirie)
 #' mat <- diag(c(10000, 10000, 100))
 #' pn <- set_prior(prior = "norm", model = "gev", mean = c(0,0,0), cov = mat)
-#' gevp  <- rpost(1000, model = "gev", prior = pn, data = portpirie, nrep = 50)
+#' gevp  <- rpost(1000, model = "gev", prior = pn, data = portpirie,
+#'                nrep = 50)
 #'
-#' library(bayesplot)
 #' # Posterior predictive test statistics
 #' pp_check(gevp)
 #' pp_check(gevp, stat = "min")
@@ -121,14 +125,14 @@
 #' u <- quantile(gom, probs = 0.65)
 #' fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
 #' gpg <- rpost(n = 1000, model = "gp", prior = fp, thresh = u,
-#'   data = gom, nrep = 50)
+#'              data = gom, nrep = 50)
 #' pp_check(gpg)
 #' pp_check(gpg, type = "overlaid")
 #'
 #' # bin-GP model
 #' bp <- set_bin_prior(prior = "jeffreys")
-#' bgpg <- rpost(n = 1000, model = "bingp", prior = fp, thresh = u, data = gom,
-#'              bin_prior = bp, nrep = 50)
+#' bgpg <- rpost(n = 1000, model = "bingp", prior = fp, thresh = u,
+#'               data = gom, bin_prior = bp, nrep = 50)
 #' pp_check(bgpg, stat = "max")
 #'
 #' # PP model
@@ -136,8 +140,10 @@
 #' rthresh <- 40
 #' pf <- set_prior(prior = "flat", model = "gev", min_xi = -1)
 #' ppr <- rpost(n = 1000, model = "pp", prior = pf, data = rainfall,
-#'   thresh = rthresh, noy = 54, nrep = 50)
+#'              thresh = rthresh, noy = 54, nrep = 50)
 #' pp_check(ppr, stat = "max")
+#' }
+#' @export pp_check
 #' @export
 pp_check.evpost <- function(object, ...,
                             type = c("stat", "overlaid", "multiple",
@@ -148,7 +154,7 @@ pp_check.evpost <- function(object, ...,
     stop("use only with \"evpost\" objects")
   }
   if (is.null(object[["data_rep"]])) {
-    stop("object$data_rep is NULL: call rpost() again supplying nrep")
+    stop("data_rep is NULL: call rpost() or rpost_rcpp() again supplying nrep")
   }
   type <- match.arg(type)
   if (is.null(subtype)) {

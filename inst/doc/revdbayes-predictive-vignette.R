@@ -1,8 +1,10 @@
 ## ---- include = FALSE----------------------------------------------------
 knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
 
-## ----setup, include=FALSE------------------------------------------------
-devtools::load_all() 
+required <- c("bayesplot", "ggplot2")
+
+if (!all(unlist(lapply(required, function(pkg) requireNamespace(pkg, quietly = TRUE)))))
+  knitr::opts_chunk$set(eval = FALSE)
 
 ## ------------------------------------------------------------------------
 # Set the number of posterior samples required.

@@ -9,12 +9,13 @@
 #' observations.
 #'
 #' @param object An object of class "evpost", a result of a call to
-#'   \code{\link{rpost}} with \code{model = "gev"}, \code{model = "os"},
-#'   \code{model = "pp"} or \code{model == "bingp"}.  Calling these functions
-#'   after a call to \code{rpost} with \code{model == "gp"} will produce an
-#'   error, because inferences about the probability of threshold exceedance
-#'   are required, in addition to the distribution of threshold excesses.
-#'   The model is stored in \code{object$model}.
+#'   \code{\link{rpost}} or \code{\link{rpost_rcpp}} with \code{model = "gev"},
+#'   \code{model = "os"}, \code{model = "pp"} or \code{model == "bingp"}.
+#'   Calling these functions after a call to \code{rpost} or \code{rpost_rcpp}
+#'   with \code{model == "gp"} will produce an error, because inferences about
+#'   the probability of threshold exceedance are required, in addition to the
+#'   distribution of threshold excesses. The model is stored in
+#'   \code{object$model}.
 #' @param type A character vector.  Indicates which type of inference is
 #'   required:
 #' \itemize{
@@ -44,8 +45,8 @@
 #'       If \code{object$model == "bingp"} then no element of \code{p} can
 #'       correspond to a predictive quantile that is below the threshold,
 #'       \code{object$thresh}.  That is, no element of \code{p} can be less
-#'       than the value of
-#'       \code{predict.evpost(object, type = "q", x = object$thresh)}.
+#'       than the value of \code{predict.evpost(object,}
+#'       \code{type = "q", x = object$thresh)}.
 #'
 #'       If \code{x} is not supplied then a default value of
 #'       \code{c(0.025, 0.25, 0.5, 0.75, 0.975)} is used.
@@ -60,11 +61,13 @@
 #'   non-missing observations divided by total number of years of non-missing
 #'   data.
 #'
-#' If \code{rpost} was called with \code{model == "bingp"} then \code{npy}
-#' must either have been supplied in that call or be supplied here.
+#' If \code{rpost} or \code{rpost_rcpp} was called with
+#' \code{model == "bingp"} then \code{npy} must either have been supplied
+#' in that call or be supplied here.
 #'
 #' Otherwise, a default value will be assumed if \code{npy} is not supplied,
-#' based on the value of \code{model} in the call to \code{rpost}:
+#' based on the value of \code{model} in the call to \code{rpost} or
+#' \code{rpost_rcpp}:
 #' \itemize{
 #'   \item{\code{model = "gev"}:} \code{npy} = 1, i.e. the data were
 #'     annual maxima so the block size is one year.
@@ -73,7 +76,7 @@
 #'   \item{\code{model = "pp"}:}
 #'     \code{npy} = \code{length(x$data)} / \code{object$noy},
 #'     i.e. the value of \code{noy} used in the call to \code{\link{rpost}}
-#'     is equated to a block size of one year.
+#'     or \code{\link{rpost_rcpp}} is equated to a block size of one year.
 #' }
 #' If \code{npy} is supplied twice then the value supplied here will be
 #' used and a warning given.
@@ -84,9 +87,9 @@
 #' @param hpd A logical scalar.
 #'   Only relevant when \code{type = "i"}.
 #'
-#'   If \code{hpd = FALSE} then the predictive interval is
-#'   equi-tailed, equal to \code{predict.evpost(object, type ="q", x = p)},
-#'   where \code{p = c((1-level/100)/2, (1+level/100)/2)}.
+#'   If \code{hpd = FALSE} then the interval is
+#'   equi-tailed, equal to \code{predict.evpost(}\code{object, type ="q", x = p)},
+#'   where \code{p = c((1-level/100)/2,} \code{(1+level/100)/2)}.
 #'
 #'   If \code{hpd = TRUE} then, in addition to the equi-tailed interval,
 #'   the shortest possible level\% interval is calculated.
@@ -117,13 +120,11 @@
 #'
 #'   \strong{GEV / OS / PP}.
 #'   If \code{model = "gev"}, \code{model = "os"} or \code{model = "pp"}
-#'   in the call to \code{\link{rpost}} we first calculate the number
-#'   of blocks \eqn{b} in \code{n_years} years.  Then we convert the
-#'   posterior simulated GEV parameters \eqn{(\mu, \sigma, \xi)} to
-#'   the \code{n_years} level of aggregation, that is,
-#'   \eqn{(\mu + \sigma log b, \sigma, \xi)} if \eqn{\xi = 0} and
-#'   \eqn{(\mu + \sigma (b ^ \xi - 1) / \xi, \sigma b ^ \xi, \xi)}
-#'   otherwise.
+#'   in the call to \code{\link{rpost}} or \code{\link{rpost_rcpp}}
+#'   we first calculate the number of blocks \eqn{b} in \code{n_years} years.
+#'   To calculate the density function or distribution function of the maximum
+#'   over \code{n_years} we call \code{\link{dgev}} or \code{\link{pgev}}
+#'   with \code{m} = \eqn{b}.
 #'
 #'   \itemize{
 #'     \item{\code{type = "p"}.} We calculate using \code{\link{pgev}}
@@ -140,10 +141,9 @@
 #'     \code{predict.evpost(object, type = "p", x = q)} = \code{p[i]}
 #'     numerically for \code{q} for each element \code{p[i]} of \code{p}.
 #'
-#'     \item{\code{type = "i"}.}
-#'     If \code{hpd = FALSE} then we calculate equi-tailed intervals using
-#'     \code{predict.evpost(object, type ="q", x = p)}, where
-#'     \code{p = c((1-level/100)/2, (1+level/100)/2)}.
+#'     \item{\code{type = "i"}.} If \code{hpd = FALSE} then the interval is
+#'     equi-tailed, equal to \code{predict.evpost()} \code{object, type ="q", x = p)},
+#'     where \code{p = c((1-level/100)/2,} \code{(1+level/100)/2)}.
 #'     If \code{hpd = TRUE} then, in addition, we perform a
 #'     numerical minimisation of the length of level\% intervals, after
 #'     approximating the predictive quantile function using monotonic
@@ -157,13 +157,15 @@
 #'   }
 #'
 #'   \strong{Binomial-GP}.  If \code{model = "bingp"} in the call to
-#'   \code{\link{rpost}} then we calculate the mean number of observations
-#'   in \code{n_years} years, i.e. \code{npy * n_years}.
+#'   \code{\link{rpost}} or \code{\link{rpost_rcpp}} then we calculate the
+#'   mean number of observations in \code{n_years} years, i.e.
+#'   \code{npy * n_years}.
 #'
 #'   Following \href{http://dx.doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}
 #'   Let \eqn{M_N} be the largest value observed in \eqn{N} years,
 #'   \eqn{m} = \code{npy * n_years} and \eqn{u} the threshold
-#'   \code{object$thresh} used in the call to \code{rpost}.
+#'   \code{object$thresh} used in the call to \code{rpost}
+#'   or \code{rpost_rcpp}.
 #'   For fixed values of \eqn{\theta = (p, \sigma, \xi)} the distribution
 #'   function of \eqn{M_N} is given by \eqn{F(z, \theta)^m}, for
 #'   \eqn{z >= u}, where
@@ -227,7 +229,7 @@
 #'   to \code{predict.evpost} are also included, as is the argument \code{npy}
 #'   supplied to, or set within, \code{predict.evpost} and
 #'   the arguments \code{data} and \code{model} from the original call to
-#'   \code{\link{rpost}}.
+#'   \code{\link{rpost}} or \code{\link{rpost_rcpp}}.
 #' @references Coles, S. G. (2001) \emph{An Introduction to Statistical
 #'   Modeling of Extreme Values}, Springer-Verlag, London.
 #'   Chapter 9: \url{http://dx.doi.org/10.1007/978-1-4471-3675-0_9}
@@ -235,7 +237,7 @@
 #'   Cross-validatory extreme value threshold selection and uncertainty
 #'   with application to ocean storm severity.
 #'   \emph{Journal of the Royal Statistical Society Series C: Applied
-#'   Statistics}, \emph{66}(1), 93-120.
+#'   Statistics}, \strong{66}(1), 93-120.
 #'   \url{http://dx.doi.org/10.1111/rssc.12159}
 #' @references Stephenson, A. (2016). Bayesian Inference for Extreme Value
 #'   Modelling. In \emph{Extreme Value Modeling and Risk Analysis: Methods and
@@ -243,14 +245,14 @@
 #'   Chapman and Hall. \url{http://dx.doi.org/10.1201/b19721-14}
 #' @seealso \code{\link{plot.evpred}} for the S3 \code{plot} method for
 #'   objects of class \code{evpred}.
-#' @seealso \code{\link{rpost}} for sampling from an extreme value posterior
-#'   distribution.
+#' @seealso \code{\link{rpost}} or \code{\link{rpost_rcpp}} for sampling
+#'   from an extreme value posterior distribution.
 #' @examples
 #' ### GEV
 #' data(portpirie)
 #' mat <- diag(c(10000, 10000, 100))
 #' pn <- set_prior(prior = "norm", model = "gev", mean = c(0,0,0), cov = mat)
-#' gevp  <- rpost(n = 1000, model = "gev", prior = pn, data = portpirie)
+#' gevp  <- rpost_rcpp(n = 1000, model = "gev", prior = pn, data = portpirie)
 #'
 #' # Interval estimation
 #' predict(gevp)$long
@@ -273,15 +275,15 @@
 #' fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
 #' bp <- set_bin_prior(prior = "jeffreys")
 #' npy_gom <- length(gom)/105
-#' bgpg <- rpost(n = 1000, model = "bingp", prior = fp, thresh = u, data = gom,
-#'               bin_prior = bp)
+#' bgpg <- rpost_rcpp(n = 1000, model = "bingp", prior = fp, thresh = u,
+#'                    data = gom, bin_prior = bp)
 #'
 #' # Setting npy in call to predict.evpost()
 #' predict(bgpg, npy = npy_gom)$long
 #'
-#' # Setting npy in call to rpost()
-#' bgpg <- rpost(n = 1000, model = "bingp", prior = fp, thresh = u, data = gom,
-#'               bin_prior = bp, npy = npy_gom)
+#' # Setting npy in call to rpost() or rpost_rcpp()
+#' bgpg <- rpost_rcpp(n = 1000, model = "bingp", prior = fp, thresh = u,
+#'                    data = gom, bin_prior = bp, npy = npy_gom)
 #'
 #' # Interval estimation
 #' predict(bgpg)$long
@@ -301,10 +303,10 @@ predict.evpost <- function(object, type = c("i", "p", "d", "q", "r"), x = NULL,
                            ...) {
   type <- match.arg(type)
   if (!inherits(object, "evpost")) {
-    stop("object must be an object of class evpost produced by rpost()")
+    stop("object must be an evpost object produced by rpost() or rpost_rcpp()")
   }
   if (object$model == "gp") {
-    stop("The model in the call to rpost() cannot be gp.  Use bingp instead.")
+    stop("The model cannot be gp.  Use bingp instead.")
   }
   if (!(object$model %in% c("gev", "os", "pp", "bingp"))) {
     stop(paste("Predictive functions are not available for model = ''",
@@ -405,7 +407,7 @@ set_npy <- function(object, npy = NULL){
   }
   if (object$model == "bingp") {
     if (is.null(object$npy) & is.null(npy)) {
-      stop("For model=bingp npy must be supplied, here or in call to rpost.")
+      stop("model=bingp: npy must be given, here or in call to rpost/rpost_rcpp.")
     }
   } else if (object$model %in% c("gev", "os")) {
     # If npy is not supplied and the model is GEV or OS then assume that
@@ -416,7 +418,8 @@ set_npy <- function(object, npy = NULL){
     }
   } else if (object$model == "pp") {
     # Similarly if npy is not supplied and the model is PP then assume that
-    # blocks of length one year were set by noy in the call to rpost().
+    # blocks of length one year were set by noy in the call to
+    # rpost()/rpost_rcpp().
     n <- length(object$data)
     noy <- object$noy
     if (is.null(npy)) {
@@ -491,9 +494,9 @@ ipred <- function(ev_obj, n_years = 100, npy = NULL, level = 95,
     qfun <- pred_qbingp
     pfun <- pred_pbingp
     # Find the smallest allowable value of p, i.e. the one that corresponds
-    # to the threshold used in the call to rpost().  This enables us to check
-    # whether or not that it is possible to calculate a given level% predictive
-    # interval without extending below the threshold.
+    # to the threshold used in the call to rpost()/rpost_rcpp().  This enables
+    # us to check whether or not that it is possible to calculate a given
+    # level% predictive interval without extending below the threshold.
     p_min <- pfun(ev_obj = ev_obj, q = ev_obj$thresh, n_years = n_years,
                   npy = npy, lower_tail = TRUE)$y
   }
@@ -654,18 +657,14 @@ pred_dgev <- function(ev_obj, x, n_years = 100, npy = NULL, log = FALSE) {
     stop("quantiles must be a vector or a matrix with length(n_years) columns")
   }
   d <- x
-  temp <- function(x, loc_n, scale_n, shape) {
-    return(mean(dgev(x, loc = loc_n, scale = scale_n, shape = shape)))
+  temp <- function(x, loc, scale, shape, m) {
+    return(mean(dgev(x = x, loc = loc, scale = scale, shape = shape, m = m)))
   }
   for (i in 1:n_y) {
-    # Convert the GEV location and scale parameters from the input time period
-    # (block size) to a period of n_years.
-    loc_n <- loc + scale * box_cox_vec(x = mult[i], lambda = shape)
-    scale_n <- scale * mult[i] ^ shape
     # Calculate the GEV pdf at x for each combination of (loc, scale, shape)
     # in the posterior sample, and take the mean.
-    d[, i] <- sapply(x[, i], temp, loc_n = loc_n, scale_n = scale_n,
-                     shape = shape)
+    d[, i] <- sapply(x[, i], temp, loc = loc, scale = scale, shape = shape,
+                     m = mult[i])
   }
   if (log) {
     d <- log(d)
@@ -692,18 +691,14 @@ pred_pgev <- function(ev_obj, q, n_years = 100, npy = NULL,
     stop("quantiles must be a vector or a matrix with length(n_years) columns")
   }
   p <- q
-  temp <- function(q, loc_n, scale_n, shape) {
-    return(mean(pgev(q, loc = loc_n, scale = scale_n, shape = shape)))
+  temp <- function(q, loc, scale, shape, m) {
+    return(mean(pgev(q = q, loc = loc, scale = scale, shape = shape, m = m)))
   }
   for (i in 1:n_y) {
-    # Convert the GEV location and scale parameters from the input time period
-    # (block size) to a period of n_years.
-    loc_n <- loc + scale * box_cox_vec(x = mult[i], lambda = shape)
-    scale_n <- scale * mult[i] ^ shape
     # Calculate the GEV cdf at q for each combination of (loc, scale, shape)
     # in the posterior sample, and take the mean.
-    p[, i] <- sapply(q[, i], temp, loc_n = loc_n, scale_n = scale_n,
-                     shape = shape)
+    p[, i] <- sapply(q[, i], temp, loc = loc, scale = scale, shape = shape,
+                     m = mult[i])
   }
   if (!lower_tail) {
     p <- 1 - p
@@ -741,22 +736,18 @@ pred_qgev <- function(ev_obj, p, n_years = 100, npy = NULL,
   }
   if (!ok_init_q) {
     init_q <- matrix(NA, nrow = n_p, ncol = n_y)
-    temp <- function(p, loc_n, scale_n, shape) {
-      return(mean(qgev(p, loc = loc_n, scale = scale_n, shape = shape)))
+    temp <- function(p, loc, scale, shape, m) {
+      return(mean(qgev(p = p, loc = loc, scale = scale, shape = shape, m = m)))
     }
   }
   for (i in 1:n_y) {
-    # Convert the GEV location and scale parameters from the input time period
-    # (block size) to a period of n_years.
-    loc_n <- loc + scale * box_cox_vec(x = mult[i], lambda = shape)
-    scale_n <- scale * mult[i] ^ shape
     # Calculate the GEV quantile at p for each combination of (loc, scale, shape)
     # in the posterior sample, and take the mean.
     #
     # This gives reasonable initial estimates for the predictive quantiles.
     if (!ok_init_q) {
-      init_q[, i] <- sapply(p[, i], temp, loc_n = loc_n, scale_n = scale_n,
-                            shape = shape)
+      init_q[, i] <- sapply(p[, i], temp, loc = loc, scale = scale,
+                            shape = shape, m = mult[i])
     }
     #
     logit <- function(p) log(p / (1 - p))
@@ -815,13 +806,10 @@ pred_rgev <- function(ev_obj, n_years = 100, npy = NULL) {
   n_y <- length(n_years)
   r_mat <- matrix(NA, nrow = n_sim, ncol = n_y)
   for (i in 1:n_y) {
-    # Convert the GEV location and scale parameters from the input time period
-    # (block size) to a period of n_years.
-    loc_n <- loc + scale * box_cox_vec(x = mult[i], lambda = shape)
-    scale_n <- scale * mult[i] ^ shape
     # Simulate a single observation from a GEV distribution corresponding
     # to each parameter combination in the posterior sample.
-    r_mat[, i] <- rgev_vec(n = 1, loc = loc_n, scale = scale_n, shape = shape)
+    r_mat[, i] <- rgev(n = n_sim, loc = loc, scale = scale, shape = shape,
+                       m = mult[i])
   }
   return(list(y = r_mat))
 }
@@ -834,13 +822,14 @@ setup_pred_gev <- function(ev_obj, n_years, npy) {
   # the GEV parameters can be converted to the n_years level of aggregation.
   #
   # Args:
-  #   ev_obj  : Object of class evpost return by rpost().
+  #   ev_obj  : Object of class evpost return by rpost()/rpost_rcpp().
   #   n_years : A numeric vector. Values of N.
   #   npy     : The mean number of observations per year of data, after
   #             excluding any missing values.  npy has either been supplied
   #             by the user or, if this is not the case, was set using
   #             set_npy() based on assumptions that in the original call to
-  #             rpost() the GEV parameters relate to blocks of length one year.
+  #             rpost()/rpost_rcpp() the GEV parameters relate to blocks
+  #             of length one year.
   #
   # Returns: A numeric scalar.  The value of mult.
   #
@@ -861,7 +850,8 @@ setup_pred_gev <- function(ev_obj, n_years, npy) {
 
 pred_dbingp <- function(ev_obj, x, n_years = 100, npy = NULL,
                         log = FALSE) {
-  # Check that q is not less than the threshold used in the call to rpost().
+  # Check that q is not less than the threshold used in the call to
+  # rpost()/rpost_rcpp().
   thresh <- ev_obj$thresh
   if (any(x < thresh)) {
     stop("Invalid x: no element of x can be less than the threshold.")
@@ -906,7 +896,8 @@ pred_dbingp <- function(ev_obj, x, n_years = 100, npy = NULL,
 
 pred_pbingp <- function(ev_obj, q, n_years = 100, npy = NULL,
                       lower_tail = TRUE) {
-  # Check that q is not less than the threshold used in the call to rpost().
+  # Check that q is not less than the threshold used in the call to
+  # rpost()/rpost_rcpp().
   thresh <- ev_obj$thresh
   if (any(q < thresh)) {
     stop("Invalid q: no element of q can be less than the threshold.")
@@ -963,7 +954,7 @@ pred_qbingp <- function(ev_obj, p, n_years = 100, npy = NULL,
     stop("quantiles must be a vector or a matrix with length(n_years) columns")
   }
   # Check that p is not less than the binGP predictive distribution function
-  # evaluated at the threshold used in the call to rpost().
+  # evaluated at the threshold used in the call to rpost()/rpost_rcpp().
   thresh <- ev_obj$thresh
   p_ok <- rep(TRUE, n_y)
   for (i in 1:n_y) {
@@ -1028,10 +1019,10 @@ pred_qbingp <- function(ev_obj, p, n_years = 100, npy = NULL,
 
 pred_rbingp <- function(ev_obj = ev_obj, n_years = n_years, npy = npy) {
   if (!inherits(ev_obj, "evpost")) {
-    stop("ev_obj must be an object of class evpost produced by rpost()")
+    stop("ev_obj must be an object produced by rpost() or rpost_rcpp()")
   }
   if (ev_obj$model != "bingp") {
-    stop("The model in the call to rpost() must be bingp.")
+    stop("The model in the call to rpost() or rpost_rcpp() must be bingp.")
   }
   if (is.null(npy)) {
     stop("npy must be supplied.")
@@ -1059,7 +1050,7 @@ pred_rbingp <- function(ev_obj = ev_obj, n_years = n_years, npy = npy) {
   u <- stats::runif(n_sim)
   for (i in 1:n_y) {
     x_val <- (1 - u ^ (1 / mult[i])) / p_u
-    new_mult <- box_cox_vec(x = x_val, lambda = -shape, poly_order = 1)
+    new_mult <- box_cox_vec(x = x_val, lambda = -shape)
     r_mat[, i] <- ifelse(u < p_min, NA, thresh - scale * new_mult)
   }
   return(list(y = r_mat))

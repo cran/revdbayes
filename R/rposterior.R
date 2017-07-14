@@ -8,19 +8,21 @@
 #'
 #' @param n A numeric scalar. The size of posterior sample required.
 #' @param model A character string.  Specifies the extreme value model.
-#' @param data  Sample data, of a format appropriate for the model.
+#' @param data  Sample data, of a format appropriate to the value of
+#'   \code{model}..
 #'   \itemize{
 #'     \item {"gp"} {A numeric vector of threshold excesses or raw data.}
 #'     \item {"bingp"} {A numeric vector of raw data.}
 #'     \item {"gev"} {A numeric vector of block maxima.}
 #'     \item {"pp"} {A numeric vector of raw data.}
 #'     \item {"os"} {A numeric matrix or data frame. Each row should contain
-#'       the largest order statistics for a block of data.  These needs not
-#'       be ordered because they are sorted inside \code{rpost}. If a block
+#'       the largest order statistics for a block of data.  These need not
+#'       be ordered: they are sorted inside \code{rpost}. If a block
 #'       contains fewer than \code{dim(as.matrix(data))[2]} order statistics
 #'       then the corresponding row should be padded by \code{NA}s. If
 #'       \code{ros} is supplied then only the largest \code{ros} values in
-#'       each row are used.}
+#'       each row are used.  If a vector is supplied then this is converted
+#'       to a matrix with one column.}
 #'   }
 #' @param prior A list specifying the prior for the parameters of the extreme
 #'   value model, created by \code{\link{set_prior}}.
@@ -41,11 +43,12 @@
 #' @param noy A numeric scalar. The number of blocks of observations,
 #'   excluding any missing values.  A block is often a year.
 #'   Only relevant, and must be supplied, if \code{model = "pp"}.
-#' @param use_noy A logical scalar.  Only relevant if model is "pp".  By
-#'   default (\code{use_noy = FALSE}) sampling is based on a likelihood in
+#' @param use_noy A logical scalar.  Only relevant if model is "pp".
+#'   If \code{use_noy = FALSE} then sampling is based on a likelihood in
 #'   which the number of blocks (years) is set equal to the number of threshold
-#'   excesses, to reduce posterior dependence between the parameters.  The
-#'   sampled values are transformed back to the required parameterisation
+#'   excesses, to reduce posterior dependence between the parameters
+#'   (\href{http://dx.doi.org/10.1214/10-AOAS333}{Wadsworth \emph{et al}. (2010)}).
+#'   The sampled values are transformed back to the required parameterisation
 #'   before returning them to the user.  If \code{use_noy = TRUE} then the
 #'   user's value of \code{noy} is used in the likelihood.
 #' @param npy A numeric scalar. The mean number of observations per year
@@ -70,14 +73,14 @@
 #' @param init_ests A numeric vector.  Initial parameter estimates for search
 #'   for the mode of the posterior distribution.
 #' @param mult A numeric scalar.  The grid of values used to choose the Box-Cox
-#'   transformation parameter lambda is based on the maximum aposteriori (MAP)
+#'   transformation parameter lambda is based on the maximum a posteriori (MAP)
 #'   estimate +/- mult x estimated posterior standard deviation.
 #' @param use_phi_map A logical scalar. If trans = "BC" then \code{use_phi_map}
 #'   determines whether the grid of values for phi used to set lambda is
 #'   centred on the maximum a posterior (MAP) estimate of phi
 #'   (\code{use_phi_map = TRUE}), or on the initial estimate of phi
 #'   (\code{use_phi_map = FALSE}).
-#' @param ... Further argments to be passed to \code{\link[rust]{ru}}.  Most
+#' @param ... Further arguments to be passed to \code{\link[rust]{ru}}.  Most
 #'   importantly \code{trans} and \code{rotate} (see \strong{Details}), and
 #'   perhaps \code{r}, \code{ep}, \code{a_algor}, \code{b_algor},
 #'   \code{a_method}, \code{b_method}, \code{a_control}, \code{b_control}.
@@ -168,16 +171,19 @@
 #'     \item{\code{bin_logf_args}:} {A list of arguments to \code{bin_logf}.}
 #'   }
 #' @seealso \code{\link{set_prior}} for setting a prior distribution.
+#' @seealso \code{\link{rpost_rcpp}} for faster posterior simulation using
+#'   the Rcpp package.
 #' @seealso \code{\link{plot.evpost}}, \code{\link{summary.evpost}} and
 #'   \code{\link{predict.evpost}} for the S3 \code{plot}, \code{summary}
 #'   and \code{predict} methods for objects of class \code{evpost}.
-#' @seealso \code{\link[rust]{ru}} in the \code{\link[rust]{rust}}
-#'   package for details of the arguments that can be passed to \code{ru} and
-#'   the form of the object returned by \code{rpost}.
-#' @seealso \code{\link[rust]{find_lambda}} in the
-#'   \code{\link[rust]{rust}} package is used inside \code{rpost} to set the
-#'   Box-Cox transformation parameter lambda when the \code{trans = "BC"}
-#'   argument is given.
+#' @seealso \code{\link[rust]{ru}} and \code{\link[rust]{ru_rcpp}} in the
+#'   \code{\link[rust]{rust}} package for details of the arguments that can
+#'   be passed to \code{ru} and the form of the object returned by
+#'   \code{rpost}.
+#' @seealso \code{\link[rust]{find_lambda}} and
+#'   \code{\link[rust]{find_lambda_rcpp}} in the \code{\link[rust]{rust}}
+#'   package is used inside \code{rpost} to set the Box-Cox transformation
+#'   parameter lambda when the \code{trans = "BC"} argument is given.
 #' @seealso \code{\link[evdbayes]{posterior}} for sampling from an extreme
 #'   value posterior using the evdbayes package.
 #' @references Coles, S. G. and Powell, E. A. (1996) Bayesian methods in
@@ -188,52 +194,65 @@
 #'   Cross-validatory extreme value threshold selection and uncertainty
 #'   with application to ocean storm severity.
 #'   \emph{Journal of the Royal Statistical Society Series C: Applied
-#'   Statistics}, \emph{66}(1), 93-120.
+#'   Statistics}, \strong{66}(1), 93-120.
 #'   \url{http://dx.doi.org/10.1111/rssc.12159}
-#' @references Stephenson, A. (2016). Bayesian Inference for Extreme Value
+#' @references Stephenson, A. (2016) Bayesian Inference for Extreme Value
 #'   Modelling. In \emph{Extreme Value Modeling and Risk Analysis: Methods and
 #'   Applications}, edited by D. K. Dey and J. Yan, 257-80. London:
 #'   Chapman and Hall. \url{http://dx.doi.org/10.1201/b19721-14}
 #'   value posterior using the evdbayes package.
+#' @references Wadsworth, J. L., Tawn, J. A. and Jonathan, P. (2010)
+#'   Accounting for choice of measurement scale in extreme value modeling.
+#'  \emph{The Annals of Applied Statistics}, \strong{4}(3), 1558-1578.
+#'   \url{http://dx.doi.org/10.1214/10-AOAS333}
 #' @examples
+#' \dontrun{
 #' # GP model
-#' data(gom)
 #' u <- quantile(gom, probs = 0.65)
 #' fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
 #' gpg <- rpost(n = 1000, model = "gp", prior = fp, thresh = u, data = gom)
 #' plot(gpg)
 #'
 #' # Binomial-GP model
-#' data(gom)
 #' u <- quantile(gom, probs = 0.65)
 #' fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
 #' bp <- set_bin_prior(prior = "jeffreys")
 #' bgpg <- rpost(n = 1000, model = "bingp", prior = fp, thresh = u, data = gom,
-#'    bin_prior = bp)
+#'               bin_prior = bp)
 #' plot(bgpg, pu_only = TRUE)
 #' plot(bgpg, add_pu = TRUE)
 #'
 #' # GEV model
-#' data(portpirie)
 #' mat <- diag(c(10000, 10000, 100))
-#' pn <- set_prior(prior = "norm", model = "gev", mean = c(0,0,0), cov = mat)
+#' pn <- set_prior(prior = "norm", model = "gev", mean = c(0, 0, 0), cov = mat)
 #' gevp  <- rpost(n = 1000, model = "gev", prior = pn, data = portpirie)
 #' plot(gevp)
 #'
+#' # GEV model, informative prior constructed on the probability scale
+#' pip  <- set_prior(quant = c(85, 88, 95), alpha = c(4, 2.5, 2.25, 0.25),
+#'                   model = "gev", prior = "prob")
+#' ox_post <- rpost(n = 1000, model = "gev", prior = pip, data = oxford)
+#' plot(ox_post)
+#'
 #' # PP model
-#' data(rainfall)
-#' rthresh <- 40
 #' pf <- set_prior(prior = "flat", model = "gev", min_xi = -1)
 #' ppr <- rpost(n = 1000, model = "pp", prior = pf, data = rainfall,
-#'   thresh = rthresh, noy = 54)
+#'              thresh = 40, noy = 54)
 #' plot(ppr)
 #'
+#' # PP model, informative prior constructed on the quantile scale
+#' piq <- set_prior(prob = 10^-(1:3), shape = c(38.9, 7.1, 47),
+#'                  scale = c(1.5, 6.3, 2.6), model = "gev", prior = "quant")
+#' rn_post <- rpost(n = 1000, model = "pp", prior = piq, data = rainfall,
+#'                  thresh = 40, noy = 54)
+#' plot(rn_post)
+#'
 #' # OS model
-#' data(venice)
 #' mat <- diag(c(10000, 10000, 100))
-#' pv <- set_prior(prior = "norm", model = "gev", mean = c(0,0,0), cov = mat)
+#' pv <- set_prior(prior = "norm", model = "gev", mean = c(0, 0, 0), cov = mat)
 #' osv <- rpost(n = 1000, model = "os", prior = pv, data = venice)
 #' plot(osv)
+#' }
 #' @export
 rpost <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data, prior,
                   nrep = NULL, thresh = NULL, noy = NULL, use_noy = TRUE,
@@ -409,6 +428,7 @@ rpost <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data, prior,
       init_ests <- change_pp_pars(init_ests, in_noy = noy, out_noy = ds$n_exc)
     }
     init_check <- logpost(par = init_ests, ds = ds)
+    print(init_check)
     if (!is.infinite(init_check)) {
       init <- init_ests
       init_phi <- switch(model,
@@ -516,15 +536,15 @@ rpost <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data, prior,
       }
       if (save_model == "gev") {
         wr <- 1:nrep
-        temp$data_rep <- t(rgev_vec(n = ds$m, loc = temp$sim_vals[wr, 1],
-                                    scale = temp$sim_vals[wr, 2],
-                                    shape = temp$sim_vals[wr, 3]))
+        temp$data_rep <- replicate(ds$m, rgev(nrep, loc = temp$sim_vals[wr, 1],
+                                              scale = temp$sim_vals[wr, 2],
+                                              shape = temp$sim_vals[wr, 3]))
       }
       if (save_model == "gp") {
         wr <- 1:nrep
-        temp$data_rep <- t(rgp_vec(n = ds$m, loc = thresh,
-                                   scale = temp$sim_vals[wr, 1],
-                                   shape = temp$sim_vals[wr, 2]))
+        temp$data_rep <- replicate(ds$m, rgp(nrep, loc = thresh,
+                                            scale = temp$sim_vals[wr, 1],
+                                            shape = temp$sim_vals[wr, 2]))
       }
       if (save_model == "bingp") {
         wr <- 1:nrep
@@ -620,7 +640,6 @@ rpost <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data, prior,
                        list(d = fr$d, which_lam = which_lam),
                        find_lambda_args,
                        list(phi_to_theta = phi_to_theta, log_j = log_j))
-  min_max_phi$min_phi[3] <- 0.1
   lambda <- do.call(rust::find_lambda, for_find_lambda)
   #
   # Only set a_control$parscale if it hasn't been supplied and if a_algor
@@ -685,15 +704,15 @@ rpost <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data, prior,
     }
     if (save_model == "gev") {
       wr <- 1:nrep
-      temp$data_rep <- t(rgev_vec(n = ds$m, loc = temp$sim_vals[wr, 1],
-                                  scale = temp$sim_vals[wr, 2],
-                                  shape = temp$sim_vals[wr, 3]))
+      temp$data_rep <- replicate(ds$m, rgev(nrep, loc = temp$sim_vals[wr, 1],
+                                            scale = temp$sim_vals[wr, 2],
+                                            shape = temp$sim_vals[wr, 3]))
     }
     if (save_model == "gp") {
       wr <- 1:nrep
-      temp$data_rep <- t(rgp_vec(n = ds$m, loc = thresh,
-                                 scale = temp$sim_vals[wr, 1],
-                                 shape = temp$sim_vals[wr, 2]))
+      temp$data_rep <- replicate(ds$m, rgp(nrep, loc = thresh,
+                                           scale = temp$sim_vals[wr, 1],
+                                           shape = temp$sim_vals[wr, 2]))
     }
     if (save_model == "bingp") {
       wr <- 1:nrep

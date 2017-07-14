@@ -85,7 +85,7 @@ Northrop, P. J., Attalides, N. and Jonathan, P. (2017)
   Cross-validatory extreme value threshold selection and uncertainty
   with application to ocean storm severity.
   \emph{Journal of the Royal Statistical Society Series C: Applied
-  Statistics}, \emph{66}(1), 93-120.
+  Statistics}, \strong{66}(1), 93-120.
   \url{http://dx.doi.org/10.1111/rssc.12159}
 }
 \seealso{
@@ -96,6 +96,6 @@ Northrop, P. J., Attalides, N. and Jonathan, P. (2017)
   sample from this prior distribution (using MCMC) if the argument
   \code{lh = "none"} is given.
 
-\code{\link{rpost}} for sampling from an extreme value posterior
-  distribution.
+\code{\link{rpost}} and \code{\link{rpost_rcpp}} for sampling
+  from an extreme value posterior distribution.
 }

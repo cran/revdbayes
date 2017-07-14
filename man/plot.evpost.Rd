@@ -6,13 +6,13 @@
 \usage{
 \method{plot}{evpost}(x, y, ..., n = ifelse(x$d == 1, 1001, 101),
   prob = c(0.5, 0.1, 0.25, 0.75, 0.95, 0.99), ru_scale = FALSE,
-  rows = NULL, xlabs = NULL, ylabs = NULL, pu_only = FALSE,
-  add_pu = FALSE, use_bayesplot = FALSE, fun_name = c("areas",
-  "intervals", "dens", "hist"))
+  rows = NULL, xlabs = NULL, ylabs = NULL, points_par = list(col = 8),
+  pu_only = FALSE, add_pu = FALSE, use_bayesplot = FALSE,
+  fun_name = c("areas", "intervals", "dens", "hist", "scatter"))
 }
 \arguments{
 \item{x}{An object of class "evpost", a result of a call to
-\code{\link{rpost}}.}
+\code{\link{rpost}} or \code{\link{rpost_rcpp}}.}
 
 \item{y}{Not used.}
 
@@ -44,14 +44,19 @@ internally.}
 on the x and y axes respectively.  If the user doesn't provide these then
 the column names of the simulated data matrix to be plotted are used.}
 
+\item{points_par}{A list of arguments to pass to
+\code{\link[graphics]{points}} to control the appearance of points
+depicting the simulated values. Only relevant when \code{d = 2}.}
+
 \item{pu_only}{Only produce a plot relating to the posterior distribution
 for the threshold exceedance probability \eqn{p}. Only relevant when
-\code{model == "bingp"} was used in the call to \code{rpost}.}
+\code{model == "bingp"} was used in the call to \code{rpost} or
+\code{rpost_rcpp}.}
 
 \item{add_pu}{Before producing the plots add the threshold exceedance
 probability \eqn{p} to the parameters of the extreme value model. Only
 relevant when \code{model == "bingp"} was used in the call to
-\code{rpost}.}
+\code{rpost} or \code{rpost_rcpp}.}
 
 \item{use_bayesplot}{A logical scalar. If \code{TRUE} the bayesplot
 function indicated by \code{fun_name} is called.  In principle \emph{any}
@@ -82,10 +87,6 @@ Nothing is returned unless \code{use_bayesplot = TRUE} when a
   functions.
 }
 \details{
-Note that \code{suppressWarnings} is used to avoid potential benign warnings
-  caused by passing unused graphical parameters to \code{hist} and
-  \code{lines} via \code{...}.
-
 For details of the \strong{bayesplot} functions available when
   \code{use_bayesplot = TRUE} see \link[bayesplot]{MCMC-overview} and
   the \strong{bayesplot} vignette
@@ -99,6 +100,7 @@ fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
 gpg <- rpost(n = 1000, model = "gp", prior = fp, thresh = u, data = gom)
 plot(gpg)
 
+\dontrun{
 # Using the bayesplot package
 plot(gpg, use_bayesplot = TRUE)
 plot(gpg, use_bayesplot = TRUE, pars = "xi", prob = 0.95)
@@ -106,6 +108,7 @@ plot(gpg, use_bayesplot = TRUE, fun_name = "intervals", pars = "xi")
 plot(gpg, use_bayesplot = TRUE, fun_name = "hist")
 plot(gpg, use_bayesplot = TRUE, fun_name = "dens")
 plot(gpg, use_bayesplot = TRUE, fun_name = "scatter")
+}
 
 ## bin-GP posterior
 data(gom)
@@ -113,17 +116,19 @@ u <- quantile(gom, probs = 0.65)
 fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
 bp <- set_bin_prior(prior = "jeffreys")
 npy_gom <- length(gom)/105
-bgpg <- rpost(n = 1000, model = "bingp", prior = fp, thresh = u, data = gom,
-             bin_prior = bp, npy = npy_gom)
+bgpg <- rpost(n = 1000, model = "bingp", prior = fp, thresh = u,
+              data = gom, bin_prior = bp, npy = npy_gom)
 plot(bgpg)
 plot(bgpg, pu_only = TRUE)
 plot(bgpg, add_pu = TRUE)
 
+\dontrun{
 # Using the bayesplot package
 dimnames(bgpg$bin_sim_vals)
 plot(bgpg, use_bayesplot = TRUE)
 plot(bgpg, use_bayesplot = TRUE, fun_name = "hist")
 plot(bgpg, use_bayesplot = TRUE, pars = "p[u]")
+}
 }
 \references{
 Jonah Gabry (2016). bayesplot: Plotting for Bayesian

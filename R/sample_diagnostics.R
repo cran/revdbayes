@@ -14,7 +14,7 @@
 #'   functions.
 #'
 #' @param x An object of class "evpost", a result of a call to
-#'   \code{\link{rpost}}.
+#'   \code{\link{rpost}} or \code{\link{rpost_rcpp}}.
 #' @param y Not used.
 #' @param ... Additional arguments passed on to \code{hist}, \code{lines},
 #'   \code{contour}, \code{points} or functions from the \strong{bayesplot}
@@ -38,13 +38,17 @@
 #' @param xlabs,ylabs Numeric vectors.  When \code{d} > 2 these set the labels
 #'   on the x and y axes respectively.  If the user doesn't provide these then
 #'   the column names of the simulated data matrix to be plotted are used.
+#' @param points_par A list of arguments to pass to
+#'   \code{\link[graphics]{points}} to control the appearance of points
+#'   depicting the simulated values. Only relevant when \code{d = 2}.
 #' @param pu_only Only produce a plot relating to the posterior distribution
 #'   for the threshold exceedance probability \eqn{p}. Only relevant when
-#'   \code{model == "bingp"} was used in the call to \code{rpost}.
+#'   \code{model == "bingp"} was used in the call to \code{rpost} or
+#'   \code{rpost_rcpp}.
 #' @param add_pu Before producing the plots add the threshold exceedance
 #'   probability \eqn{p} to the parameters of the extreme value model. Only
 #'   relevant when \code{model == "bingp"} was used in the call to
-#'   \code{rpost}.
+#'   \code{rpost} or \code{rpost_rcpp}.
 #' @param use_bayesplot A logical scalar. If \code{TRUE} the bayesplot
 #'   function indicated by \code{fun_name} is called.  In principle \emph{any}
 #'   bayesplot function (that starts with \code{mcmc_}) can be called but
@@ -54,11 +58,6 @@
 #'   with the initial \code{mcmc_} part removed.  See
 #'   \link[bayesplot]{MCMC-overview} and links therein for the names of these
 #'   functions. Some examples are given below.
-#' @details
-#' Note that \code{suppressWarnings} is used to avoid potential benign warnings
-#'   caused by passing unused graphical parameters to \code{hist} and
-#'   \code{lines} via \code{...}.
-#'
 #' @details For details of the \strong{bayesplot} functions available when
 #'   \code{use_bayesplot = TRUE} see \link[bayesplot]{MCMC-overview} and
 #'   the \strong{bayesplot} vignette
@@ -82,6 +81,7 @@
 #' gpg <- rpost(n = 1000, model = "gp", prior = fp, thresh = u, data = gom)
 #' plot(gpg)
 #'
+#' \dontrun{
 #' # Using the bayesplot package
 #' plot(gpg, use_bayesplot = TRUE)
 #' plot(gpg, use_bayesplot = TRUE, pars = "xi", prob = 0.95)
@@ -89,6 +89,7 @@
 #' plot(gpg, use_bayesplot = TRUE, fun_name = "hist")
 #' plot(gpg, use_bayesplot = TRUE, fun_name = "dens")
 #' plot(gpg, use_bayesplot = TRUE, fun_name = "scatter")
+#' }
 #'
 #' ## bin-GP posterior
 #' data(gom)
@@ -96,24 +97,28 @@
 #' fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
 #' bp <- set_bin_prior(prior = "jeffreys")
 #' npy_gom <- length(gom)/105
-#' bgpg <- rpost(n = 1000, model = "bingp", prior = fp, thresh = u, data = gom,
-#'              bin_prior = bp, npy = npy_gom)
+#' bgpg <- rpost(n = 1000, model = "bingp", prior = fp, thresh = u,
+#'               data = gom, bin_prior = bp, npy = npy_gom)
 #' plot(bgpg)
 #' plot(bgpg, pu_only = TRUE)
 #' plot(bgpg, add_pu = TRUE)
 #'
+#' \dontrun{
 #' # Using the bayesplot package
 #' dimnames(bgpg$bin_sim_vals)
 #' plot(bgpg, use_bayesplot = TRUE)
 #' plot(bgpg, use_bayesplot = TRUE, fun_name = "hist")
 #' plot(bgpg, use_bayesplot = TRUE, pars = "p[u]")
+#' }
 #' @export
 plot.evpost <- function(x, y, ..., n = ifelse(x$d == 1, 1001, 101),
                         prob = c(0.5, 0.1, 0.25, 0.75, 0.95, 0.99),
                         ru_scale = FALSE, rows = NULL, xlabs = NULL,
-                        ylabs = NULL, pu_only = FALSE, add_pu = FALSE,
-                        use_bayesplot = FALSE,
-                        fun_name = c("areas", "intervals", "dens", "hist")) {
+                        ylabs = NULL, points_par = list(col = 8),
+                        pu_only = FALSE, add_pu = FALSE, use_bayesplot = FALSE,
+                        fun_name = c("areas", "intervals", "dens", "hist",
+                                     "scatter")) {
+  fun_name <- match.arg(fun_name)
   if (!inherits(x, "evpost")) {
     stop("use only with \"evpost\" objects")
   }
@@ -136,9 +141,15 @@ plot.evpost <- function(x, y, ..., n = ifelse(x$d == 1, 1001, 101),
   if (ru_scale) {
     plot_data <- x$sim_vals_rho
     plot_density <- x$logf_rho
+    if (is.null(x$logf_rho_args)) {
+      density_args <- x$logf_args
+    } else {
+      density_args <- x$logf_rho_args
+    }
   } else {
     plot_data <- x$sim_vals
     plot_density <- x$logf
+    density_args <- x$logf_args
   }
   #
   if (pu_only & is.null(x$bin_sim_vals)) {
@@ -154,7 +165,7 @@ plot.evpost <- function(x, y, ..., n = ifelse(x$d == 1, 1001, 101),
   if (pu_only) {
     plot_data <- x$bin_sim_vals
     plot_density <- x$bin_logf
-    x$logf_args <- x$bin_logf_args
+    density_args <- x$bin_logf_args
     x$d <- 1
   }
   if (add_pu) {
@@ -162,14 +173,13 @@ plot.evpost <- function(x, y, ..., n = ifelse(x$d == 1, 1001, 101),
     x$d <- x$d + 1
   }
   if (x$d == 1) {
-    temp <- suppressWarnings(graphics::hist(plot_data, prob = TRUE,
-                                            plot = FALSE))
+    temp <- graphics::hist(plot_data, plot = FALSE)
     a <- temp$breaks[1]
     b <- temp$breaks[length(temp$breaks)]
     h <- (b-a)/n
     xx <- seq(a, b, by = h)
     density_fun <- function(z) {
-      density_list <- c(list(z), x$logf_args)
+      density_list <- c(list(z), density_args)
       exp(do.call(plot_density, density_list))
     }
     yy <- sapply(xx, density_fun)
@@ -187,19 +197,23 @@ plot.evpost <- function(x, y, ..., n = ifelse(x$d == 1, 1001, 101),
     yy <- yy / area
     max_y <- max(temp$density, yy)
     temp <- list(...)
+    my_hist <- function(x, ..., type, lty, lwd, pch, lend, ljoin, lmitre) {
+      graphics::hist(x, ...)
+    }
     if (is.null(temp$xlab)) {
-      graphics::hist(plot_data, prob = TRUE, main="", ylim = c(0, max_y),
-                     xlab = "", ...)
-      suppressWarnings(graphics::hist(plot_data, prob = TRUE, main="",
-                                      ylim = c(0, max_y), xlab = "", ...))
+      my_hist(plot_data, prob = TRUE, main="", ylim = c(0, max_y), xlab = "",
+              ...)
       if (!is.null(colnames(plot_data))) {
         graphics::title(xlab = parse(text = colnames(plot_data)[1]))
       }
     } else {
-      suppressWarnings(graphics::hist(plot_data, prob = TRUE, main="",
-                                      ylim = c(0, max_y), ...))
+      my_hist(plot_data, prob = TRUE, main="", ylim = c(0, max_y), ...)
     }
-    suppressWarnings(graphics::lines(xx, yy, ...))
+    my_lines <- function(x, y, ..., breaks, freq, probability, include.lowest,
+                         right, density, angle, border, plot, labels, nclass) {
+      graphics::lines(x, y, ...)
+    }
+    my_lines(xx, yy, ...)
   }
   if (x$d == 2) {
     r <- apply(plot_data, 2, range)
@@ -209,7 +223,7 @@ plot.evpost <- function(x, y, ..., n = ifelse(x$d == 1, 1001, 101),
     zz <- matrix(NA, ncol = length(xx), nrow = length(yy))
     for (i in 1:length(xx)) {
       for (j in 1:length(yy)) {
-        for_logf <- c(list(c(xx[i], yy[j])), x$logf_args)
+        for_logf <- c(list(c(xx[i], yy[j])), density_args)
         zz[i, j] <- exp(do.call(plot_density, for_logf))
       }
     }
@@ -220,7 +234,7 @@ plot.evpost <- function(x, y, ..., n = ifelse(x$d == 1, 1001, 101),
     #
     graphics::contour(xx, yy, zz, levels = con.levs, add = FALSE, ann = FALSE,
       labels = prob * 100, ...)
-    graphics::points(plot_data, col = 8, ...)
+    do.call(graphics::points, c(list(x = plot_data), points_par))
     graphics::contour(xx, yy, zz, levels = con.levs, add = TRUE, ann = TRUE,
       labels = prob * 100, ...)
     temp <- list(...)
@@ -240,12 +254,19 @@ plot.evpost <- function(x, y, ..., n = ifelse(x$d == 1, 1001, 101),
       rows <- x$d -2
     }
     cols <- ceiling(choose(x$d, 2) / rows)
-    temp <- list(...)
     if (is.null(xlabs)) {
-      xlabs <- colnames(plot_data)
+      if (!is.null(colnames(plot_data))) {
+        xlabs <- colnames(plot_data)
+      } else {
+        xlabs <- rep(NA, x$d)
+      }
     }
     if (is.null(ylabs)) {
-      ylabs <- colnames(plot_data)
+      if (!is.null(colnames(plot_data))) {
+        ylabs <- colnames(plot_data)
+      } else {
+        ylabs <- rep(NA, x$d)
+      }
     }
     def.par <- graphics::par(no.readonly = TRUE)
     graphics::par(mfrow = c(rows, cols))
@@ -270,10 +291,10 @@ plot.evpost <- function(x, y, ..., n = ifelse(x$d == 1, 1001, 101),
 #' \code{summary} method for class "evpost"
 #'
 #' @param object An object of class "evpost", a result of a call to
-#'   \code{\link{rpost}}.
+#'   \code{\link{rpost}} or \code{\link{rpost_rcpp}}.
 #' @param add_pu Includes in the summary of the simulated values the threshold
 #'   exceedance probability \eqn{p}. Only relevant when \code{model == "bingp"}
-#'   was used in the call to \code{rpost}.
+#'   was used in the call to \code{rpost} or \code{rpost_rcpp}.
 #' @param ... Additional arguments passed on to \code{print} or \code{summary}.
 #' @return Prints
 #' \itemize{
@@ -289,11 +310,12 @@ plot.evpost <- function(x, y, ..., n = ifelse(x$d == 1, 1001, 101),
 #' data(gom)
 #' u <- stats::quantile(gom, probs = 0.65)
 #' fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
-#' gpg <- rpost(n = 1000, model = "gp", prior = fp, thresh = u, data = gom)
+#' gpg <- rpost_rcpp(n = 1000, model = "gp", prior = fp, thresh = u,
+#'                   data = gom)
 #' summary(gpg)
-#' @seealso \code{\link{ru}} for descriptions of \code{object$sim_vals} and
-#'   \code{object$box}.
-#' @seealso \code{\link{plot.ru}} for a diagnostic plot.
+#' @seealso \code{\link[rust]{ru}} or \code{\link[rust]{ru_rcpp}} for
+#'   descriptions of \code{object$sim_vals} and \code{object$box}.
+#' @seealso \code{\link{plot.evpost}} for a diagnostic plot.
 #' @export
 summary.evpost <- function(object, add_pu = FALSE, ...) {
   if (!inherits(object, "evpost")) {
