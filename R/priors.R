@@ -3,8 +3,8 @@
 #' Construction of prior distributions for extreme value model parameters
 #'
 #' Constructs a prior distribution for use as the argument \code{prior} in
-#' \code{\link{rpost}} and \code{\link{rpost_rcpp}}.
-#' The user can either specify their own prior function
+#' \code{\link{rpost}} and \code{\link{rpost_rcpp}}.  The user can either
+#' specify their own prior function, returning the log of the prior density,
 #' (using an R function or an external pointer to a compiled C++ function)
 #' and arguments for hyperparameters or choose from a list of in-built
 #' model-specific priors.  Note that the arguments \code{model = "gev"},
@@ -18,7 +18,7 @@
 #' @param prior Either
 #' \itemize{
 #'   \item {An R function, or a pointer to a user-supplied compiled
-#'   C++ function, that returns the value of the prior
+#'   C++ function, that returns the value of the log of the prior density
 #'   (see \strong{Examples}), or}
 #'   \item {A character string giving the name of the prior.
 #'     See \strong{Details} for a list of priors available for each model.}
@@ -397,7 +397,7 @@ gp_prior <- function(prior = c("norm", "mdi", "flat", "flatflat", "jeffreys",
 #'   The inverse of the prior covariance matrix.
 #' @param min_xi  A numeric scalar.  Prior lower bound on \eqn{\xi}.
 #' @param max_xi  A numeric scalar.  Prior upper bound on \eqn{\xi}.
-#' @param trendsd  Has no function other than to achieve compatability with
+#' @param trendsd  Has no function other than to achieve compatibility with
 #'   function in the evdbayes package.
 #' @return The log of the prior density.
 #' @export
@@ -426,7 +426,7 @@ gp_norm <- function(pars, mean, icov, min_xi = -Inf, max_xi = Inf,
 #'   Must not be \code{-Inf} because this results in an improper posterior.
 #'   See Northrop and Attalides (2016) for details.
 #' @param max_xi  A numeric scalar.  Prior upper bound on \eqn{\xi}.
-#' @param trendsd  Has no function other than to achieve compatability with
+#' @param trendsd  Has no function other than to achieve compatibility with
 #'   function in the evdbayes package.
 #' @return The log of the prior density.
 #' @references Northrop, P.J. and Attalides, N. (2016) Posterior propriety in
@@ -450,7 +450,7 @@ gp_mdi <- function(pars, a = 1, min_xi = -1, max_xi = Inf, trendsd = 0) {
 #' @param min_xi  A numeric scalar.  Prior lower bound on \eqn{\xi}.
 #'   Must not be \code{-Inf} because this results in an improper posterior.
 #' @param max_xi  A numeric scalar.  Prior upper bound on \eqn{\xi}.
-#' @param trendsd  Has no function other than to achieve compatability with
+#' @param trendsd  Has no function other than to achieve compatibility with
 #'   function in the evdbayes package.
 #' @return The log of the prior density.
 #' @export
@@ -470,7 +470,7 @@ gp_flat <- function(pars, min_xi = -Inf, max_xi = Inf, trendsd = 0) {
 #' @param min_xi  A numeric scalar.  Prior lower bound on \eqn{\xi}.
 #'   Must not be \code{-Inf} because this results in an improper posterior.
 #' @param max_xi  A numeric scalar.  Prior upper bound on \eqn{\xi}.
-#' @param trendsd  Has no function other than to achieve compatability with
+#' @param trendsd  Has no function other than to achieve compatibility with
 #'   function in the evdbayes package.
 #' @return The log of the prior density.
 #' @export
@@ -490,7 +490,7 @@ gp_flatflat <- function(pars, min_xi = -Inf, max_xi = Inf, trendsd = 0) {
 #' @param min_xi  A numeric scalar.  Prior lower bound on \eqn{\xi}.
 #'   Must not be \code{-Inf} because this results in an improper posterior.
 #' @param max_xi  A numeric scalar.  Prior upper bound on \eqn{\xi}.
-#' @param trendsd  Has no function other than to achieve compatability with
+#' @param trendsd  Has no function other than to achieve compatibility with
 #'   function in the evdbayes package.
 #' @return The log of the prior density.
 #' @export
@@ -511,7 +511,7 @@ gp_jeffreys <- function(pars, min_xi = -1/2, max_xi = Inf, trendsd = 0) {
 #' @param max_xi  A numeric scalar.  Prior upper bound on \eqn{\xi}.
 #' @param pq A numeric vector of length 2.
 #'   See \code{\link{set_prior}} for details.
-#' @param trendsd  Has no function other than to achieve compatability with
+#' @param trendsd  Has no function other than to achieve compatibility with
 #'   function in the evdbayes package.
 #' @return The log of the prior density.
 #' @export
@@ -657,7 +657,7 @@ gev_prior <- function(prior=c("norm", "loglognorm", "mdi", "flat", "flatflat",
 #'   The inverse of the prior covariance matrix.
 #' @param min_xi  A numeric scalar.  Prior lower bound on \eqn{\xi}.
 #' @param max_xi  A numeric scalar.  Prior upper bound on \eqn{\xi}.
-#' @param trendsd  Has no function other than to achieve compatability with
+#' @param trendsd  Has no function other than to achieve compatibility with
 #'   function in the evdbayes package.
 #' @return The log of the prior density.
 #' @export
@@ -685,7 +685,7 @@ gev_norm <- function(pars, mean, icov, min_xi = -Inf, max_xi = Inf,
 #'   The inverse of the prior covariance matrix.
 #' @param min_xi  A numeric scalar.  Prior lower bound on \eqn{\xi}.
 #' @param max_xi  A numeric scalar.  Prior upper bound on \eqn{\xi}.
-#' @param trendsd  Has no function other than to achieve compatability with
+#' @param trendsd  Has no function other than to achieve compatibility with
 #'   function in the evdbayes package.
 #' @return The log of the prior density.
 #' @export
@@ -715,7 +715,7 @@ gev_loglognorm <- function(pars, mean, icov, min_xi = -Inf, max_xi = Inf,
 #' @param min_xi  A numeric scalar.  Prior lower bound on \eqn{\xi}.
 #'   Must not be \code{-Inf} because this results in an improper posterior.
 #' @param max_xi  A numeric scalar.  Prior upper bound on \eqn{\xi}.
-#' @param trendsd  Has no function other than to achieve compatability with
+#' @param trendsd  Has no function other than to achieve compatibility with
 #'   function in the evdbayes package.
 #' @return The log of the prior density.
 #' @export
@@ -736,7 +736,7 @@ gev_mdi <- function(pars, a=0.5772156649015323, min_xi=-1, max_xi=Inf,
 #' @param min_xi  A numeric scalar.  Prior lower bound on \eqn{\xi}.
 #'   Must not be \code{-Inf} because this results in an improper posterior.
 #' @param max_xi  A numeric scalar.  Prior upper bound on \eqn{\xi}.
-#' @param trendsd  Has no function other than to achieve compatability with
+#' @param trendsd  Has no function other than to achieve compatibility with
 #'   function in the evdbayes package.
 #' @return The log of the prior density.
 #' @export
@@ -756,7 +756,7 @@ gev_flat <- function(pars, min_xi = -Inf, max_xi = Inf, trendsd = 0) {
 #' @param min_xi  A numeric scalar.  Prior lower bound on \eqn{\xi}.
 #'   Must not be \code{-Inf} because this results in an improper posterior.
 #' @param max_xi  A numeric scalar.  Prior upper bound on \eqn{\xi}.
-#' @param trendsd  Has no function other than to achieve compatability with
+#' @param trendsd  Has no function other than to achieve compatibility with
 #'   function in the evdbayes package.
 #' @return The log of the prior density.
 #' @export
@@ -777,7 +777,7 @@ gev_flatflat <- function(pars, min_xi = -Inf, max_xi = Inf, trendsd = 0) {
 #' @param max_xi  A numeric scalar.  Prior upper bound on \eqn{\xi}.
 #' @param pq A numeric vector of length 2.
 #'   See \code{\link{set_prior}} for details.
-#' @param trendsd  Has no function other than to achieve compatability with
+#' @param trendsd  Has no function other than to achieve compatibility with
 #'   function in the evdbayes package.
 #' @return The log of the prior density.
 #' @export

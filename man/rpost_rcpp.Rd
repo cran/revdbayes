@@ -4,11 +4,11 @@
 \alias{rpost_rcpp}
 \title{Random sampling from extreme value posterior distributions}
 \usage{
-rpost_rcpp(n, model = c("gev", "gp", "bingp", "pp", "os"), data, prior,
+rpost_rcpp(n, model = c("gev", "gp", "bingp", "pp", "os"), data, prior, ...,
   nrep = NULL, thresh = NULL, noy = NULL, use_noy = TRUE, npy = NULL,
   ros = NULL, bin_prior = structure(list(prior = "bin_beta", ab = c(1/2,
   1/2), class = "binprior")), init_ests = NULL, mult = 2,
-  use_phi_map = FALSE, ...)
+  use_phi_map = FALSE)
 }
 \arguments{
 \item{n}{A numeric scalar. The size of posterior sample required.}
@@ -34,6 +34,13 @@ rpost_rcpp(n, model = c("gev", "gp", "bingp", "pp", "os"), data, prior,
 
 \item{prior}{A list specifying the prior for the parameters of the extreme
 value model, created by \code{\link{set_prior}}.}
+
+\item{...}{Further arguments to be passed to \code{\link[rust]{ru}}.  Most
+importantly \code{trans} and \code{rotate} (see \strong{Details}), and
+perhaps \code{r}, \code{ep}, \code{a_algor}, \code{b_algor},
+\code{a_method}, \code{b_method}, \code{a_control}, \code{b_control}.
+May also be used to pass the arguments \code{n_grid} and/or \code{ep_bc}
+to \code{\link[rust]{find_lambda}}.}
 
 \item{nrep}{A numeric scalar.  If \code{nrep} is not \code{NULL} then
 \code{nrep} gives the number of replications of the original dataset
@@ -72,8 +79,8 @@ user's value of \code{noy} is used in the likelihood.}
   The value of \code{npy} does not affect any calculation in
   \code{rpost}, it only affects subsequent extreme value inferences using
   \code{predict.evpost}.  However, setting \code{npy} in the call to
-  \code{rpost} avoids the need to supply \code{npy} when calling these
-  latter functions.  This is likely to be useful only when
+  \code{rpost} avoids the need to supply \code{npy} when calling
+  \code{predict.evpost}.  This is likely to be useful only when
   \code{model = bingp}. See the documentation of
   \code{\link{predict.evpost}} for further details.}
 
@@ -98,13 +105,6 @@ determines whether the grid of values for phi used to set lambda is
 centred on the maximum a posterior (MAP) estimate of phi
 (\code{use_phi_map = TRUE}), or on the initial estimate of phi
 (\code{use_phi_map = FALSE}).}
-
-\item{...}{Further argments to be passed to \code{\link[rust]{ru}}.  Most
-importantly \code{trans} and \code{rotate} (see \strong{Details}), and
-perhaps \code{r}, \code{ep}, \code{a_algor}, \code{b_algor},
-\code{a_method}, \code{b_method}, \code{a_control}, \code{b_control}.
-May also be used to pass the arguments \code{n_grid} and/or \code{ep_bc}
-to \code{\link[rust]{find_lambda}}.}
 }
 \value{
 An object (list) of class \code{"evpost"}, which has the same
@@ -113,12 +113,15 @@ An object (list) of class \code{"evpost"}, which has the same
   \itemize{
     \item{\code{model}:} The argument \code{model} to \code{rpost}
       detailed above.
-    \item{\code{data}:} The argument \code{data} to \code{rpost}
-      detailed above, with any missing values removed, except that
+    \item{\code{data}:} The content depends on \code{model}:
+      if \code{model = "gev"} then this is the argument \code{data} to
+      \code{rpost} detailed above, with missing values removed;
       if \code{model = "gp"} then only the values that lie above the
-      threshold are included and if \code{model = "bingp"} or
+      threshold are included; if \code{model = "bingp"} or
       \code{model = "pp"} then the input data are returned
-      but any value lying below the threshold is set to \code{thresh}.
+      but any value lying below the threshold is set to \code{thresh};
+      if \code{model = "os"} then the order statistics used are returned
+      as a single vector.
     \item{\code{prior}:} The argument \code{prior} to \code{rpost}
       detailed above.
     \item{\code{logf_rho_args}:} A list of arguments to the (transformed)

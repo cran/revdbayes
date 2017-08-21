@@ -59,8 +59,8 @@
 #'   The value of \code{npy} does not affect any calculation in
 #'   \code{rpost}, it only affects subsequent extreme value inferences using
 #'   \code{predict.evpost}.  However, setting \code{npy} in the call to
-#'   \code{rpost} avoids the need to supply \code{npy} when calling these
-#'   latter functions.  This is likely to be useful only when
+#'   \code{rpost} avoids the need to supply \code{npy} when calling
+#'   \code{predict.evpost}.  This is likely to be useful only when
 #'   \code{model = bingp}. See the documentation of
 #'   \code{\link{predict.evpost}} for further details.
 #' @param ros A numeric scalar.  Only relevant when \code{model = "os"}. The
@@ -73,14 +73,14 @@
 #' @param init_ests A numeric vector.  Initial parameter estimates for search
 #'   for the mode of the posterior distribution.
 #' @param mult A numeric scalar.  The grid of values used to choose the Box-Cox
-#'   transformation parameter lambda is based on the maximum aposteriori (MAP)
+#'   transformation parameter lambda is based on the maximum a posteriori (MAP)
 #'   estimate +/- mult x estimated posterior standard deviation.
 #' @param use_phi_map A logical scalar. If trans = "BC" then \code{use_phi_map}
 #'   determines whether the grid of values for phi used to set lambda is
 #'   centred on the maximum a posterior (MAP) estimate of phi
 #'   (\code{use_phi_map = TRUE}), or on the initial estimate of phi
 #'   (\code{use_phi_map = FALSE}).
-#' @param ... Further argments to be passed to \code{\link[rust]{ru}}.  Most
+#' @param ... Further arguments to be passed to \code{\link[rust]{ru}}.  Most
 #'   importantly \code{trans} and \code{rotate} (see \strong{Details}), and
 #'   perhaps \code{r}, \code{ep}, \code{a_algor}, \code{b_algor},
 #'   \code{a_method}, \code{b_method}, \code{a_control}, \code{b_control}.
@@ -133,12 +133,15 @@
 #'   \itemize{
 #'     \item{\code{model}:} The argument \code{model} to \code{rpost}
 #'       detailed above.
-#'     \item{\code{data}:} The argument \code{data} to \code{rpost}
-#'       detailed above, with any missing values removed, except that
+#'     \item{\code{data}:} The content depends on \code{model}:
+#'       if \code{model = "gev"} then this is the argument \code{data} to
+#'       \code{rpost} detailed above, with missing values removed;
 #'       if \code{model = "gp"} then only the values that lie above the
-#'       threshold are included and if \code{model = "bingp"} or
+#'       threshold are included; if \code{model = "bingp"} or
 #'       \code{model = "pp"} then the input data are returned
-#'       but any value lying below the threshold is set to \code{thresh}.
+#'       but any value lying below the threshold is set to \code{thresh};
+#'       if \code{model = "os"} then the order statistics used are returned
+#'       as a single vector.
 #'     \item{\code{prior}:} The argument \code{prior} to \code{rpost}
 #'       detailed above.
 #'     \item{\code{logf_rho_args}:} A list of arguments to the (transformed)
@@ -278,12 +281,12 @@
 #' plot(osv)
 #' @export
 rpost_rcpp <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data,
-                       prior, nrep = NULL, thresh = NULL, noy = NULL,
+                       prior, ..., nrep = NULL, thresh = NULL, noy = NULL,
                        use_noy = TRUE, npy = NULL, ros= NULL,
                        bin_prior = structure(list(prior = "bin_beta",
                                              ab = c(1 / 2, 1 / 2),
                                              class = "binprior")),
-                       init_ests = NULL, mult = 2, use_phi_map = FALSE, ...) {
+                       init_ests = NULL, mult = 2, use_phi_map = FALSE) {
   #
   model <- match.arg(model)
   save_model <- model
@@ -413,7 +416,6 @@ rpost_rcpp <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data,
   #
   # If init is not admissible set xi = 0 and try again
   #
-  #  init_check <- cpp_logpost(x = init, pars = for_post)
   init_check <- calc_init_logpost(model = model, prior_type = prior_type,
                                   init = init, for_post = for_post)
   #
@@ -441,7 +443,6 @@ rpost_rcpp <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data,
     if (model == "pp" & use_noy == FALSE) {
       init_ests <- change_pp_pars(init_ests, in_noy = noy, out_noy = ds$n_exc)
     }
-#    init_check <- cpp_logpost(x = init_ests, pars = for_post)
     init_check <- calc_init_logpost(model = model, prior_type = prior_type,
                                     init = init_ests, for_post = for_post)
     print(init_check)

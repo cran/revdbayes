@@ -59,8 +59,8 @@
 #'   The value of \code{npy} does not affect any calculation in
 #'   \code{rpost}, it only affects subsequent extreme value inferences using
 #'   \code{predict.evpost}.  However, setting \code{npy} in the call to
-#'   \code{rpost} avoids the need to supply \code{npy} when calling these
-#'   latter functions.  This is likely to be useful only when
+#'   \code{rpost} avoids the need to supply \code{npy} when calling
+#'   \code{predict.evpost}.  This is likely to be useful only when
 #'   \code{model = bingp}. See the documentation of
 #'   \code{\link{predict.evpost}} for further details.
 #' @param ros A numeric scalar.  Only relevant when \code{model = "os"}. The
@@ -133,12 +133,15 @@
 #'   \itemize{
 #'     \item{\code{model}:} The argument \code{model} to \code{rpost}
 #'       detailed above.
-#'     \item{\code{data}:} The argument \code{data} to \code{rpost}
-#'       detailed above, with any missing values removed, except that
+#'     \item{\code{data}:} The content depends on \code{model}:
+#'       if \code{model = "gev"} then this is the argument \code{data} to
+#'       \code{rpost} detailed above, with missing values removed;
 #'       if \code{model = "gp"} then only the values that lie above the
-#'       threshold are included and if \code{model = "bingp"} or
+#'       threshold are included; if \code{model = "bingp"} or
 #'       \code{model = "pp"} then the input data are returned
-#'       but any value lying below the threshold is set to \code{thresh}.
+#'       but any value lying below the threshold is set to \code{thresh};
+#'       if \code{model = "os"} then the order statistics used are returned
+#'       as a single vector.
 #'     \item{\code{prior}:} The argument \code{prior} to \code{rpost}
 #'       detailed above.
 #'   }
@@ -255,12 +258,12 @@
 #' }
 #' @export
 rpost <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data, prior,
-                  nrep = NULL, thresh = NULL, noy = NULL, use_noy = TRUE,
+                  ..., nrep = NULL, thresh = NULL, noy = NULL, use_noy = TRUE,
                   npy = NULL, ros= NULL,
                   bin_prior = structure(list(prior = "bin_beta",
                                              ab = c(1 / 2, 1 / 2),
                                              class = "binprior")),
-                  init_ests = NULL, mult = 2, use_phi_map = FALSE, ...) {
+                  init_ests = NULL, mult = 2, use_phi_map = FALSE) {
   #
   model <- match.arg(model)
   save_model <- model
