@@ -1,3 +1,19 @@
+# revdbayes 1.3.1
+
+## New features
+
+* Bayesian and maximum likelihood inference for the K-gaps model for inferring the extremal index using threshold inter-exceedances times. [Suveges, M. and Davison, A. C. (2010), Model misspecification in peaks over threshold analysis, The Annals of Applied Statistics, 4(1), 203-221. doi:10.1214/09-AOAS292.]
+
+* New vignette: "Inference for the extremal index using the K-gaps model".
+
+## Bug fixes and minor improvements
+
+* Added the attribute `attr(gom, "npy")` (with value 3) to the `gom` dataset.  This is for compatability with the **threshr** package.
+
+* Give an explicit error message if `plot.evpost` is called with the logically incompatible arguments `add_pu = TRUE` and `pu_only = TRUE`.
+
+* The documentation for `set_bin_prior` has been corrected: only in-built priors are available, i.e. it is not possible for the user to supply their own prior.
+
 # revdbayes 1.2.1
 
 ## Bug fixes and minor improvements

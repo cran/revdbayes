@@ -14,6 +14,11 @@
 #'   ratio-of-uniforms algorithm by working with transformation of the model
 #'   parameters.
 #'
+#'   The function \code{\link{kgaps_post}} simulates from the posterior
+#'   distribution of the extremal index \eqn{\theta} based on the
+#'   K-gaps model for threshold interexceedance times of Suveges and Davison
+#'   (2010).  See also Attalides (2015).
+#'
 #'   See \code{vignette("revdbayes-vignette", package = "revdbayes")} for an
 #'   overview of the package and
 #'   \code{vignette("revdbayes-using-rcpp-vignette", package = "revdbayes")}
@@ -25,15 +30,23 @@
 #' @references Northrop, P. J. (2016). rust: Ratio-of-Uniforms Simulation with
 #'   Transformation. R package version 1.2.2.
 #'   \url{https://cran.r-project.org/package=rust}.
-#'
+#' @references Suveges, M. and Davison, A. C. (2010) Model
+#'   misspecification in peaks over threshold analysis, \emph{The Annals of
+#'   Applied Statistics}, \strong{4}(1), 203-221.
+#'   \url{http://dx.doi.org/10.1214/09-AOAS292}
+#' @references Attalides, N. (2015) Threshold-based extreme value modelling,
+#'   PhD thesis, University College London.
+#'   \url{http://discovery.ucl.ac.uk/1471121/1/Nicolas_Attalides_Thesis.pdf}
 #' @seealso \code{\link{set_prior}} to set a prior density for extreme value
 #'   parameters.
 #' @seealso \code{\link{rpost}} and \code{\link{rpost_rcpp}} to perform
 #'   ratio-of-uniforms sampling from an extreme value posterior distribution.
+#' @seealso \code{\link{kgaps_post}} to sample from the posterior distribution
+#'   for the extremal index.
 #' @seealso The \code{\link[rust]{ru}} and \code{\link[rust]{ru_rcpp}}
 #'   functions in the \code{\link{rust}} package for details of the arguments
 #'   that can be passed to \code{ru} via \code{rpost} and for the form of the
-#'   object (of class "evprior") returned from \code{rpost}, which has the same
+#'   object (of class "evpost") returned from \code{rpost}, which has the same
 #'   structure as an object (of class "ru") returned by \code{ru} and
 #'   \code{ru_rcpp}.
 #' @docType package
@@ -53,7 +66,7 @@
 #' @importFrom bayesplot mcmc_intervals
 #' @importFrom bayesplot mcmc_dens
 #' @importFrom bayesplot mcmc_hist
-#' @useDynLib revdbayes
+#' @useDynLib revdbayes, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 NULL
 
@@ -121,3 +134,20 @@ NULL
 #'   Modelling of Extreme Values}. London: Springer.
 #'   \url{https://doi.org/10.1007/978-1-4471-3675-0}
 "venice"
+
+#' Newlyn sea surges
+#'
+#' The vector \code{newlyn} contains 2894 maximum sea-surges measured at
+#' Newlyn, Cornwall, UK over the period 1971-1976. The observations are
+#' the maximum hourly sea-surge heights over contiguous 15-hour time
+#' periods.
+#' @format A vector of length 2894.
+#' @source Coles, S.G. (1991) Modelling extreme multivariate events. PhD thesis,
+#'   University of Sheffield, U.K.
+#' @references Fawcett, L. and Walshaw, D. (2012) Estimating return levels from
+#'   serially dependent extremes. \emph{Environmetrics}, \strong{23}(3),
+#'   272-283.  \url{https://doi.org/10.1002/env.2133}
+#' @references Northrop, P. J. (2015) An efficient semiparametric maxima
+#'   estimator of the extremal index. \emph{Extremes}, \strong{18},
+#'   585-603.  \url{https://doi.org/10.1007/s10687-015-0221-5}
+"newlyn"

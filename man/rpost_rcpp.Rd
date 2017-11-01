@@ -97,7 +97,7 @@ beta(1/2, 1/2) prior is used.}
 for the mode of the posterior distribution.}
 
 \item{mult}{A numeric scalar.  The grid of values used to choose the Box-Cox
-transformation parameter lambda is based on the maximum aposteriori (MAP)
+transformation parameter lambda is based on the maximum a posteriori (MAP)
 estimate +/- mult x estimated posterior standard deviation.}
 
 \item{use_phi_map}{A logical scalar. If trans = "BC" then \code{use_phi_map}
@@ -108,7 +108,7 @@ centred on the maximum a posterior (MAP) estimate of phi
 }
 \value{
 An object (list) of class \code{"evpost"}, which has the same
-  structure as an object of class "ru" returned from
+  structure as an object of class \code{"ru"} returned from
   \code{\link[rust]{ru_rcpp}}.  In addition this list contains
   \itemize{
     \item{\code{model}:} The argument \code{model} to \code{rpost}

@@ -128,7 +128,7 @@
 #'   for further details and examples.
 #'
 #' @return An object (list) of class \code{"evpost"}, which has the same
-#'   structure as an object of class "ru" returned from
+#'   structure as an object of class \code{"ru"} returned from
 #'   \code{\link[rust]{ru_rcpp}}.  In addition this list contains
 #'   \itemize{
 #'     \item{\code{model}:} The argument \code{model} to \code{rpost}
@@ -394,8 +394,7 @@ rpost_rcpp <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data,
     )
   }
   #
-  # Combine lists ds (data) and prior (details of prior) into one list and
-  # add the log-likelihood and log-prior pointers to the list for_post.
+  # Combine lists ds (data) and prior (details of prior) into one list.
   #
   for_post <- c(ds, prior)
   # For the OS model add the largest sample size over all order statistics.
@@ -445,7 +444,6 @@ rpost_rcpp <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data,
     }
     init_check <- calc_init_logpost(model = model, prior_type = prior_type,
                                     init = init_ests, for_post = for_post)
-    print(init_check)
     if (!is.infinite(init_check)) {
       init <- init_ests
       init_phi <- switch(model,

@@ -103,14 +103,14 @@
 #'   For \code{model = "gp"}: (an extended version
 #'     of) the maximal data information (MDI) prior, that is,
 #'     \deqn{\pi(\sigma, \xi) = (1/ \sigma) exp[- a (\xi + 1)], for
-#'     \sigma > 0, \xi >= -1, a > 0.}
+#'     \sigma > 0, \xi >= -1, a >= 0.}
 #'     The value of \eqn{a} is set using the argument \code{a}.  The default
 #'     value is \eqn{a = 1}, which gives the MDI prior.
 #'
 #'     For \code{model = "gev"}: (an extended version
 #'     of) the maximal data information (MDI) prior, that is,
 #'     \deqn{\pi(\mu, \sigma, \xi) = (1/ \sigma) exp[- a (\xi + 1)], for
-#'     \sigma > 0, \xi >= -1, a > 0.}
+#'     \sigma > 0, \xi >= -1, a >= 0.}
 #'     The value of \eqn{a} is set using the argument \code{a}.  The default
 #'     value is \eqn{a = \gamma}, where \eqn{\gamma = 0.57721} is Euler's
 #'     constant, which gives the MDI prior.
@@ -370,8 +370,8 @@ gp_prior <- function(prior = c("norm", "mdi", "flat", "flatflat", "jeffreys",
   }
   if (prior == "mdi" & !is.null(temp$a)) {
     a <- temp$a
-    if (length(a) != 1 | !is.numeric(a) | a <= 0)
-        stop("a must be a positive numeric vector of length 1")
+    if (length(a) != 1 | !is.numeric(a) | a < 0)
+        stop("a must be a non-negative numeric vector of length 1")
   }
   if (prior == "beta" & !is.null(temp$pq)) {
     pq <- temp$pq
@@ -592,8 +592,8 @@ gev_prior <- function(prior=c("norm", "loglognorm", "mdi", "flat", "flatflat",
   }
   if (prior == "mdi" & !is.null(temp$a)) {
     a <- temp$a
-    if (length(a) != 1 | !is.numeric(a) | a <= 0)
-        stop("a must be a positive numeric vector of length 1")
+    if (length(a) != 1 | !is.numeric(a) | a < 0)
+        stop("a must be a non-negative numeric vector of length 1")
   }
   if (prior == "beta" & !is.null(temp$pq)) {
     pq <- temp$pq
@@ -823,14 +823,14 @@ hpar_drop <- function(x_list, hpar_vec) {
 #' Construction of a prior distribution for a binomial probability \eqn{p}
 #'
 #' Constructs a prior distribution for use as the argument \code{bin_prior} in
-#' \code{\link{rpost}} or in \code{\link{binpost}}.  The user can either
-#' specify their own prior function and arguments for hyperparameters or choose
+#' \code{\link{rpost}} or in \code{\link{binpost}}.  The user can choose
 #' from a list of in-built priors.
 #'
 #' @param prior A character string giving the name of the prior for \eqn{p}.
 #'   See \strong{Details} for a list of the priors available.
-#' @param ... Further arguments to be passed to the user-supplied or
-#'   in-built prior function.  For details of the latter see \strong{Details}.
+#' @param ... Further arguments to be passed to an in-built prior function.
+#'   This is only relevant if \code{model = "beta"}, when \code{ab} can be
+#'   passed. See \strong{Details}.
 #' @details
 #'   \strong{Binomial priors.} The names of the binomial priors set using
 #'   \code{bin_prior} are:

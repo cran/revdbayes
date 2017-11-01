@@ -13,37 +13,40 @@ got_evdbayes <- requireNamespace("evdbayes", quietly = TRUE)
 # prior_prob
 
 prior_prob_test <- function(x, quant, alpha) {
-  if(got_evdbayes) {
-    e_val <- evdbayes::dprior.prob(par = x, quant = quant, alpha = alpha,
-                                   trendsd = 0)
-  }
   r_val <- as.numeric(gev_prob(pars = x, quant = quant, alpha = alpha))
   c_val <- cpp_gev_prob(x = x, ppars = list(quant = quant, alpha = alpha))
-  return(list(e_val = e_val, r_val = r_val, c_val = c_val))
+  if (got_evdbayes) {
+    e_val <- evdbayes::dprior.prob(par = x, quant = quant, alpha = alpha,
+                                   trendsd = 0)
+  } else {
+    return(c(r_val, c_val))
+  }
+  return(c(e_val, r_val, c_val))
 }
 
 # prior_quant
 
 prior_quant_test <- function(x, prob, shape, scale) {
-  if(got_evdbayes) {
-    e_val <- evdbayes::dprior.quant(par = x, prob = prob, shape = shape,
-                                    scale = scale, trendsd = 0)
-  }
   r_val <- as.numeric(gev_quant(pars = x, prob = prob, shape = shape,
                                 scale = scale))
   c_val <- cpp_gev_quant(x = x, ppars = list(prob = prob, shape = shape,
                                              scale = scale))
-  return(list(e_val = e_val, r_val = r_val, c_val = c_val))
+  if(got_evdbayes) {
+    e_val <- evdbayes::dprior.quant(par = x, prob = prob, shape = shape,
+                                    scale = scale, trendsd = 0)
+  } else {
+    return(c(r_val, c_val))
+  }
+  return(c(e_val, r_val, c_val))
 }
 
 test_function <- function(x, test_string) {
   testthat::test_that(test_string, {
-#    skip_on_cran()
     if (got_evdbayes) {
-      testthat::expect_equal(x$r_val, x$c_val, x$e_val,
-                                  tolerance = my_tol)
+      testthat::expect_equal(x[1], x[2], tolerance = my_tol)
+      testthat::expect_equal(x[2], x[3], tolerance = my_tol)
     } else {
-      testthat::expect_equal(x$r_val, x$c_val, tolerance = my_tol)
+      testthat::expect_equal(x[1], x[2], tolerance = my_tol)
     }
   })
 }

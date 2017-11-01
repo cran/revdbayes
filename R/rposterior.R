@@ -128,7 +128,8 @@
 #'   for further details and examples.
 #'
 #' @return An object (list) of class \code{"evpost"}, which has the same
-#'   structure as an object of class "ru" returned from \code{\link[rust]{ru}}.
+#'   structure as an object of class \code{"ru"} returned from
+#'   \code{\link[rust]{ru}}.
 #'   In addition this list contains
 #'   \itemize{
 #'     \item{\code{model}:} The argument \code{model} to \code{rpost}
@@ -431,7 +432,6 @@ rpost <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data, prior,
       init_ests <- change_pp_pars(init_ests, in_noy = noy, out_noy = ds$n_exc)
     }
     init_check <- logpost(par = init_ests, ds = ds)
-    print(init_check)
     if (!is.infinite(init_check)) {
       init <- init_ests
       init_phi <- switch(model,

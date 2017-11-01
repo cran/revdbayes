@@ -59,9 +59,6 @@ if (got_microbenchmark) {
 }  
 
 ## ------------------------------------------------------------------------
-# Informative prior set using evdbayes
-pr <- prior.quant(prob = 10^-(1:3), shape = c(38.9, 7.1, 47), 
-                  scale = c(1.5, 6.3, 2.6))
 # Informative prior set using revdbayes
 pr2 <- set_prior(prob = 10^-(1:3), shape = c(38.9, 7.1, 47),
                  scale = c(1.5, 6.3, 2.6), model = "gev", prior = "quant")
@@ -70,6 +67,9 @@ t0 <- c(43.2, 7.64, 0.32)
 s <- c(2, .2, .07)
 if (got_microbenchmark) {
   if (got_evdbayes) {
+    # Informative prior set using evdbayes
+    pr <- prior.quant(prob = 10^-(1:3), shape = c(38.9, 7.1, 47), 
+                      scale = c(1.5, 6.3, 2.6))
     res <- microbenchmark(
       rpost = rpost(n = n, model = "pp", prior = pr2, data = rainfall,
                 thresh = 40, noy = 54),

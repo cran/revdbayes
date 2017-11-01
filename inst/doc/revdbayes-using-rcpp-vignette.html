@@ -12,7 +12,7 @@
 
 <meta name="author" content="Paul J. Northrop" />
 
-<meta name="date" content="2017-08-21" />
+<meta name="date" content="2017-11-01" />
 
 <title>Faster simulation using revdbayes</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Faster simulation using revdbayes</h1>
 <h4 class="author"><em>Paul J. Northrop</em></h4>
-<h4 class="date"><em>2017-08-21</em></h4>
+<h4 class="date"><em>2017-11-01</em></h4>
 
 
 <div id="TOC">
@@ -85,7 +85,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul>
 </div>
 
-<p>This vignette introduces a new feature of <em>revdbayes</em>: reducing posterior simulation time by performing the most time-consuming tasks using C++ functions. This achieved using a new facility in the <em>rust</em> package <span class="citation">(Northrop 2016)</span>, which in turn uses the <strong>Rcpp</strong> package <span class="citation">(Eddelbuettel and Francois 2011, <span class="citation">Eddelbuettel (2013)</span>)</span>. The result is a new function <code>rpost_rcpp</code>, which has the same structure as the existing function <code>rpost</code>. From a user’s perspective the only difference between these two functions occurs if they wish to supply their own prior distribution: <code>rpost_rcpp</code> requires an external pointer to a C++ function (see <a href="#cpp_fun">Providing a user-defined prior</a>), whereas <code>rpost</code> requires an input R function (see the vignette <a href="revdbayes-vignette.html">Introducing revdbayes</a>.</p>
+<p>This vignette introduces a new feature of <em>revdbayes</em>: reducing posterior simulation time by performing the most time-consuming tasks using C++ functions. This achieved using a new facility in the <em>rust</em> package <span class="citation">(Northrop 2017)</span>, which in turn uses the <strong>Rcpp</strong> package <span class="citation">(Eddelbuettel and Francois 2011, <span class="citation">Eddelbuettel (2013)</span>)</span>. The result is a new function <code>rpost_rcpp</code>, which has the same structure as the existing function <code>rpost</code>. From a user’s perspective the only difference between these two functions occurs if they wish to supply their own prior distribution: <code>rpost_rcpp</code> requires an external pointer to a C++ function (see <a href="#cpp_fun">Providing a user-defined prior</a>), whereas <code>rpost</code> requires an input R function (see the vignette <a href="revdbayes-vignette.html">Introducing revdbayes</a>.</p>
 <p>Before we deal with user-supplied priors we compare posterior simulation times using <code>rpost</code> and <code>rpost_rcpp</code> for examples based on in-built prior distributions. We use the default settings of <code>rpost</code> and <code>rpost_rcpp</code> throughout. We also compare the speed of these functions with the function <code>posterior</code> in the <strong>evdbayes</strong> package <span class="citation">(Stephenson and Ribatet 2014)</span>, using the <strong>microbenchmark</strong> package <span class="citation">(Mersmann 2015)</span>.</p>
 <div id="performance-comparisons" class="section level2">
 <h2>Performance comparisons</h2>
@@ -118,13 +118,13 @@ if (got_microbenchmark) {
   <span class="kw">print</span>(res, <span class="dt">signif =</span> <span class="dv">2</span>)
 }  
 <span class="co">#&gt; Unit: milliseconds</span>
-<span class="co">#&gt;        expr   min    lq      mean median    uq   max neval</span>
-<span class="co">#&gt;       rpost 160.0 174.0 190.44071  185.0 198.0 333.0   100</span>
-<span class="co">#&gt;  rpost_rcpp  19.2  20.4  23.09532   22.1  24.3  34.9   100</span>
+<span class="co">#&gt;        expr   min    lq      mean median    uq max neval</span>
+<span class="co">#&gt;       rpost 111.0 119.0 125.77119    123 129.0 213   100</span>
+<span class="co">#&gt;  rpost_rcpp  19.6  20.2  26.98988     21  23.7 293   100</span>
 <span class="co">#&gt; Unit: relative</span>
-<span class="co">#&gt;        expr min  lq     mean median  uq max neval</span>
-<span class="co">#&gt;       rpost 8.4 8.5 8.245858    8.4 8.1 9.5   100</span>
-<span class="co">#&gt;  rpost_rcpp 1.0 1.0 1.000000    1.0 1.0 1.0   100</span></code></pre></div>
+<span class="co">#&gt;        expr min  lq     mean median  uq  max neval</span>
+<span class="co">#&gt;       rpost 5.7 5.9 4.659939    5.9 5.4 0.73   100</span>
+<span class="co">#&gt;  rpost_rcpp 1.0 1.0 1.000000    1.0 1.0 1.00   100</span></code></pre></div>
 <p>In this example <code>rpost_rcpp</code> is, on average, a factor of approximately 8-9 times faster than <code>rpost</code>.</p>
 </div>
 <div id="generalised-extreme-value-gev-model" class="section level3">
@@ -157,24 +157,21 @@ if (got_microbenchmark) {
   <span class="kw">print</span>(res, <span class="dt">signif =</span> <span class="dv">2</span>)
 }  
 <span class="co">#&gt; Unit: milliseconds</span>
-<span class="co">#&gt;        expr   min  lq      mean median    uq max neval</span>
-<span class="co">#&gt;       rpost 408.0 424 459.81602  429.0 443.0 792   100</span>
-<span class="co">#&gt;  rpost_rcpp  69.6  72  82.12671   74.2  76.6 449   100</span>
-<span class="co">#&gt;    evdbayes 287.0 294 308.54190  298.0 304.0 458   100</span>
+<span class="co">#&gt;        expr   min    lq      mean median    uq max neval</span>
+<span class="co">#&gt;       rpost 249.0 263.0 276.05224  271.0 280.0 390   100</span>
+<span class="co">#&gt;  rpost_rcpp  71.3  74.8  79.35369   77.3  82.2 104   100</span>
+<span class="co">#&gt;    evdbayes 208.0 216.0 228.92112  224.0 236.0 298   100</span>
 <span class="co">#&gt; Unit: relative</span>
 <span class="co">#&gt;        expr min  lq     mean median  uq max neval</span>
-<span class="co">#&gt;       rpost 5.9 5.9 5.598861    5.8 5.8 1.8   100</span>
+<span class="co">#&gt;       rpost 3.5 3.5 3.478757    3.5 3.4 3.8   100</span>
 <span class="co">#&gt;  rpost_rcpp 1.0 1.0 1.000000    1.0 1.0 1.0   100</span>
-<span class="co">#&gt;    evdbayes 4.1 4.1 3.756901    4.0 4.0 1.0   100</span></code></pre></div>
+<span class="co">#&gt;    evdbayes 2.9 2.9 2.884820    2.9 2.9 2.9   100</span></code></pre></div>
 <p>This comparison is generous to <code>posterior</code> because the burn-in has been set to zero and <code>posterior</code> produces a dependent sample rather than a random sample. The <em>effective sample size</em> of an MCMC sample from <code>posterior</code> varies between simulations and across parameters. The <code>effectiveSize</code> function in the <strong>coda</strong> package <span class="citation">(Plummer et al. 2006)</span> suggests that the effective sample size in this example is of the order of 100 to 200, whereas the <strong>revdbayes</strong> functions <code>rpost</code> and <code>rpost_rcpp</code> produce random samples of size 1000. <code>rpost</code> is less than 50% slower than <code>posterior</code> while <code>rpost_rcpp</code> is faster than <code>posterior</code> by a factor of 4.</p>
 </div>
 <div id="point-process-pp-model" class="section level3">
 <h3>Point Process (PP) model</h3>
 <p>We compare the computational efficiencies of <code>rpost</code>, <code>rpost_rcpp</code> and the evdbayes function <code>posterior</code> when performing the analysis of daily rainfall totals from the <a href="revdbayes-vignette.html">Introducing revdbayes</a>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Informative prior set using evdbayes</span>
-pr &lt;-<span class="st"> </span><span class="kw">prior.quant</span>(<span class="dt">prob =</span> <span class="dv">10</span>^-(<span class="dv">1</span>:<span class="dv">3</span>), <span class="dt">shape =</span> <span class="kw">c</span>(<span class="fl">38.9</span>, <span class="fl">7.1</span>, <span class="dv">47</span>), 
-                  <span class="dt">scale =</span> <span class="kw">c</span>(<span class="fl">1.5</span>, <span class="fl">6.3</span>, <span class="fl">2.6</span>))
-<span class="co"># Informative prior set using revdbayes</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Informative prior set using revdbayes</span>
 pr2 &lt;-<span class="st"> </span><span class="kw">set_prior</span>(<span class="dt">prob =</span> <span class="dv">10</span>^-(<span class="dv">1</span>:<span class="dv">3</span>), <span class="dt">shape =</span> <span class="kw">c</span>(<span class="fl">38.9</span>, <span class="fl">7.1</span>, <span class="dv">47</span>),
                  <span class="dt">scale =</span> <span class="kw">c</span>(<span class="fl">1.5</span>, <span class="fl">6.3</span>, <span class="fl">2.6</span>), <span class="dt">model =</span> <span class="st">&quot;gev&quot;</span>, <span class="dt">prior =</span> <span class="st">&quot;quant&quot;</span>)
 <span class="co"># Tuning parameters from the evdbayes user guide.</span>
@@ -182,6 +179,9 @@ t0 &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="fl">43.2
 s &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">2</span>, .<span class="dv">2</span>, .<span class="dv">07</span>)
 if (got_microbenchmark) {
   if (got_evdbayes) {
+    <span class="co"># Informative prior set using evdbayes</span>
+    pr &lt;-<span class="st"> </span><span class="kw">prior.quant</span>(<span class="dt">prob =</span> <span class="dv">10</span>^-(<span class="dv">1</span>:<span class="dv">3</span>), <span class="dt">shape =</span> <span class="kw">c</span>(<span class="fl">38.9</span>, <span class="fl">7.1</span>, <span class="dv">47</span>), 
+                      <span class="dt">scale =</span> <span class="kw">c</span>(<span class="fl">1.5</span>, <span class="fl">6.3</span>, <span class="fl">2.6</span>))
     res &lt;-<span class="st"> </span><span class="kw">microbenchmark</span>(
       <span class="dt">rpost =</span> <span class="kw">rpost</span>(<span class="dt">n =</span> n, <span class="dt">model =</span> <span class="st">&quot;pp&quot;</span>, <span class="dt">prior =</span> pr2, <span class="dt">data =</span> rainfall,
                 <span class="dt">thresh =</span> <span class="dv">40</span>, <span class="dt">noy =</span> <span class="dv">54</span>),
@@ -205,14 +205,14 @@ if (got_microbenchmark) {
 }  
 <span class="co">#&gt; Unit: milliseconds</span>
 <span class="co">#&gt;        expr   min    lq      mean median    uq max neval</span>
-<span class="co">#&gt;       rpost 652.0 682.0 699.69551  693.0 710.0 793   100</span>
-<span class="co">#&gt;  rpost_rcpp  43.7  45.7  48.53683   47.7  49.6 118   100</span>
-<span class="co">#&gt;    evdbayes 272.0 276.0 281.59867  280.0 283.0 346   100</span>
+<span class="co">#&gt;       rpost 438.0 455.0 471.23499  467.0 478.0 576   100</span>
+<span class="co">#&gt;  rpost_rcpp  46.3  49.3  52.94718   51.1  53.3 125   100</span>
+<span class="co">#&gt;    evdbayes 282.0 288.0 302.51777  295.0 309.0 388   100</span>
 <span class="co">#&gt; Unit: relative</span>
-<span class="co">#&gt;        expr  min lq      mean median   uq max neval</span>
-<span class="co">#&gt;       rpost 15.0 15 14.415765   15.0 14.0 6.7   100</span>
-<span class="co">#&gt;  rpost_rcpp  1.0  1  1.000000    1.0  1.0 1.0   100</span>
-<span class="co">#&gt;    evdbayes  6.2  6  5.801753    5.9  5.7 2.9   100</span></code></pre></div>
+<span class="co">#&gt;        expr min  lq     mean median  uq max neval</span>
+<span class="co">#&gt;       rpost 9.5 9.2 8.900096    9.1 9.0 4.6   100</span>
+<span class="co">#&gt;  rpost_rcpp 1.0 1.0 1.000000    1.0 1.0 1.0   100</span>
+<span class="co">#&gt;    evdbayes 6.1 5.8 5.713577    5.8 5.8 3.1   100</span></code></pre></div>
 <p>In this example <code>rpost</code> is more than a factor of two slower than <code>posterior</code> but <code>rpost_rcpp</code> is substantially faster than <code>posterior</code>.</p>
 </div>
 </div>
@@ -283,7 +283,7 @@ gpg &lt;-<span class="st"> </span><span class="kw">rpost_rcpp</span>(<span class
 <p>Mersmann, O. 2015. <em>Microbenchmark: Accurate Timing Functions</em>. <a href="https://CRAN.R-project.org/package=microbenchmark" class="uri">https://CRAN.R-project.org/package=microbenchmark</a>.</p>
 </div>
 <div id="ref-rust">
-<p>Northrop, P. J. 2016. <em>rust: Ratio-of-Uniforms Simulation with Transformation</em>. <a href="https://CRAN.R-project.org/package=rust" class="uri">https://CRAN.R-project.org/package=rust</a>.</p>
+<p>Northrop, P. J. 2017. <em>rust: Ratio-of-Uniforms Simulation with Transformation</em>. <a href="https://CRAN.R-project.org/package=rust" class="uri">https://CRAN.R-project.org/package=rust</a>.</p>
 </div>
 <div id="ref-coda">
 <p>Plummer, M., N. Best, K. Cowles, and K. Vines. 2006. “CODA: Convergence Diagnosis and Output Analysis for MCMC.” <em>R News</em> 6 (1): 7–11. <a href="https://journal.r-project.org/archive/" class="uri">https://journal.r-project.org/archive/</a>.</p>
@@ -301,7 +301,7 @@ gpg &lt;-<span class="st"> </span><span class="kw">rpost_rcpp</span>(<span class
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>
