@@ -45,8 +45,8 @@
 #'   generalised ratio-of-uniforms distribution.  To improve the probability
 #'   of acceptance, and to ensure that the simulation will work even in
 #'   extreme cases where the posterior density of \eqn{\theta} is unbounded as
-#'   \eqn{\theta} approaches 0 or 1, we simulate from the posterior distribution
-#'   of \eqn{\phi = logit(\theta)} and then transform back to the
+#'   \eqn{\theta} approaches 0 or 1, we simulate from the posterior
+#'   distribution of \eqn{\phi = logit(\theta)} and then transform back to the
 #'   \eqn{\theta}-scale.
 #' @return An object (list) of class \code{"evpost"}, which has the same
 #'   structure as an object of class \code{"ru"} returned from
@@ -76,8 +76,18 @@
 #' k_postsim <- kgaps_post(newlyn, thresh)
 #' plot(k_postsim)
 #' @export
-kgaps_post <- function(data, thresh, k = 1, n = 1000, inc_cens = FALSE, alpha = 1,
-                       beta = 1, param = c("logit", "theta"), use_rcpp = TRUE) {
+kgaps_post <- function(data, thresh, k = 1, n = 1000, inc_cens = FALSE,
+                       alpha = 1, beta = 1, param = c("logit", "theta"),
+                       use_rcpp = TRUE) {
+  if (!is.numeric(thresh) || length(thresh) != 1) {
+    stop("thresh must be a numeric scalar")
+  }
+  if (thresh >= max(data)) {
+    stop("thresh must be less than max(data)")
+  }
+  if (!is.numeric(k) || length(k) != 1) {
+    stop("k must be a numeric scalar")
+  }
   param <- match.arg(param)
   if (k < 1) {
     stop("k must be no smaller than 1.")
@@ -202,6 +212,15 @@ kgaps_post <- function(data, thresh, k = 1, n = 1000, inc_cens = FALSE, alpha = 
 #' kgaps_mle(newlyn, thresh, conf = 95)
 #' @export
 kgaps_mle <- function(data, thresh, k = 1, inc_cens = FALSE, conf = NULL) {
+  if (!is.numeric(thresh) || length(thresh) != 1) {
+    stop("thresh must be a numeric scalar")
+  }
+  if (!is.numeric(k) || length(k) != 1) {
+    stop("k must be a numeric scalar")
+  }
+  if (thresh >= max(data)) {
+    stop("thresh must be less than max(data)")
+  }
   # Calculate sufficient statistics
   ss <- kgaps_stats(data, thresh, k, inc_cens)
   # If N0 = 0 then all exceedances occur singly (all K-gaps are positive)
@@ -230,7 +249,7 @@ kgaps_mle <- function(data, thresh, k = 1, inc_cens = FALSE, conf = NULL) {
   if (is.null(conf)) {
     return(list(theta_mle = theta_mle, theta_se = theta_se, ss = ss))
   }
-  conf_int <- kgaps_conf_int(theta_mle, ss, conf = 95)
+  conf_int <- kgaps_conf_int(theta_mle, ss, conf = conf)
   return(list(theta_mle = theta_mle, theta_se = theta_se, theta_ci = conf_int,
               ss = ss))
 }
@@ -294,6 +313,15 @@ kgaps_mle <- function(data, thresh, k = 1, inc_cens = FALSE, conf = NULL) {
 kgaps_stats <- function(data, thresh, k = 1, inc_cens = FALSE) {
   if (any(is.na(data))) {
     stop("No missing values are allowed in ''data''")
+  }
+  if (!is.numeric(thresh) || length(thresh) != 1) {
+    stop("thresh must be a numeric scalar")
+  }
+  if (thresh >= max(data)) {
+    stop("thresh must be less than max(data)")
+  }
+  if (!is.numeric(k) || length(k) != 1) {
+    stop("k must be a numeric scalar")
   }
   # Sample size, positions, number and proportion of exceedances
   nx <- length(data)

@@ -36,14 +36,24 @@ Currently \code{object$model = "gev"},
     (see \link[bayesplot]{pp_check}).
 }}
 
-\item{subtype}{A character scalar.}
+\item{subtype}{A character scalar.  Specifies the form of the plot(s)
+produced.  Could be one of
+\code{"dens", "hist", "boxplot", "ribbon"} or \code{"intervals"}.
+If \code{subtype} is not supplied then the defaults are:
+\code{"ecdf"} if \code{type = overlaid},
+\code{"dens"} if \code{type = multiple},
+\code{"intervals"} if \code{type = intervals}.
+\code{subtype} is not relevant if \code{type = "stat"}.}
 
 \item{stat}{See \link[bayesplot]{PPC-test-statistics}.}
 
 \item{nrep}{If \code{type = "multiple"} the maximum number of
-summary plots of the predictive simulated datasets to include.}
+summary plots of the predictive simulated datasets to include.
+If \code{nrep} is greater than \code{nrow(object$data_rep)} then
+\code{nrep} is set equal to \code{nrow(object$data_rep)}.}
 
 \item{fun}{The plotting function to call.
+Only relevant if \code{type = "user"}.
 Can be any of the functions detailed at \link[bayesplot]{PPC-overview}.
 The "ppc_" prefix can optionally be dropped if fun is specified
 as a string.}
@@ -66,7 +76,7 @@ For details of these functions see \link[bayesplot]{PPC-overview}.
   \href{https://CRAN.R-project.org/package=bayesplot}{Graphical posterior predictive checks}.
 
   The general idea is to compare the observed data \code{object$data}
-  with a matrix \code{object$data_rep}) in which each row is a
+  with a matrix \code{object$data_rep} in which each row is a
   replication of the observed data simulated from the posterior predictive
   distribution.  For greater detail see Chapter 6 of
   \href{www.stat.columbia.edu/~gelman/book}{Gelman et al. (2014)}.
@@ -159,7 +169,7 @@ Chapman & Hall/CRC Press, London, third edition. (Chapter 6)
 \url{www.stat.columbia.edu/~gelman/book}
 }
 \seealso{
-\code{\link{rpost}} and \code{\link{rpost_rcpp}}for sampling
+\code{\link{rpost}} and \code{\link{rpost_rcpp}} for sampling
   from an extreme value posterior distribution.
 
 \strong{bayesplot} functions \link[bayesplot]{PPC-overview},

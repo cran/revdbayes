@@ -56,32 +56,18 @@ plot(gp4, ru_scale = TRUE, cex.main = 0.75, cex.lab = 0.75,
 ## ---- echo = FALSE-------------------------------------------------------
 thresh <- quantile(gom, probs = 0.95)
 fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
-t1 <- system.time(
-gp1 <- rpost(n = n, model = "gp", prior = fp, thresh = thresh, data = gom,
-             rotate = FALSE)
-)[3]
 t2 <- system.time(
 gp2 <- rpost(n = n, model = "gp", prior = fp, thresh = thresh, data = gom)
-)[3]
-t3 <- system.time(
-gp3 <- rpost(n = n, model = "gp", prior = fp, thresh = thresh, data = gom,
-             rotate = FALSE, trans = "BC")
 )[3]
 t4 <- system.time(
 gp4 <- rpost(n = n, model = "gp", prior = fp, thresh = thresh, data = gom,
              trans = "BC")
 )[3]
 
-## ---- fig.show='hold'----------------------------------------------------
-plot(gp1, ru_scale = FALSE, cex.main = 0.75, cex.lab = 0.75, 
-  main = paste("no transformation \n pa = ", round(gp1$pa, 3), 
-               ", time = ", round(t1, 2), "s"))
+## ---- fig.show='hold', echo = FALSE--------------------------------------
 plot(gp2, ru_scale = TRUE, cex.main = 0.75, cex.lab = 0.75, 
   main = paste("rotation \n pa = ", round(gp2$pa, 3),
                ", time = ", round(t2, 2), "s"))
-plot(gp3, ru_scale = TRUE, cex.main = 0.75, cex.lab = 0.75, 
-  main = paste("Box-Cox \n pa = ", round(gp3$pa, 3),
-               ", time = ", round(t3, 2), "s"))
 plot(gp4, ru_scale = TRUE, cex.main = 0.75, cex.lab = 0.75,
   main = paste("Box-Cox and rotation \n pa = ", round(gp4$pa, 3),
                ", time = ", round(t4, 2), "s"))

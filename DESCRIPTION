@@ -1,7 +1,7 @@
 Package: revdbayes
 Title: Ratio-of-Uniforms Sampling for Bayesian Extreme Value Analysis
-Version: 1.3.1
-Date: 2017-11-01
+Version: 1.3.2
+Date: 2018-02-12
 Authors@R: person(c("Paul", "J."), "Northrop", email = "p.northrop@ucl.ac.uk",
   role = c("aut", "cre", "cph"))
 Description: Provides functions for the Bayesian analysis of extreme value
@@ -12,13 +12,11 @@ Description: Provides functions for the Bayesian analysis of extreme value
     Monte Carlo ('MCMC') methods for posterior simulation.  Also provided
     are functions for making inferences about the extremal index, using 
     the K-gaps model of Suveges and Davison (2010) <doi:10.1214/09-AOAS292>.
-    See the 'revdbayes' website for more information, documentation and 
-    examples.
 Imports: bayesplot (>= 1.1.0), graphics, methods, Rcpp, rust (>=
-        1.2.2), stats, utils
+        1.2.2), stats, utils, zoo
 License: GPL (>= 2)
 LazyData: TRUE
-Depends: R (>= 3.3.1),
+Depends: R (>= 3.3.0),
 RoxygenNote: 6.0.1
 Suggests: evdbayes, ggplot2 (>= 2.2.1), knitr, microbenchmark,
         rmarkdown, testthat
@@ -27,8 +25,8 @@ URL: http://github.com/paulnorthrop/revdbayes
 BugReports: http://github.com/paulnorthrop/revdbayes/issues
 LinkingTo: Rcpp (>= 0.12.10), RcppArmadillo
 NeedsCompilation: yes
-Packaged: 2017-11-01 22:08:51 UTC; paul
+Packaged: 2018-02-12 19:44:22 UTC; paul
 Author: Paul J. Northrop [aut, cre, cph]
 Maintainer: Paul J. Northrop <p.northrop@ucl.ac.uk>
 Repository: CRAN
-Date/Publication: 2017-11-02 00:57:43 UTC
+Date/Publication: 2018-02-12 23:14:59 UTC

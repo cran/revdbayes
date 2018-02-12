@@ -12,7 +12,7 @@
 
 <meta name="author" content="Paul J. Northrop" />
 
-<meta name="date" content="2017-11-01" />
+<meta name="date" content="2018-02-12" />
 
 <title>Posterior Predictive Extreme Value Inference using the revdbayes Package</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Posterior Predictive Extreme Value Inference using the revdbayes Package</h1>
 <h4 class="author"><em>Paul J. Northrop</em></h4>
-<h4 class="date"><em>2017-11-01</em></h4>
+<h4 class="date"><em>2018-02-12</em></h4>
 
 
 <div id="TOC">
@@ -109,9 +109,12 @@ fp &lt;-<span class="st"> </span><span class="kw">set_prior</span>(<span class="
 gpg &lt;-<span class="st"> </span><span class="kw">rpost</span>(<span class="dt">n =</span> <span class="dv">1000</span>, <span class="dt">model =</span> <span class="st">&quot;gp&quot;</span>, <span class="dt">prior =</span> fp, <span class="dt">thresh =</span> u, <span class="dt">data =</span> gom, <span class="dt">nrep =</span> <span class="dv">50</span>)</code></pre></div>
 <div id="posterior-predictive-model-checking" class="section level2">
 <h2>Posterior predictive model checking</h2>
-<p>The <code>pp_check</code> method <code>pp_check.evpost</code> provides an interface to the posterior predictive checking graphics available in the <em>bayesplot</em> package <span class="citation">(Gabry 2016)</span>. For details see the bayesplot vignette <a href="https://CRAN.R-project.org/package=bayesplot">Graphical posterior predictive checks</a>. <em>bayesplot</em> functions return a <code>ggplot</code> object that can be customised using the <em>gglot2</em> package <span class="citation">(Wickham 2009)</span>.</p>
+<p>The <code>pp_check</code> method <code>pp_check.evpost</code> provides an interface to the posterior predictive checking graphics available in the <em>bayesplot</em> package <span class="citation">(Gabry and Mahr 2017)</span>. For details see the bayesplot vignette <a href="https://CRAN.R-project.org/package=bayesplot">Graphical posterior predictive checks</a>. <em>bayesplot</em> functions return a <code>ggplot</code> object that can be customised using the <em>gglot2</em> package <span class="citation">(Wickham 2009)</span>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(bayesplot)
-<span class="co">#&gt; This is bayesplot version 1.2.0</span>
+<span class="co">#&gt; Warning: package 'bayesplot' was built under R version 3.4.2</span>
+<span class="co">#&gt; This is bayesplot version 1.4.0</span>
+<span class="co">#&gt; - Plotting theme set to bayesplot::theme_default()</span>
+<span class="co">#&gt; - Online documentation at mc-stan.org/bayesplot</span>
 <span class="kw">library</span>(ggplot2)</code></pre></div>
 <p>We show three examples of the graphical posterior predictive checks that are available from <em>bayesplot</em>.</p>
 <div id="overlaid-density-and-distribution-functions" class="section level3">
@@ -191,7 +194,7 @@ bgpg &lt;-<span class="st"> </span><span class="kw">rpost</span>(<span class="dt
 </script>
 <div id="refs" class="references">
 <div id="ref-bayesplot">
-<p>Gabry, Jonah. 2016. <em>bayesplot: Plotting for Bayesian Models</em>. <a href="https://CRAN.R-project.org/package=bayesplot" class="uri">https://CRAN.R-project.org/package=bayesplot</a>.</p>
+<p>Gabry, Jonah, and Tristan Mahr. 2017. <em>Bayesplot: Plotting for Bayesian Models</em>. <a href="https://CRAN.R-project.org/package=bayesplot" class="uri">https://CRAN.R-project.org/package=bayesplot</a>.</p>
 </div>
 <div id="ref-BDA2014">
 <p>Gelman, A., J. B. Carlin, Dunson Stern H. S., and D. B. Rubin. 2014. <em>Bayesian Data Analysis</em>. Third. London: Chapman &amp; Hall / CRC Press. <a href="http://www.stat.columbia.edu/~gelman/book" class="uri">http://www.stat.columbia.edu/~gelman/book</a>.</p>
