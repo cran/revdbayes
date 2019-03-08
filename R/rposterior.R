@@ -22,7 +22,8 @@
 #'       then the corresponding row should be padded by \code{NA}s. If
 #'       \code{ros} is supplied then only the largest \code{ros} values in
 #'       each row are used.  If a vector is supplied then this is converted
-#'       to a matrix with one column.}
+#'       to a matrix with one column.  This is equivalent to using
+#'       \code{model = "gev"}.}
 #'   }
 #' @param prior A list specifying the prior for the parameters of the extreme
 #'   value model, created by \code{\link{set_prior}}.
@@ -47,7 +48,7 @@
 #'   If \code{use_noy = FALSE} then sampling is based on a likelihood in
 #'   which the number of blocks (years) is set equal to the number of threshold
 #'   excesses, to reduce posterior dependence between the parameters
-#'   (\href{http://dx.doi.org/10.1214/10-AOAS333}{Wadsworth \emph{et al}. (2010)}).
+#'   (\href{https://doi.org/10.1214/10-AOAS333}{Wadsworth \emph{et al}. (2010)}).
 #'   The sampled values are transformed back to the required parameterisation
 #'   before returning them to the user.  If \code{use_noy = TRUE} then the
 #'   user's value of \code{noy} is used in the likelihood.
@@ -99,7 +100,7 @@
 #' \emph{Binomial-GP}: \code{model = "bingp"}.  The GP model for threshold
 #'   excesses supplemented by a binomial(\code{length(data)}, \eqn{p})
 #'   model for the number of threshold excesses.  See
-#'   \href{http://dx.doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}
+#'   \href{https://doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}
 #'   for details.  Currently, the GP and binomial parameters are assumed to
 #'   be independent \emph{a priori}.
 #'
@@ -193,22 +194,22 @@
 #' @references Coles, S. G. and Powell, E. A. (1996) Bayesian methods in
 #'   extreme value modelling: a review and new developments.
 #'   \emph{Int. Statist. Rev.}, \strong{64}, 119-136.
-#'   \url{http://dx.doi.org/10.2307/1403426}
+#'   \url{https://doi.org/10.2307/1403426}
 #' @references Northrop, P. J., Attalides, N. and Jonathan, P. (2017)
 #'   Cross-validatory extreme value threshold selection and uncertainty
 #'   with application to ocean storm severity.
 #'   \emph{Journal of the Royal Statistical Society Series C: Applied
 #'   Statistics}, \strong{66}(1), 93-120.
-#'   \url{http://dx.doi.org/10.1111/rssc.12159}
+#'   \url{https://doi.org/10.1111/rssc.12159}
 #' @references Stephenson, A. (2016) Bayesian Inference for Extreme Value
 #'   Modelling. In \emph{Extreme Value Modeling and Risk Analysis: Methods and
 #'   Applications}, edited by D. K. Dey and J. Yan, 257-80. London:
-#'   Chapman and Hall. \url{http://dx.doi.org/10.1201/b19721-14}
+#'   Chapman and Hall. \url{https://doi.org/10.1201/b19721}
 #'   value posterior using the evdbayes package.
 #' @references Wadsworth, J. L., Tawn, J. A. and Jonathan, P. (2010)
 #'   Accounting for choice of measurement scale in extreme value modeling.
 #'  \emph{The Annals of Applied Statistics}, \strong{4}(3), 1558-1578.
-#'   \url{http://dx.doi.org/10.1214/10-AOAS333}
+#'   \url{https://doi.org/10.1214/10-AOAS333}
 #' @examples
 #' \dontrun{
 #' # GP model
@@ -813,10 +814,10 @@ pu_pp <- function (q, loc = 0, scale = 1, shape = 0, lower_tail = TRUE){
 #'   \item {\code{m} : number of threshold exceedances.}
 #' }
 #' @details If \code{prior$prior == "bin_beta"} then the posterior for \eqn{p}
-#'   is a beta distribution so \code{\link[stats]{rbeta}} is used to sample
-#'   from the posterior.  If \code{prior$prior == "bin_mdi"} then rejection
-#'   sampling is used to sample from the posterior with an envelope function
-#'   equal to the density of a
+#'   is a beta distribution so \code{\link[stats:Beta]{rbeta}} is used to
+#'   sample from the posterior.  If \code{prior$prior == "bin_mdi"} then
+#'   rejection sampling is used to sample from the posterior with an envelope
+#'   function equal to the density of a
 #'   beta(\code{ds$m} + 1, \code{ds$n_raw - ds$m} + 1) density.
 #' @return An object (list) of class \code{"binpost"} with components
 #'   \itemize{

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Paul J. Northrop" />
 
-<meta name="date" content="2018-02-12" />
+<meta name="date" content="2019-03-08" />
 
 <title>Faster simulation using revdbayes</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Faster simulation using revdbayes</h1>
 <h4 class="author"><em>Paul J. Northrop</em></h4>
-<h4 class="date"><em>2018-02-12</em></h4>
+<h4 class="date"><em>2019-03-08</em></h4>
 
 
 <div id="TOC">
@@ -93,10 +93,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="co"># Are microbenchmark and evdbayes available?</span>
 got_microbenchmark &lt;-<span class="st"> </span><span class="kw">requireNamespace</span>(<span class="st">&quot;microbenchmark&quot;</span>, <span class="dt">quietly =</span> <span class="ot">TRUE</span>)
 got_evdbayes &lt;-<span class="st"> </span><span class="kw">requireNamespace</span>(<span class="st">&quot;evdbayes&quot;</span>, <span class="dt">quietly =</span> <span class="ot">TRUE</span>)
-if (got_microbenchmark) {
+<span class="cf">if</span> (got_microbenchmark) {
   <span class="kw">library</span>(microbenchmark)
 }
-if (got_evdbayes) {
+<span class="cf">if</span> (got_evdbayes) {
   <span class="kw">library</span>(evdbayes)
 }
 <span class="co"># Set the number of posterior samples required.</span>
@@ -106,8 +106,8 @@ n &lt;-<span class="st"> </span><span class="dv">1000</span>
 <h3>Generalised Pareto (GP) model</h3>
 <p>We repeat the analysis of the Gulf of Mexico Wave Height Data from the <a href="revdbayes-vignette.html">Introducing revdbayes</a> vignette to check that using Rcpp does indeed reduce computation time.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">u &lt;-<span class="st"> </span><span class="kw">quantile</span>(gom, <span class="dt">probs =</span> <span class="fl">0.65</span>)
-fp &lt;-<span class="st"> </span><span class="kw">set_prior</span>(<span class="dt">prior =</span> <span class="st">&quot;flat&quot;</span>, <span class="dt">model =</span> <span class="st">&quot;gp&quot;</span>, <span class="dt">min_xi =</span> -<span class="dv">1</span>)
-if (got_microbenchmark) {
+fp &lt;-<span class="st"> </span><span class="kw">set_prior</span>(<span class="dt">prior =</span> <span class="st">&quot;flat&quot;</span>, <span class="dt">model =</span> <span class="st">&quot;gp&quot;</span>, <span class="dt">min_xi =</span> <span class="op">-</span><span class="dv">1</span>)
+<span class="cf">if</span> (got_microbenchmark) {
   res &lt;-<span class="st"> </span><span class="kw">microbenchmark</span>(
     <span class="dt">rpost =</span> <span class="kw">rpost</span>(<span class="dt">n =</span> n, <span class="dt">model =</span> <span class="st">&quot;gp&quot;</span>, <span class="dt">prior =</span> fp, <span class="dt">thresh =</span> u, <span class="dt">data =</span> gom),
     <span class="dt">rpost_rcpp =</span> <span class="kw">rpost_rcpp</span>(<span class="dt">n =</span> n, <span class="dt">model =</span> <span class="st">&quot;gp&quot;</span>, <span class="dt">prior =</span> fp, <span class="dt">thresh =</span> u, 
@@ -118,14 +118,14 @@ if (got_microbenchmark) {
   <span class="kw">print</span>(res, <span class="dt">signif =</span> <span class="dv">2</span>)
 }  
 <span class="co">#&gt; Unit: milliseconds</span>
-<span class="co">#&gt;        expr   min    lq      mean median    uq max neval</span>
-<span class="co">#&gt;       rpost 180.0 190.0 217.81950  202.0 225.0 428   100</span>
-<span class="co">#&gt;  rpost_rcpp  31.8  33.5  46.44165   35.9  39.1 430   100</span>
+<span class="co">#&gt;        expr  min   lq  mean median    uq   max neval</span>
+<span class="co">#&gt;       rpost 94.9 98.9 102.0  100.0 104.0 151.0   100</span>
+<span class="co">#&gt;  rpost_rcpp 17.9 18.4  19.3   18.7  19.2  31.3   100</span>
 <span class="co">#&gt; Unit: relative</span>
-<span class="co">#&gt;        expr min  lq     mean median  uq max neval</span>
-<span class="co">#&gt;       rpost 5.7 5.7 4.690176    5.6 5.7   1   100</span>
-<span class="co">#&gt;  rpost_rcpp 1.0 1.0 1.000000    1.0 1.0   1   100</span></code></pre></div>
-<p>In this example <code>rpost_rcpp</code> is, on average, a factor of approximately 8-9 times faster than <code>rpost</code>.</p>
+<span class="co">#&gt;        expr min  lq mean median  uq max neval</span>
+<span class="co">#&gt;       rpost 5.3 5.4  5.3    5.4 5.4 4.8   100</span>
+<span class="co">#&gt;  rpost_rcpp 1.0 1.0  1.0    1.0 1.0 1.0   100</span></code></pre></div>
+<p>In this example <code>rpost_rcpp</code> is indeed much faster than <code>rpost</code>.</p>
 </div>
 <div id="generalised-extreme-value-gev-model" class="section level3">
 <h3>Generalised Extreme Value (GEV) model</h3>
@@ -133,10 +133,10 @@ if (got_microbenchmark) {
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mat &lt;-<span class="st"> </span><span class="kw">diag</span>(<span class="kw">c</span>(<span class="dv">10000</span>, <span class="dv">10000</span>, <span class="dv">100</span>))
 pn &lt;-<span class="st"> </span><span class="kw">set_prior</span>(<span class="dt">prior =</span> <span class="st">&quot;norm&quot;</span>, <span class="dt">model =</span> <span class="st">&quot;gev&quot;</span>, <span class="dt">mean =</span> <span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="dt">cov =</span> mat)
 <span class="co"># Tuning parameters from the evdbayes user guide.</span>
-t0 &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="fl">3.87</span>, <span class="fl">0.2</span>, -<span class="fl">0.05</span>) 
+t0 &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="fl">3.87</span>, <span class="fl">0.2</span>, <span class="op">-</span><span class="fl">0.05</span>) 
 s &lt;-<span class="st"> </span><span class="kw">c</span>(.<span class="dv">06</span>, .<span class="dv">25</span>, .<span class="dv">25</span>)
-if (got_microbenchmark) {
-  if (got_evdbayes) {
+<span class="cf">if</span> (got_microbenchmark) {
+  <span class="cf">if</span> (got_evdbayes) {
     res &lt;-<span class="st"> </span><span class="kw">microbenchmark</span>(
       <span class="dt">rpost =</span> <span class="kw">rpost</span>(<span class="dt">n =</span> n, <span class="dt">model =</span> <span class="st">&quot;gev&quot;</span>, <span class="dt">prior =</span> pn, <span class="dt">data =</span> portpirie),
       <span class="dt">rpost_rcpp =</span> <span class="kw">rpost_rcpp</span>(<span class="dt">n =</span> n, <span class="dt">model =</span> <span class="st">&quot;gev&quot;</span>, <span class="dt">prior =</span> pn, 
@@ -144,7 +144,7 @@ if (got_microbenchmark) {
       <span class="dt">evdbayes =</span> <span class="kw">posterior</span>(<span class="dt">n =</span> n, <span class="dt">init =</span> t0, <span class="dt">prior =</span> pn, <span class="dt">lh =</span> <span class="st">&quot;gev&quot;</span>, 
                          <span class="dt">data =</span> portpirie, <span class="dt">psd =</span> s, <span class="dt">burn =</span> <span class="dv">0</span>)
     )
-  } else {
+  } <span class="cf">else</span> {
     res &lt;-<span class="st"> </span><span class="kw">microbenchmark</span>(
       <span class="dt">rpost =</span> <span class="kw">rpost</span>(<span class="dt">n =</span> n, <span class="dt">model =</span> <span class="st">&quot;gev&quot;</span>, <span class="dt">prior =</span> pn, <span class="dt">data =</span> portpirie),
       <span class="dt">rpost_rcpp =</span> <span class="kw">rpost_rcpp</span>(<span class="dt">n =</span> n, <span class="dt">model =</span> <span class="st">&quot;gev&quot;</span>, <span class="dt">prior =</span> pn, 
@@ -157,30 +157,30 @@ if (got_microbenchmark) {
   <span class="kw">print</span>(res, <span class="dt">signif =</span> <span class="dv">2</span>)
 }  
 <span class="co">#&gt; Unit: milliseconds</span>
-<span class="co">#&gt;        expr min  lq     mean median  uq max neval</span>
-<span class="co">#&gt;       rpost 390 425 466.3995    449 486 777   100</span>
-<span class="co">#&gt;  rpost_rcpp 116 123 138.3151    127 135 317   100</span>
-<span class="co">#&gt;    evdbayes 336 351 396.0096    371 408 907   100</span>
+<span class="co">#&gt;        expr   min  lq  mean median    uq   max neval</span>
+<span class="co">#&gt;       rpost 231.0 240 246.0  245.0 248.0 301.0   100</span>
+<span class="co">#&gt;  rpost_rcpp  63.2  65  67.3   66.6  69.4  78.6   100</span>
+<span class="co">#&gt;    evdbayes 185.0 189 192.0  192.0 194.0 202.0   100</span>
 <span class="co">#&gt; Unit: relative</span>
-<span class="co">#&gt;        expr min  lq     mean median  uq max neval</span>
-<span class="co">#&gt;       rpost 3.3 3.4 3.372006    3.5 3.6 2.5   100</span>
-<span class="co">#&gt;  rpost_rcpp 1.0 1.0 1.000000    1.0 1.0 1.0   100</span>
-<span class="co">#&gt;    evdbayes 2.9 2.8 2.863097    2.9 3.0 2.9   100</span></code></pre></div>
-<p>This comparison is generous to <code>posterior</code> because the burn-in has been set to zero and <code>posterior</code> produces a dependent sample rather than a random sample. The <em>effective sample size</em> of an MCMC sample from <code>posterior</code> varies between simulations and across parameters. The <code>effectiveSize</code> function in the <strong>coda</strong> package <span class="citation">(Plummer et al. 2006)</span> suggests that the effective sample size in this example is of the order of 100 to 200, whereas the <strong>revdbayes</strong> functions <code>rpost</code> and <code>rpost_rcpp</code> produce random samples of size 1000. <code>rpost</code> is less than 50% slower than <code>posterior</code> while <code>rpost_rcpp</code> is faster than <code>posterior</code> by a factor of 4.</p>
+<span class="co">#&gt;        expr min  lq mean median  uq max neval</span>
+<span class="co">#&gt;       rpost 3.7 3.7  3.7    3.7 3.6 3.8   100</span>
+<span class="co">#&gt;  rpost_rcpp 1.0 1.0  1.0    1.0 1.0 1.0   100</span>
+<span class="co">#&gt;    evdbayes 2.9 2.9  2.9    2.9 2.8 2.6   100</span></code></pre></div>
+<p>This comparison is generous to <code>posterior</code> because the burn-in has been set to zero and <code>posterior</code> produces a dependent sample rather than a random sample. The <em>effective sample size</em> of an MCMC sample from <code>posterior</code> varies between simulations and across parameters. The <code>effectiveSize</code> function in the <strong>coda</strong> package <span class="citation">(Plummer et al. 2006)</span> suggests that the effective sample size in this example is of the order of 100 to 200, whereas the <strong>revdbayes</strong> functions <code>rpost</code> and <code>rpost_rcpp</code> produce random samples of size 1000. <code>rpost</code> is a little slower than <code>posterior</code> while <code>rpost_rcpp</code> is much faster than <code>posterior</code>.</p>
 </div>
 <div id="point-process-pp-model" class="section level3">
 <h3>Point Process (PP) model</h3>
 <p>We compare the computational efficiencies of <code>rpost</code>, <code>rpost_rcpp</code> and the evdbayes function <code>posterior</code> when performing the analysis of daily rainfall totals from the <a href="revdbayes-vignette.html">Introducing revdbayes</a>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Informative prior set using revdbayes</span>
-pr2 &lt;-<span class="st"> </span><span class="kw">set_prior</span>(<span class="dt">prob =</span> <span class="dv">10</span>^-(<span class="dv">1</span>:<span class="dv">3</span>), <span class="dt">shape =</span> <span class="kw">c</span>(<span class="fl">38.9</span>, <span class="fl">7.1</span>, <span class="dv">47</span>),
+pr2 &lt;-<span class="st"> </span><span class="kw">set_prior</span>(<span class="dt">prob =</span> <span class="dv">10</span><span class="op">^-</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>), <span class="dt">shape =</span> <span class="kw">c</span>(<span class="fl">38.9</span>, <span class="fl">7.1</span>, <span class="dv">47</span>),
                  <span class="dt">scale =</span> <span class="kw">c</span>(<span class="fl">1.5</span>, <span class="fl">6.3</span>, <span class="fl">2.6</span>), <span class="dt">model =</span> <span class="st">&quot;gev&quot;</span>, <span class="dt">prior =</span> <span class="st">&quot;quant&quot;</span>)
 <span class="co"># Tuning parameters from the evdbayes user guide.</span>
 t0 &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="fl">43.2</span>, <span class="fl">7.64</span>, <span class="fl">0.32</span>) 
 s &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">2</span>, .<span class="dv">2</span>, .<span class="dv">07</span>)
-if (got_microbenchmark) {
-  if (got_evdbayes) {
+<span class="cf">if</span> (got_microbenchmark) {
+  <span class="cf">if</span> (got_evdbayes) {
     <span class="co"># Informative prior set using evdbayes</span>
-    pr &lt;-<span class="st"> </span><span class="kw">prior.quant</span>(<span class="dt">prob =</span> <span class="dv">10</span>^-(<span class="dv">1</span>:<span class="dv">3</span>), <span class="dt">shape =</span> <span class="kw">c</span>(<span class="fl">38.9</span>, <span class="fl">7.1</span>, <span class="dv">47</span>), 
+    pr &lt;-<span class="st"> </span><span class="kw">prior.quant</span>(<span class="dt">prob =</span> <span class="dv">10</span><span class="op">^-</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>), <span class="dt">shape =</span> <span class="kw">c</span>(<span class="fl">38.9</span>, <span class="fl">7.1</span>, <span class="dv">47</span>), 
                       <span class="dt">scale =</span> <span class="kw">c</span>(<span class="fl">1.5</span>, <span class="fl">6.3</span>, <span class="fl">2.6</span>))
     res &lt;-<span class="st"> </span><span class="kw">microbenchmark</span>(
       <span class="dt">rpost =</span> <span class="kw">rpost</span>(<span class="dt">n =</span> n, <span class="dt">model =</span> <span class="st">&quot;pp&quot;</span>, <span class="dt">prior =</span> pr2, <span class="dt">data =</span> rainfall,
@@ -190,7 +190,7 @@ if (got_microbenchmark) {
       <span class="dt">evdbayes =</span> <span class="kw">posterior</span>(<span class="dt">n =</span> n, <span class="dt">init =</span> t0, <span class="dt">prior =</span> pr, <span class="st">&quot;pp&quot;</span>, <span class="dt">data =</span> rainfall,
                        <span class="dt">thresh =</span> <span class="dv">40</span>, <span class="dt">noy =</span> <span class="dv">54</span>, <span class="dt">psd =</span> s, <span class="dt">burn =</span> <span class="dv">0</span>)
     )
-  } else {
+  } <span class="cf">else</span> {
     res &lt;-<span class="st"> </span><span class="kw">microbenchmark</span>(
       <span class="dt">rpost =</span> <span class="kw">rpost</span>(<span class="dt">n =</span> n, <span class="dt">model =</span> <span class="st">&quot;pp&quot;</span>, <span class="dt">prior =</span> pr2, <span class="dt">data =</span> rainfall,
                 <span class="dt">thresh =</span> <span class="dv">40</span>, <span class="dt">noy =</span> <span class="dv">54</span>),
@@ -204,16 +204,16 @@ if (got_microbenchmark) {
   <span class="kw">print</span>(res, <span class="dt">signif =</span> <span class="dv">2</span>)
 }  
 <span class="co">#&gt; Unit: milliseconds</span>
-<span class="co">#&gt;        expr   min    lq      mean median    uq  max neval</span>
-<span class="co">#&gt;       rpost 646.0 696.0 766.06383    725 801.0 1090   100</span>
-<span class="co">#&gt;  rpost_rcpp  74.7  78.6  82.91733     81  83.7  133   100</span>
-<span class="co">#&gt;    evdbayes 446.0 453.0 484.28197    469 499.0  704   100</span>
+<span class="co">#&gt;        expr   min    lq  mean median    uq max neval</span>
+<span class="co">#&gt;       rpost 397.0 420.0 428.0  426.0 433.0 510   100</span>
+<span class="co">#&gt;  rpost_rcpp  37.9  39.9  42.6   41.3  43.7 103   100</span>
+<span class="co">#&gt;    evdbayes 236.0 244.0 247.0  247.0 249.0 317   100</span>
 <span class="co">#&gt; Unit: relative</span>
-<span class="co">#&gt;        expr min  lq     mean median  uq max neval</span>
-<span class="co">#&gt;       rpost 8.7 8.9 9.238887    8.9 9.6 8.2   100</span>
-<span class="co">#&gt;  rpost_rcpp 1.0 1.0 1.000000    1.0 1.0 1.0   100</span>
-<span class="co">#&gt;    evdbayes 6.0 5.8 5.840540    5.8 6.0 5.3   100</span></code></pre></div>
-<p>In this example <code>rpost</code> is more than a factor of two slower than <code>posterior</code> but <code>rpost_rcpp</code> is substantially faster than <code>posterior</code>.</p>
+<span class="co">#&gt;        expr  min   lq mean median  uq max neval</span>
+<span class="co">#&gt;       rpost 10.0 11.0 10.0     10 9.9 4.9   100</span>
+<span class="co">#&gt;  rpost_rcpp  1.0  1.0  1.0      1 1.0 1.0   100</span>
+<span class="co">#&gt;    evdbayes  6.2  6.1  5.8      6 5.7 3.1   100</span></code></pre></div>
+<p>In this example <code>rpost</code> is slower than <code>posterior</code> but <code>rpost_rcpp</code> is substantially faster than <code>posterior</code>.</p>
 </div>
 </div>
 <div id="cpp_fun" class="section level2">
@@ -263,7 +263,7 @@ SEXP create_prior_xptr(std::string fstr) {
 <p>Once the external pointer to the user-supplied prior C++ function has been created it is passed to <code>set_prior</code>, along with any required parameter values. The following example repeats the example in <a href="#gp_example">Generalised Pareto (GP) model</a>. The difference is that now we create the pointer <code>ptr_gp_flat</code> and pass it to <code>set_prior</code> using <code>prior = ptr_gp_flat</code> rather than using the arguments <code>prior = &quot;flat&quot;, model = &quot;gp&quot;</code> to specify the equivalent in-built prior.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># GP model, user-defined prior</span>
 ptr_gp_flat &lt;-<span class="st"> </span><span class="kw">create_prior_xptr</span>(<span class="st">&quot;gp_flat&quot;</span>)
-p_user &lt;-<span class="st"> </span><span class="kw">set_prior</span>(<span class="dt">prior =</span> ptr_gp_flat, <span class="dt">model =</span> <span class="st">&quot;gp&quot;</span>, <span class="dt">min_xi =</span> -<span class="dv">1</span>)
+p_user &lt;-<span class="st"> </span><span class="kw">set_prior</span>(<span class="dt">prior =</span> ptr_gp_flat, <span class="dt">model =</span> <span class="st">&quot;gp&quot;</span>, <span class="dt">min_xi =</span> <span class="op">-</span><span class="dv">1</span>)
 gpg &lt;-<span class="st"> </span><span class="kw">rpost_rcpp</span>(<span class="dt">n =</span> <span class="dv">1000</span>, <span class="dt">model =</span> <span class="st">&quot;gp&quot;</span>, <span class="dt">prior =</span> p_user, <span class="dt">thresh =</span> u,
                   <span class="dt">data =</span> gom)</code></pre></div>
 </div>
@@ -286,7 +286,7 @@ gpg &lt;-<span class="st"> </span><span class="kw">rpost_rcpp</span>(<span class
 <p>Northrop, P. J. 2017. <em>rust: Ratio-of-Uniforms Simulation with Transformation</em>. <a href="https://CRAN.R-project.org/package=rust" class="uri">https://CRAN.R-project.org/package=rust</a>.</p>
 </div>
 <div id="ref-coda">
-<p>Plummer, M., N. Best, K. Cowles, and K. Vines. 2006. “CODA: Convergence Diagnosis and Output Analysis for MCMC.” <em>R News</em> 6 (1): 7–11. <a href="https://journal.r-project.org/archive/" class="uri">https://journal.r-project.org/archive/</a>.</p>
+<p>Plummer, M., N. Best, K. Cowles, and K. Vines. 2006. “CODA: Convergence Diagnosis and Output Analysis for MCMC.” <em>R News</em> 6 (1): 7–11. <a href="https://www.r-project.org/doc/Rnews/Rnews_2006-1.pdf" class="uri">https://www.r-project.org/doc/Rnews/Rnews_2006-1.pdf</a>.</p>
 </div>
 <div id="ref-evdbayes">
 <p>Stephenson, A., and M. Ribatet. 2014. <em>evdbayes: Bayesian Analysis in Extreme Value Theory</em>. <a href="https://CRAN.R-project.org/package=evdbayes" class="uri">https://CRAN.R-project.org/package=evdbayes</a>.</p>

@@ -20,9 +20,10 @@ vector \eqn{\alpha} = (\eqn{\alpha_1}, ..., \eqn{\alpha_K}).
 }
 \details{
 The simulation is based on the property that if
-  \eqn{Y_1}, ..., \eqn{Y_K} are independent, \eqn{Y_i} has a
-  gamma(\eqn{\alpha_i}, 1) distribution and \eqn{S = Y_1 + ... + Y_k}
-  then \eqn{(Y_1, ..., Y_K) / S} has a
+  \eqn{Y_1, \ldots, Y_K}{Y_1, ..., Y_K} are independent, \eqn{Y_i} has a
+  gamma(\eqn{\alpha_i}, 1) distribution and
+  \eqn{S = Y_1 + \cdots + Y_k}{S = Y_1 + ... + Y_k}
+  then \eqn{(Y_1, \ldots, Y_K) / S}{(Y_1, ..., Y_K) / S} has a
   Dirichlet(\eqn{\alpha_1}, ..., \eqn{\alpha_K}) distribution.
 
   See
@@ -35,7 +36,7 @@ rDir(n = 10, alpha = 1:4)
 Kotz, S., Balakrishnan, N. and Johnson, N. L. (2000)
   \emph{Continuous Multivariate Distributions, vol. 1, Models and
   Applications, 2nd edn}, ch. 49. New York: Wiley.
-  \url{http://dx.doi.org/10.1002/0471722065}
+  \url{https://doi.org/10.1002/0471722065}
 }
 \seealso{
 \code{\link{rprior_prob}} for prior simulation of

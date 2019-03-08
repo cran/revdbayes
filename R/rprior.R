@@ -26,8 +26,8 @@
 #'   then \code{lb_prob} is not used.
 #' @details The simulation is based on the way that the prior is constructed.
 #'   See
-#'   \href{http://dx.doi.org/10.2307/2986068}{Coles and Tawn (1996)},
-#'   \href{http://dx.doi.org/10.1201/b19721-14}{Stephenson (1996)}
+#'   \href{https://doi.org/10.2307/2986068}{Coles and Tawn (1996)},
+#'   \href{https://doi.org/10.1201/b19721}{Stephenson (1996)}
 #'   or the evdbayes user guide
 #'   for details of the construction of the prior. First, the quantile
 #'   differences are simulated from the specified gamma distributions.
@@ -38,20 +38,20 @@
 #'   to the simulated quantiles.  This is reduced to a one-dimensional
 #'   optimisation over the GEV shape parameter.
 #' @return An \code{n} by 3 numeric matrix.
-#' @seealso \code{\link[evdbayes]{prior.quant}} to set this prior using the
-#'   evdbayes package.
-#' @seealso \code{\link[evdbayes]{posterior}}: evdbayes function that can
-#'   sample from this prior distribution (using MCMC) if the argument
+#' @seealso \code{\link[evdbayes:prior]{prior.quant}} to set this prior
+#'   using the evdbayes package.
+#' @seealso \code{\link[evdbayes:prior]{posterior}}: evdbayes function that
+#'   can sample from this prior distribution (using MCMC) if the argument
 #'   \code{lh = "none"} is given.
 #' @seealso \code{\link{rpost}} and \code{\link{rpost_rcpp}} for sampling
 #'   from an extreme value posterior distribution.
 #' @references Coles, S. G. and Tawn, J. A. (1996) A Bayesian analysis of
 #'   extreme rainfall data. \emph{Appl. Statist.}, \strong{45}, 463-478.
-#'   \url{http://dx.doi.org/10.2307/2986068}.
+#'   \url{https://doi.org/10.2307/2986068}.
 #' @references Stephenson, A. 2016. Bayesian Inference for Extreme Value
 #'   Modelling. In \emph{Extreme Value Modeling and Risk Analysis: Methods and
 #'   Applications}, edited by D. K. Dey and J. Yan, 257-80. London:
-#'   Chapman and Hall. \url{http://dx.doi.org/10.1201/b19721-14}
+#'   Chapman and Hall. \url{https://doi.org/10.1201/b19721}
 #' @examples
 #' pr <- 10 ^ -(1:3)
 #' sh <- c(38.9, 7.1, 47)
@@ -121,7 +121,7 @@ rprior_quant <- function(n, prob, shape, scale, lb = NULL, lb_prob = 0.001){
 #' @param n A numeric scalar. The size of sample required.
 #' @param quant A numeric vector of length 3.  Contains quantiles
 #'   \eqn{q_1, q_2, q_3}.  A prior distribution is placed on the
-#'   non-exceedance (\code{exc=FALSE}) or exceedance (\code{exc=TRUE})
+#'   non-exceedance (\code{exc = FALSE}) or exceedance (\code{exc = TRUE})
 #'   probabilities corresponding to these quantiles.
 #'   The values should \emph{increase} with the index of the vector.
 #'   If not, the values in \code{quant} will be sorted into increasing order
@@ -129,13 +129,18 @@ rprior_quant <- function(n, prob, shape, scale, lb = NULL, lb_prob = 0.001){
 #' @param alpha A numeric vector of length 4. Parameters of the Dirichlet
 #'   distribution for the exceedance probabilities.
 #' @param exc A logical scalar.  Let \eqn{M} be the GEV variable,
-#'   \eqn{r_q = P(M <= q)}, \eqn{p_q = P(M > q) = 1-r_q} and
+#'   \eqn{r_q = P(M \leq q)}{r_q = P(M <= q)},
+#'   \eqn{p_q = P(M > q) = 1 - r_q} and
 #'   \code{quant} = (\eqn{q_1, q_2, q_3}).
-#'   If \code{exc=FALSE} then a Dirichlet(\code{alpha}) distribution is placed on
-#'   (\eqn{r_q1, r_q2 - r_q1, r_q3 - r_q2, 1 - r_q3}), as in
+#'   If \code{exc = FALSE} then a Dirichlet(\code{alpha}) distribution is
+#'   placed on
+#'   \eqn{(r_{q_1}, r_{q_2} - r_{q_1}, r_{q_3} - r_{q_2}, 1 - r_{q_3})}{%
+#'         (r_q1, r_q2 - r_q1, r_q3 - r_q2, 1 - r_q3)}, as in
 #'   Northrop et al. (2017).
-#'   If \code{exc=TRUE} then a Dirichlet(\code{alpha}) distribution is placed on
-#'   (\eqn{1 - p_q1, p_q1 - p_q2, p_q2 - p_q3, p_q3}), where
+#'   If \code{exc = TRUE} then a Dirichlet(\code{alpha}) distribution
+#'   is placed on
+#'   \eqn{(1 - p_{q_1}, p_{q_1} - p_{q_2}, p_{q_2} - p_{q_3}, p_{q_3})}{%
+#'        (1 - p_q1, p_q1 - p_q2, p_q2 - p_q3, p_q3)}, where
 #'   \eqn{p_q = P(M > q)}, as in Stephenson (2016).
 #' @param lb A numeric scalar.  If this is not \code{NULL} then the simulation
 #'   is constrained so that \code{lb} is an approximate lower bound on the
@@ -147,9 +152,9 @@ rprior_quant <- function(n, prob, shape, scale, lb = NULL, lb_prob = 0.001){
 #'   then \code{lb_prob} is not used.
 #' @details The simulation is based on the way that the prior is constructed.
 #'   See
-#'   \href{http://dx.doi.org/10.1201/b19721-14}{Stephenson (1996)}
+#'   \href{https://doi.org/10.1201/b19721}{Stephenson (1996)}
 #'   the evdbayes user guide or Northrop et al. (2017)
-#'   \href{http://dx.doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}
+#'   \href{https://doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}
 #'   for details of the construction of the prior.  First, differences between
 #'   probabilities are simulated from a Dirichlet distribution. Then the GEV
 #'   location, scale and shape parameters that correspond to these quantile
@@ -159,8 +164,8 @@ rprior_quant <- function(n, prob, shape, scale, lb = NULL, lb_prob = 0.001){
 #'   This is reduced to a one-dimensional optimisation over the GEV shape
 #'   parameter.
 #' @return An \code{n} by 3 numeric matrix.
-#' @seealso \code{\link[evdbayes]{prior.prob}} to set this prior using the
-#'   evdbayes package.
+#' @seealso \code{\link[evdbayes:prior]{prior.prob}} to set this prior using
+#'   the evdbayes package.
 #' @seealso \code{\link[evdbayes]{posterior}}: evdbayes function that can
 #'   sample from this prior distribution (using MCMC) if the argument
 #'   \code{lh = "none"} is given.
@@ -173,13 +178,13 @@ rprior_quant <- function(n, prob, shape, scale, lb = NULL, lb_prob = 0.001){
 #' @references Stephenson, A. 2016. Bayesian Inference for Extreme Value
 #'   Modelling. In \emph{Extreme Value Modeling and Risk Analysis: Methods and
 #'   Applications}, edited by D. K. Dey and J. Yan, 257-80. London:
-#'   Chapman and Hall. \url{http://dx.doi.org/10.1201/b19721-14}
+#'   Chapman and Hall. \url{https://doi.org/10.1201/b19721}
 #' @references Northrop, P. J., Attalides, N. and Jonathan, P. (2017)
 #'   Cross-validatory extreme value threshold selection and uncertainty
 #'   with application to ocean storm severity.
 #'   \emph{Journal of the Royal Statistical Society Series C: Applied
 #'   Statistics}, \strong{66}(1), 93-120.
-#'   \url{http://dx.doi.org/10.1111/rssc.12159}
+#'   \url{https://doi.org/10.1111/rssc.12159}
 #' @examples
 #' quant <- c(85, 88, 95)
 #' alpha <- c(4, 2.5, 2.25, 0.25)
@@ -265,9 +270,9 @@ rprior_prob <- function(n, quant, alpha, exc = FALSE, lb = NULL,
 #' @details Suppose that \eqn{G(x)} is the distribution function of
 #'   a GEV(\eqn{\mu, \sigma, \xi}) distribution.  This function attempts to
 #'   solve numerically the set of three non-linear equations
-#'   \deqn{G(q[i]) = 1 - p[i], i = 1, 2, 3}
-#'   where \eqn{q[i], i=1,2,3} are the quantiles in \code{quant} and
-#'   \eqn{p[i], i=1,2,3} are the exceedance probabilities in \code{prob}.
+#'   \deqn{G(q_i) = 1 - p_i, i = 1, 2, 3}
+#'   where \eqn{q_i, i=1,2,3} are the quantiles in \code{quant} and
+#'   \eqn{p_i, i=1,2,3} are the exceedance probabilities in \code{prob}.
 #'   This is reduced to a one-dimensional optimisation over the GEV
 #'   shape parameter.
 #' @return A numeric vector of length 3 containing the GEV location, scale and
@@ -323,9 +328,10 @@ quantile_to_gev <- function(quant, prob){
 #' @param n A numeric scalar. The size of sample required.
 #' @param alpha A numeric vector.  Dirichlet concentration parameter.
 #' @details The simulation is based on the property that if
-#'   \eqn{Y_1}, ..., \eqn{Y_K} are independent, \eqn{Y_i} has a
-#'   gamma(\eqn{\alpha_i}, 1) distribution and \eqn{S = Y_1 + ... + Y_k}
-#'   then \eqn{(Y_1, ..., Y_K) / S} has a
+#'   \eqn{Y_1, \ldots, Y_K}{Y_1, ..., Y_K} are independent, \eqn{Y_i} has a
+#'   gamma(\eqn{\alpha_i}, 1) distribution and
+#'   \eqn{S = Y_1 + \cdots + Y_k}{S = Y_1 + ... + Y_k}
+#'   then \eqn{(Y_1, \ldots, Y_K) / S}{(Y_1, ..., Y_K) / S} has a
 #'   Dirichlet(\eqn{\alpha_1}, ..., \eqn{\alpha_K}) distribution.
 #'
 #'   See
@@ -336,11 +342,11 @@ quantile_to_gev <- function(quant, prob){
 #' @references Kotz, S., Balakrishnan, N. and Johnson, N. L. (2000)
 #'   \emph{Continuous Multivariate Distributions, vol. 1, Models and
 #'   Applications, 2nd edn}, ch. 49. New York: Wiley.
-#'   \url{http://dx.doi.org/10.1002/0471722065}
+#'   \url{https://doi.org/10.1002/0471722065}
 #' @examples
 #' rDir(n = 10, alpha = 1:4)
 #' @export
-rDir <- function(n = 1, alpha = c(1,1)){
+rDir <- function(n = 1, alpha = c(1, 1)){
   y <- matrix(NA, nrow = n, ncol = length(alpha))
   for (j in 1:ncol(y)){
     y[, j] <- stats::rgamma(n, shape = alpha[j])

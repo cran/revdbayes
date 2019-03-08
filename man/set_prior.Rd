@@ -5,8 +5,8 @@
 \title{Construction of prior distributions for extreme value model parameters}
 \usage{
 set_prior(prior = c("norm", "loglognorm", "mdi", "flat", "flatflat",
-  "jeffreys", "beta", "prob", "quant"), model = c("gev", "gp", "pp", "os"),
-  ...)
+  "jeffreys", "beta", "prob", "quant"), model = c("gev", "gp", "pp",
+  "os"), ...)
 }
 \arguments{
 \item{prior}{Either
@@ -64,10 +64,10 @@ Of the in-built named priors available in revdbayes only
   \code{prior = "norm"} (\code{\link{gev_norm}}) or
   \code{prior = "loglognorm"} (\code{\link{gev_loglognorm}}) are proper.
   If \code{model = "gev"} these priors are equivalent to priors available
-  in the evdbayes package, namely \code{\link[evdbayes]{prior.prob}},
-  \code{\link[evdbayes]{prior.quant}},
-  \code{\link[evdbayes]{prior.norm}} and
-  \code{\link[evdbayes]{prior.loglognorm}}.
+  in the evdbayes package, namely \code{\link[evdbayes:prior]{prior.prob}},
+  \code{\link[evdbayes:prior]{prior.quant}},
+  \code{\link[evdbayes:prior]{prior.norm}} and
+  \code{\link[evdbayes:prior]{prior.loglognorm}}.
 
   The other in-built priors are improper, that is, the integral of the
   prior function over its support is not finite.  Such priors do not
@@ -102,32 +102,38 @@ Of the in-built named priors available in revdbayes only
   \item {\code{"norm"}.
 
   For \code{model = "gp"}:
-    (\eqn{log \sigma, \xi}), is bivariate normal with mean \code{mean}
-    (a numeric vector of length 2) and covariance matrix \code{cov}
-    (a symmetric positive definite 2 by 2 matrix).
+    (\eqn{\log \sigma, \xi}{log \sigma, \xi}), is bivariate normal
+    with mean \code{mean} (a numeric vector of length 2) and covariance
+    matrix \code{cov} (a symmetric positive definite 2 by 2 matrix).
 
   For \code{model = "gev"}:
-    (\eqn{\mu, log \sigma, \xi}), is trivariate normal with mean
-    \code{mean} (a numeric vector of length 3) and covariance matrix
-    \code{cov} (a symmetric positive definite 3 by 3 matrix).
+    (\eqn{\mu, \log \sigma, \xi}{\mu, log \sigma, \xi}), is trivariate
+    normal with mean \code{mean} (a numeric vector of length 3) and
+    covariance matrix \code{cov} (a symmetric positive definite 3 by 3
+    matrix).
   }
   \item {\code{"loglognorm"}.  For \code{model = "gev"} only:
-    (\eqn{log \mu, log \sigma, \xi}), is trivariate normal with mean
-    \code{mean} (a numeric vector of length 3) and covariance matrix
-    \code{cov} (a symmetric positive definite 3 by 3 matrix).
+    (\eqn{\log \mu, \log \sigma, \xi}{log \mu, log \sigma, \xi}), is
+    trivariate normal with mean \code{mean} (a numeric vector of length 3)
+    and covariance matrix \code{cov} (a symmetric positive definite 3 by 3
+    matrix).
   }
   \item {\code{"mdi"}.
 
   For \code{model = "gp"}: (an extended version
     of) the maximal data information (MDI) prior, that is,
-    \deqn{\pi(\sigma, \xi) = (1/ \sigma) exp[- a (\xi + 1)], for
+    \deqn{\pi(\sigma, \xi) = \sigma^{-1} \exp[-a(\xi + 1)], {\rm ~for~}
+    \sigma > 0, \xi \geq -1, a \geq 0.}{%
+    \pi(\sigma, \xi) = (1/ \sigma) exp[- a (\xi + 1)], for
     \sigma > 0, \xi >= -1, a >= 0.}
     The value of \eqn{a} is set using the argument \code{a}.  The default
     value is \eqn{a = 1}, which gives the MDI prior.
 
     For \code{model = "gev"}: (an extended version
     of) the maximal data information (MDI) prior, that is,
-    \deqn{\pi(\mu, \sigma, \xi) = (1/ \sigma) exp[- a (\xi + 1)], for
+    \deqn{\pi(\mu, \sigma, \xi) = \sigma^{-1} \exp[-a(\xi + 1)],
+    {\rm ~for~} \sigma > 0, \xi \geq -1, a \geq 0.}{%
+    \pi(\mu, \sigma, \xi) = (1/ \sigma) exp[- a (\xi + 1)], for
     \sigma > 0, \xi >= -1, a >= 0.}
     The value of \eqn{a} is set using the argument \code{a}.  The default
     value is \eqn{a = \gamma}, where \eqn{\gamma = 0.57721} is Euler's
@@ -136,38 +142,45 @@ Of the in-built named priors available in revdbayes only
     For each of these cases \eqn{\xi} must be is bounded below
     \emph{a priori} for the posterior to be proper
     (Northrop and Attalides, 2016).  An argument for the
-    bound \eqn{\xi >= -1} is that for \eqn{\xi < -1} the GP (GEV)
-    likelihood is unbounded above as \eqn{-\sigma/\xi}
+    bound \eqn{\xi \geq -1}{\xi >= -1} is that for \eqn{\xi < -1} the
+    GP (GEV) likelihood is unbounded above as \eqn{-\sigma/\xi}
     (\eqn{\mu - \sigma/\xi})) approaches the sample maximum.  In
     maximum likelihood estimation of GP parameters (Grimshaw, 1993)
     and GEV parameters a local maximum of the likelihood
-    is sought on the region \eqn{\sigma > 0, \xi >= -1}.
+    is sought on the region
+    \eqn{\sigma > 0, \xi \geq -1}{\sigma > 0, \xi >= -1}.
   }
   \item{\code{"flat"}.
 
     For \code{model = "gp"}: a flat prior for
-    \eqn{\xi} (and for \eqn{log \sigma}):
-    \deqn{\pi(\sigma, \xi) = (1/ \sigma), for \sigma > 0.}
+    \eqn{\xi} (and for \eqn{\log \sigma}{log \sigma}):
+    \deqn{\pi(\sigma, \xi) = \sigma^{-1}, {\rm ~for~} \sigma > 0.}{%
+          \pi(\sigma, \xi) = (1/ \sigma), for \sigma > 0.}
 
     For \code{model = "gev"}: a flat prior for
-    \eqn{\xi} (and for \eqn{\mu} and \eqn{log \sigma}):
-    \deqn{\pi(\mu, \sigma, \xi) = (1/ \sigma), for \sigma > 0.}
+    \eqn{\xi} (and for \eqn{\mu} and \eqn{\log \sigma}{log \sigma}):
+    \deqn{\pi(\mu, \sigma, \xi) = \sigma^{-1}, {\rm ~for~} \sigma > 0.}{%
+          \pi(\mu, \sigma, \xi) = (1/ \sigma), for \sigma > 0.}
   }
   \item{\code{"flatflat"}.
 
     For \code{model = "gp"}: flat priors for
     \eqn{\sigma} and \eqn{\xi}:
-    \deqn{\pi(\sigma, \xi) = 1, for \sigma > 0.}
+    \deqn{\pi(\sigma, \xi) = 1, {\rm ~for~} \sigma > 0.}{%
+          \pi(\sigma, \xi) = 1, for \sigma > 0.}
 
     For \code{model = "gev"}: flat priors for \eqn{\mu}, \eqn{\sigma}
     and \eqn{\xi}:
-    \deqn{\pi(\mu, \sigma, \xi) = 1, for \sigma > 0.}
+    \deqn{\pi(\mu, \sigma, \xi) = 1, {\rm ~for~} \sigma > 0.}{%
+          \pi(\mu, \sigma, \xi) = 1, for \sigma > 0.}
 
     Therefore, the posterior is proportional to the likelihood.
   }
   \item{\code{"jeffreys"}.  For \code{model = "gp"} only: the Jeffreys
     prior (Castellanos and Cabras, 2007):
-    \deqn{\pi(\sigma, \xi) = 1/ [\sigma (1+\xi) \sqrt(1+2\xi)],
+    \deqn{\pi(\sigma, \xi) = \sigma^{-1}(1+\xi)^{-1}(1+2\xi)^{-1/2},
+      {\rm ~for~} \sigma > 0, \xi > -1 / 2.}{%
+      \pi(\sigma, \xi) = 1/ [\sigma (1+\xi) \sqrt(1+2\xi)],
       for \sigma > 0, \xi > -1 / 2.}
 
     In the GEV case the Jeffreys prior doesn't yield a proper posterior
@@ -176,15 +189,21 @@ Of the in-built named priors available in revdbayes only
   \item{\code{"beta"}.
     For \code{model = "gp"}: a beta-type(p, q)
     prior is used for xi on the interval (\code{min_xi}, \code{max_xi}):
-    \deqn{\pi(\sigma, \xi) = (1/\sigma) (\xi - min_xi) ^ (p-1)
+    \deqn{\pi(\sigma, \xi) = \sigma^{-1} (\xi - {\min}_{\xi}) ^ {p-1}
+          ({\max}_{\xi} - \xi) ^ {q-1}, {\rm ~for~}
+          {\min}_{\xi} < \xi < {\max}_{\xi}.}{%
+          \pi(\sigma, \xi) = (1/\sigma) (\xi - min_xi) ^ (p-1)
           (max_xi - \xi) ^ (q-1), for min_xi < \xi < max_xi.}
 
     For \code{model = "gev"}: similarly ...
-    \deqn{\pi(\mu, \sigma, \xi) = (1/\sigma) (\xi - min_xi) ^ (p-1)
+    \deqn{\pi(\mu, \sigma, \xi) = \sigma^{-1} (\xi - {\min}_{\xi}) ^ {p-1}
+          ({\max}_{\xi} - \xi) ^ {q-1}, {\rm ~for~}
+          {\min}_{\xi} < \xi < {\max}_{\xi}.}{%
+          \pi(\mu, \sigma, \xi) = (1/\sigma) (\xi - min_xi) ^ (p-1)
           (max_xi - \xi) ^ (q-1), for min_xi < \xi < max_xi.}
 
     The argument \code{pq} is a vector containing \code{c(p,q)}.
-    The default settings for this prior are \code{p=6,q=9} and
+    The default settings for this prior are \code{p = 6, q = 9} and
     \code{min_xi = -1/2, max_xi = 1/2}, which corresponds to the
     prior for \eqn{\xi} proposed in Martins and Stedinger (2000, 2001).
   }
@@ -218,11 +237,11 @@ u_prior_ptr <- set_prior(prior = ptr_gp_flat, model = "gp")
 Castellanos, E. M. and Cabras, S. (2007) A default Bayesian
   procedure for the generalized Pareto distribution.
   \emph{Journal of Statistical Planning and Inference} \strong{137(2)},
-  473-483. \url{http://dx.doi.org/10.1016/j.jspi.2006.01.006}.
+  473-483. \url{https://doi.org/10.1016/j.jspi.2006.01.006}.
 
 Coles, S. G. and Tawn, J. A. (1996) A Bayesian analysis of
   extreme rainfall data. \emph{Appl. Statist.}, \strong{45}, 463-478.
-  \url{http://dx.doi.org/10.2307/2986068}.
+  \url{https://doi.org/10.2307/2986068}.
 
 Crowder, M. (1992) Bayesian priors based on parameter
   transformation using the distribution function
@@ -231,38 +250,38 @@ Crowder, M. (1992) Bayesian priors based on parameter
 
 Grimshaw, S. D. (1993) Computing Maximum Likelihood Estimates
   for the Generalized Pareto Distribution.  \emph{Technometrics},
-  \strong{35(2)}, 185-191. \url{http://dx.doi.org/10.2307/1269663}.
+  \strong{35(2)}, 185-191. \url{https://doi.org/10.2307/1269663}.
 
 Hosking, J. R. M. and Wallis, J. R. (1987) Parameter and
 Quantile Estimation for the Generalized Pareto Distribution. Technometrics,
-29(3), 339-349. \url{http://dx.doi.org/10.2307/1269343}.
+29(3), 339-349. \url{https://doi.org/10.2307/1269343}.
 
 Martins, E. S. and Stedinger, J. R. (2000) Generalized maximum
   likelihood generalized extreme value quantile estimators for hydrologic
   data, \emph{Water Resources Research}, \strong{36(3)}, 737-744.
-  \url{http://dx.doi.org/10.1029/1999WR900330}.
+  \url{https://doi.org/10.1029/1999WR900330}.
 
 Martins, E. S. and Stedinger, J. R. (2001) Generalized maximum
   likelihood Pareto-Poisson estimators for partial duration series,
   \emph{Water Resources Research}, \strong{37(10)}, 2551-2557.
-  \url{http://dx.doi.org/10.1029/2001WR000367}.
+  \url{https://doi.org/10.1029/2001WR000367}.
 
 Northrop, P.J. and Attalides, N. (2016) Posterior propriety in
   Bayesian extreme value analyses using reference priors
   \emph{Statistica Sinica}, \strong{26}(2), 721--743
-  \url{http://dx.doi.org/10.5705/ss.2014.034}.
+  \url{https://doi.org/10.5705/ss.2014.034}.
 
 Northrop, P. J., Attalides, N. and Jonathan, P. (2017)
   Cross-validatory extreme value threshold selection and uncertainty
   with application to ocean storm severity.
   \emph{Journal of the Royal Statistical Society Series C: Applied
   Statistics}, \strong{66}(1), 93-120.
-  \url{http://dx.doi.org/10.1111/rssc.12159}
+  \url{https://doi.org/10.1111/rssc.12159}
 
 Stephenson, A. (2016) Bayesian inference for extreme value
   modelling.  In \emph{Extreme Value Modeling and Risk Analysis: Methods
   and Applications} (eds D. K. Dey and J. Yan), 257-280, Chapman and Hall,
-  London. \url{http://dx.doi.org/10.1201/b19721-14}.
+  London. \url{https://doi.org/10.1201/b19721}.
 }
 \seealso{
 \code{\link{rpost}} and \code{\link{rpost_rcpp}} for sampling
@@ -284,9 +303,10 @@ Stephenson, A. (2016) Bayesian inference for extreme value
   \code{\link{gev_beta}}, \code{\link{gev_prob}}, \code{\link{gev_quant}}
   to see the arguments for priors for GEV parameters.
 
-\code{\link[evdbayes]{prior.prob}},
-  \code{\link[evdbayes]{prior.quant}}, \code{\link[evdbayes]{prior.norm}}
-  and \code{\link[evdbayes]{prior.loglognorm}} for setting a prior
+\code{\link[evdbayes:prior]{prior.prob}},
+  \code{\link[evdbayes:prior]{prior.quant}},
+  \code{\link[evdbayes:prior]{prior.norm}}
+  and \code{\link[evdbayes:prior]{prior.loglognorm}} for setting a prior
   distribution using the evdbayes package.
 
 \code{\link[evdbayes]{posterior}} for sampling from an extreme

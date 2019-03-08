@@ -88,7 +88,8 @@
 #'   Only relevant when \code{type = "i"}.
 #'
 #'   If \code{hpd = FALSE} then the interval is
-#'   equi-tailed, equal to \code{predict.evpost(}\code{object, type ="q", x = p)},
+#'   equi-tailed, with its limits produced by
+#'   \code{predict.evpost(}\code{object, type ="q", x = p)},
 #'   where \code{p = c((1-level/100)/2,} \code{(1+level/100)/2)}.
 #'
 #'   If \code{hpd = TRUE} then, in addition to the equi-tailed interval,
@@ -97,8 +98,8 @@
 #'   is a highest predictive density (HPD) interval.
 #' @param lower_tail A logical scalar.
 #'   Only relevant when \code{type = "p"} or \code{type = "q"}.
-#'   If TRUE (default), (output or input) probabilities are P[X <= x],
-#'   otherwise, P[X > x].
+#'   If TRUE (default), (output or input) probabilities are
+#'   \eqn{P[X \leq x]}{P[X <= x]}, otherwise, \eqn{P[X > x]}{P[X > x]}.
 #' @param log A logical scalar.  Only relevant when \code{type = "d"}.
 #'   If TRUE the log-density is returned.
 #' @param big_q A numeric scalar.  Only relevant when \code{type = "q"}.
@@ -114,11 +115,11 @@
 #'   variability of future observations.  In practice the integrals involved
 #'   are estimated using an empirical mean over the posterior sample.
 #'   See, for example,
-#'   \href{http://dx.doi.org/10.1007/978-1-4471-3675-0_9}{Coles (2001),
+#'   \href{https://doi.org/10.1007/978-1-4471-3675-0_9}{Coles (2001),
 #'   chapter 9},
-#'   \href{http://dx.doi.org/10.1201/b19721-14}{Stephenson (2016)}
+#'   \href{https://doi.org/10.1201/b19721}{Stephenson (2016)}
 #'   or
-#'   \href{http://dx.doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}
+#'   \href{https://doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}
 #'   for details.
 #'   See also the vignette
 #'   \href{https://CRAN.R-project.org/package=revdbayes}{Posterior Predictive Extreme Value Inference}
@@ -166,15 +167,16 @@
 #'   mean number of observations in \code{n_years} years, i.e.
 #'   \code{npy * n_years}.
 #'
-#'   Following \href{http://dx.doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}
-#'   Let \eqn{M_N} be the largest value observed in \eqn{N} years,
+#'   Following \href{https://doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}
+#'   let \eqn{M_N} be the largest value observed in \eqn{N} years,
 #'   \eqn{m} = \code{npy * n_years} and \eqn{u} the threshold
 #'   \code{object$thresh} used in the call to \code{rpost}
 #'   or \code{rpost_rcpp}.
 #'   For fixed values of \eqn{\theta = (p, \sigma, \xi)} the distribution
 #'   function of \eqn{M_N} is given by \eqn{F(z, \theta)^m}, for
-#'   \eqn{z >= u}, where
-#'   \deqn{F(z, \theta) = 1 - p * [1 + \xi (x - u) / \sigma] ^ (-1/\xi).}
+#'   \eqn{z \geq u}{z >= u}, where
+#'   \deqn{F(z, \theta) = 1 - p [1 + \xi (x - u) / \sigma] ^ {-1/\xi}.}{%
+#'         F(z, \theta) = 1 - p * [1 + \xi (x - u) / \sigma] ^ (-1/\xi).}
 #'   The distribution function of \eqn{M_N} cannot be evaluated for
 #'   \eqn{z < u} because no model has been supposed for observations below
 #'   the threshold.
@@ -237,17 +239,17 @@
 #'   \code{\link{rpost}} or \code{\link{rpost_rcpp}}.
 #' @references Coles, S. G. (2001) \emph{An Introduction to Statistical
 #'   Modeling of Extreme Values}, Springer-Verlag, London.
-#'   Chapter 9: \url{http://dx.doi.org/10.1007/978-1-4471-3675-0_9}
+#'   Chapter 9: \url{https://doi.org/10.1007/978-1-4471-3675-0_9}
 #' @references Northrop, P. J., Attalides, N. and Jonathan, P. (2017)
 #'   Cross-validatory extreme value threshold selection and uncertainty
 #'   with application to ocean storm severity.
 #'   \emph{Journal of the Royal Statistical Society Series C: Applied
 #'   Statistics}, \strong{66}(1), 93-120.
-#'   \url{http://dx.doi.org/10.1111/rssc.12159}
+#'   \url{https://doi.org/10.1111/rssc.12159}
 #' @references Stephenson, A. (2016). Bayesian Inference for Extreme Value
 #'   Modelling. In \emph{Extreme Value Modeling and Risk Analysis: Methods and
 #'   Applications}, edited by D. K. Dey and J. Yan, 257-80. London:
-#'   Chapman and Hall. \url{http://dx.doi.org/10.1201/b19721-14}
+#'   Chapman and Hall. \url{https://doi.org/10.1201/b19721}
 #' @seealso \code{\link{plot.evpred}} for the S3 \code{plot} method for
 #'   objects of class \code{evpred}.
 #' @seealso \code{\link{rpost}} or \code{\link{rpost_rcpp}} for sampling

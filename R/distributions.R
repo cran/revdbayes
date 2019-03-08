@@ -17,14 +17,15 @@
 #' @param log,log.p A logical scalar; if TRUE, probabilities p are given as
 #'   log(p).
 #' @param lower.tail A logical scalar.  If TRUE (default), probabilities
-#'   are P[X <= x], otherwise, P[X > x].
+#'   are \eqn{P[X \leq x]}{P[X <= x]}, otherwise, \eqn{P[X > x]}{P[X > x]}.
 #' @param m A numeric scalar.  The distribution is reparameterised by working
 #'  with the GEV(\code{loc, scale, shape}) distribution function raised to the
 #'  power \code{m}.  See \strong{Details}.
 #' @details The distribution function of a GEV distribution with parameters
 #'  \code{loc} = \eqn{\mu}, \code{scale} = \eqn{\sigma} (>0) and
 #'  \code{shape} = \eqn{\xi} is
-#'  \deqn{F(x) = exp { - [1 + \xi (x - \mu) / \sigma] ^ (-1/\xi)} }
+#'  \deqn{F(x) = \exp\{-[1 + \xi (x - \mu) / \sigma] ^ {-1/\xi} \}}{%
+#'        F(x) = exp{ -[1 + \xi (x - \mu) / \sigma] ^ (-1/\xi)} }
 #'  for \eqn{1 + \xi (x - \mu) / \sigma > 0}.  If \eqn{\xi = 0} the
 #'  distribution function is defined as the limit as \eqn{\xi} tends to zero.
 #'  The support of the distribution depends on \eqn{\xi}: it is
@@ -45,7 +46,8 @@
 #'
 #'  The effect of \code{m} is to change the location, scale and shape
 #'  parameters to
-#'  \eqn{(\mu + \sigma log m, \sigma, \xi)} if \eqn{\xi = 0} and
+#'  \eqn{(\mu + \sigma \log m, \sigma, \xi)}{(\mu + \sigma log m, \sigma, \xi)}
+#'  if \eqn{\xi = 0} and
 #'  \eqn{(\mu + \sigma (m ^ \xi - 1) / \xi, \sigma m ^ \xi, \xi)}.
 #'  For integer \code{m} we can think of this as working with the
 #'  maximum of \code{m} independent copies of the original
@@ -63,10 +65,10 @@
 #' @references Jenkinson, A. F. (1955) The frequency distribution of the
 #'   annual maximum (or minimum) of meteorological elements.
 #'   \emph{Quart. J. R. Met. Soc.}, \strong{81}, 158-171.
-#'   Chapter 3: \url{http://dx.doi.org/10.1002/qj.49708134804}
+#'   Chapter 3: \url{https://doi.org/10.1002/qj.49708134804}
 #' @references Coles, S. G. (2001) \emph{An Introduction to Statistical
 #'   Modeling of Extreme Values}, Springer-Verlag, London.
-#'   \url{http://dx.doi.org/10.1007/978-1-4471-3675-0_3}
+#'   \url{https://doi.org/10.1007/978-1-4471-3675-0_3}
 #' @examples
 #' dgev(-1:4, 1, 0.5, 0.8)
 #' dgev(1:6, 1, 0.5, -0.2, log = TRUE)
@@ -215,11 +217,12 @@ rgev <- function (n, loc = 0, scale = 1, shape = 0, m = 1) {
 #' @param log,log.p A logical scalar; if TRUE, probabilities p are given as
 #'   log(p).
 #' @param lower.tail A logical scalar.  If TRUE (default), probabilities
-#'   are P[X <= x], otherwise, P[X > x].
+#'   are \eqn{P[X \leq x]}{P[X <= x]}, otherwise, \eqn{P[X > x]}{P[X > x]}.
 #' @details The distribution function of a GP distribution with parameters
 #'  \code{location} = \eqn{\mu}, \code{scale} = \eqn{\sigma} (>0) and
 #'  \code{shape} = \eqn{\xi} is
-#'  \deqn{F(x) = 1 - [1 + \xi (x - \mu) / \sigma] ^ (-1/\xi) }
+#'  \deqn{F(x) = 1 - [1 + \xi (x - \mu) / \sigma] ^ {-1/\xi}}{%
+#'        F(x) = 1 - [1 + \xi (x - \mu) / \sigma] ^ (-1/\xi)}
 #'  for \eqn{1 + \xi (x - \mu) / \sigma > 0}.  If \eqn{\xi = 0} the
 #'  distribution function is defined as the limit as \eqn{\xi} tends to zero.
 #'  The support of the distribution depends on \eqn{\xi}: it is
@@ -241,10 +244,10 @@ rgev <- function (n, loc = 0, scale = 1, shape = 0, m = 1) {
 #'   and \code{rgp} generates random deviates.
 #' @references Pickands, J. (1975) Statistical inference using extreme
 #'   order statistics. \emph{Annals of Statistics}, \strong{3}, 119-131.
-#'   \url{http://dx.doi.org/10.1214/aos/1176343003}
+#'   \url{https://doi.org/10.1214/aos/1176343003}
 #' @references Coles, S. G. (2001) \emph{An Introduction to Statistical
 #'   Modeling of Extreme Values}, Springer-Verlag, London.
-#'   Chapter 4: \url{http://dx.doi.org/10.1007/978-1-4471-3675-0_4}
+#'   Chapter 4: \url{https://doi.org/10.1007/978-1-4471-3675-0_4}
 #' @examples
 #' dgp(0:4, scale = 0.5, shape = 0.8)
 #' dgp(1:6, scale = 0.5, shape = -0.2, log = TRUE)

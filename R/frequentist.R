@@ -9,7 +9,7 @@ gp_mle <- function(gp_data) {
   #
   # Grimshaw, S. D. (1993) Computing Maximum Likelihood Estimates
   #   for the Generalized Pareto Distribution.  Technometrics, 35(2), 185-191.
-  #   and Computing (1991) 1, 129-133. http://dx.doi.org/10.1007/BF01889987.
+  #   and Computing (1991) 1, 129-133. https://doi.org/10.1007/BF01889987.
   #
   # Args:
   #   gp_data : A numeric vector containing positive values, assumed to be a
@@ -278,6 +278,9 @@ grimshaw_gp_mle <- function(x) {
       thhi<-epsilon
     }
     thzero<-hibnd    #{  Initial value for modified Newton-Raphson is hibnd. }
+    # 14/8/2018, PJN: Try a different initial value, away from hibnd
+    thzero <- (hibnd + epsilon) / 2
+    #
     dxold<-abs(thhi-thlo)
     dx<-dxold
     temp1<-sum(log(1-thzero*x))/n
@@ -512,6 +515,9 @@ grimshaw_gp_mle <- function(x) {
       thhi<-epsilon
     }
     thzero<-hibnd    #{  Initial value for modified Newton-Raphson is hibnd. }
+    # 14/8/2018, PJN: Try a different initial value, away from hibnd
+    thzero <- (hibnd + epsilon) / 2
+    #
     dxold<-abs(thhi-thlo)
     dx<-dxold
     temp1<-sum(log(1-thzero*x))/n
@@ -678,6 +684,13 @@ grimshaw_gp_mle <- function(x) {
   }
   if(nomle!=0){
     mles<-mles[ind,]
+    # 6/7/2018: Start of codeprovided by Leo  Belzile, to fix a bug
+    # Discard values of k that are greater than 1
+    outside <- which(mles[,1]> 1+1e-10)
+    if (length(outside) > 0){ #at most 2 such values
+        mles[outside,3] <- -Inf #replace by hard bound
+    }
+    # End of code provided by Leo
     nmles<-nrow(mles)
     #
     #  Add the boundary value where k=1 to the candidates for the

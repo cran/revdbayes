@@ -4,14 +4,16 @@
 \alias{gev_prob}
 \title{Informative GEV prior on a probability scale}
 \usage{
-gev_prob(pars, quant, alpha, min_xi = -Inf, max_xi = Inf, trendsd = 0)
+gev_prob(pars, quant, alpha, min_xi = -Inf, max_xi = Inf,
+  trendsd = 0)
 }
 \arguments{
 \item{pars}{A numeric vector of length 3.
 GEV parameters (\eqn{\mu, \sigma, \xi}).}
 
 \item{quant}{A numeric vector of length 3 containing quantiles
-(\eqn{q1, q2, q3}) such that \eqn{q1 < q2 < q3}. If the values
+(\eqn{q_1, q_2, q_3}{q1, q2, q3}) such that
+\eqn{q_1 < q_2 < q_3}{q1 < q2 < q3}. If the values
 in \code{quant} are not ordered from smallest to largest then they
 will be ordered inside \code{set_prior} without warning.}
 
@@ -37,16 +39,17 @@ prior see \code{\link{set_prior}}.
 \details{
 A prior for GEV parameters \eqn{(\mu, \sigma, \xi)},
   based on Crowder (1992).  This construction is typically used to set
-  an informative prior, based on specified quantiles \eqn{q1, q2, q3}.
+  an informative prior, based on specified quantiles
+  \eqn{q_1, q_2, q_3}{q1, q2, q3}.
   There are two interpretations of the parameter vector
   \code{alpha} = \eqn{(\alpha_1, \alpha_2, \alpha_3, \alpha_4)}:
   as the parameters of beta distributions for ratio of exceedance
   probabilities
-  \href{http://dx.doi.org/10.1201/b19721-14}{(Stephenson, 2016)}
+  \href{https://doi.org/10.1201/b19721}{(Stephenson, 2016)}
   and as the parameters of
   a Dirichlet distribution for differences between non-exceedance
   probabilities
-  \href{http://dx.doi.org/10.1111/rssc.12159}{(Northrop et al., 2017)}.
+  \href{https://doi.org/10.1111/rssc.12159}{(Northrop et al., 2017)}.
   See these publications for details.
 }
 \references{
@@ -60,12 +63,12 @@ Northrop, P. J., Attalides, N. and Jonathan, P. (2017)
   with application to ocean storm severity.
   \emph{Journal of the Royal Statistical Society Series C: Applied
   Statistics}, \strong{66}(1), 93-120.
-  \url{http://dx.doi.org/10.1111/rssc.12159}
+  \url{https://doi.org/10.1111/rssc.12159}
 
 Stephenson, A. (2016) Bayesian inference for extreme value
   modelling.  In \emph{Extreme Value Modeling and Risk Analysis: Methods
   and Applications} (eds D. K. Dey and J. Yan), 257-280, Chapman and Hall,
-  London. \url{http://dx.doi.org/10.1201/b19721-14}.
+  London. \url{https://doi.org/10.1201/b19721}.
 }
 \seealso{
 \code{\link{set_prior}} for setting a prior distribution.
@@ -74,5 +77,5 @@ Stephenson, A. (2016) Bayesian inference for extreme value
   from an extreme value posterior distribution.
 
 Sets the same prior as the function
-  \code{\link[evdbayes]{prior.prob}} in the evdbayes package.
+  \code{\link[evdbayes:prior]{prior.prob}} in the evdbayes package.
 }

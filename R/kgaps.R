@@ -22,7 +22,8 @@
 #'   beta(\eqn{\alpha}, \eqn{\beta}) prior for \eqn{\theta}.
 #' @param param A character scalar.  If \code{param = "logit"} (the default)
 #'   then we simulate from the posterior distribution of
-#'   \eqn{\phi = logit(\theta)} and then transform back to the
+#'   \eqn{\phi = \log(\theta / (1-\theta))}{\phi = log(\theta / (1-\theta))}
+#'   and then transform back to the
 #'   \eqn{\theta}-scale.  If \code{param = "theta"} then we simulate
 #'   directly from the posterior distribution of \eqn{\theta}, unless
 #'   the sample K-gaps are all equal to zero or all positive, when we revert
@@ -35,8 +36,10 @@
 #' @details A beta(\eqn{\alpha}, \eqn{\beta}) prior distribution is used for
 #'   \eqn{\theta} so that the posterior from which values are simulated is
 #'   proportional to
-#'   \deqn{\theta ^ (2 N_1 + \alpha - 1) * (1 - \theta) ^ (N_0 + \beta - 1) *
-#'     exp(- \theta q (S_0 + ... + S_N)).}
+#'   \deqn{\theta ^ {2 N_1 + \alpha - 1} (1 - \theta) ^ {N_0 + \beta - 1}
+#'     \exp\{- \theta q (S_0 + \cdots + S_N)\}.}{%
+#'     \theta ^ (2 N_1 + \alpha - 1) * (1 - \theta) ^ (N_0 + \beta - 1) *
+#'     exp(- \theta q (S_0 + \dots + S_N)).}
 #'   See \code{\link{kgaps_stats}} for a description of the variables
 #'   involved in the contribution of the likelihood to this expression.
 #'
@@ -46,8 +49,9 @@
 #'   of acceptance, and to ensure that the simulation will work even in
 #'   extreme cases where the posterior density of \eqn{\theta} is unbounded as
 #'   \eqn{\theta} approaches 0 or 1, we simulate from the posterior
-#'   distribution of \eqn{\phi = logit(\theta)} and then transform back to the
-#'   \eqn{\theta}-scale.
+#'   distribution of
+#'   \eqn{\phi = \log(\theta / (1-\theta))}{\phi = log(\theta / (1-\theta))}
+#'   and then transform back to the \eqn{\theta}-scale.
 #' @return An object (list) of class \code{"evpost"}, which has the same
 #'   structure as an object of class \code{"ru"} returned from
 #'   \code{\link[rust]{ru}}.
@@ -61,7 +65,7 @@
 #' @references Suveges, M. and Davison, A. C. (2010) Model
 #'   misspecification in peaks over threshold analysis, \emph{The Annals of
 #'   Applied Statistics}, \strong{4}(1), 203-221.
-#'   \url{http://dx.doi.org/10.1214/09-AOAS292}
+#'   \url{https://doi.org/10.1214/09-AOAS292}
 #' @references Attalides, N. (2015) Threshold-based extreme value modelling,
 #'   PhD thesis, University College London.
 #'   \url{http://discovery.ucl.ac.uk/1471121/1/Nicolas_Attalides_Thesis.pdf}
@@ -88,13 +92,13 @@ kgaps_post <- function(data, thresh, k = 1, n = 1000, inc_cens = FALSE,
   if (!is.numeric(k) || length(k) != 1) {
     stop("k must be a numeric scalar")
   }
-  param <- match.arg(param)
   if (k < 1) {
     stop("k must be no smaller than 1.")
   }
   if (alpha <= 0 | beta <= 0) {
     stop("alpha and beta must be positive.")
   }
+  param <- match.arg(param)
   # Calculate the MLE and get the sufficient statistics
   mle_list <- kgaps_mle(data, thresh, k, inc_cens)
   theta_mle <- mle_list$theta_mle
@@ -187,7 +191,7 @@ kgaps_post <- function(data, thresh, k = 1, n = 1000, inc_cens = FALSE,
 #' @references Suveges, M. and Davison, A. C. (2010) Model
 #'   misspecification in peaks over threshold analysis, \emph{The Annals of
 #'   Applied Statistics}, \strong{4}(1), 203-221.
-#'   \url{http://dx.doi.org/10.1214/09-AOAS292}
+#'   \url{https://doi.org/10.1214/09-AOAS292}
 #' @references Attalides, N. (2015) Threshold-based extreme value modelling,
 #'   PhD thesis, University College London.
 #'   \url{http://discovery.ucl.ac.uk/1471121/1/Nicolas_Attalides_Thesis.pdf}
@@ -272,17 +276,21 @@ kgaps_mle <- function(data, thresh, k = 1, inc_cens = FALSE, conf = NULL) {
 #' @param inc_cens A logical scalar indicating whether or not to include
 #'   contributions from censored inter-exceedance times relating to the
 #'   first and last observation.  See Attalides (2015) for details.
-#' @details The sample K-gaps are \eqn{S_0, S_1, ..., S_(N-1),
-#'   S_N}, where \eqn{S_1, ..., S_(N-1)} are uncensored and \eqn{S_0} and
-#'   \eqn{S_N} are censored.  Under the assumption that the K-gaps are
+#' @details The sample K-gaps are
+#'   \eqn{S_0, S_1, \ldots, S_{N-1}, S_N}{S_0, S_1, ..., S_(N-1), S_N}, where
+#'   \eqn{S_1, \ldots, S_{N-1}}{S_1, ..., S_(N-1)} are uncensored and \eqn{S_0}
+#'   and \eqn{S_N} are censored.  Under the assumption that the K-gaps are
 #'   independent, the log-likelihood of the K-gaps model is given by
-#'   \deqn{l(\theta; S_0, ..., S_N) = N_0 log(1 - \theta) + 2 N_1 log \theta -
+#'   \deqn{l(\theta; S_0, \ldots, S_N) = N_0 \log(1 - \theta) +
+#'     2 N_1 \log \theta - \theta q (S_0 + \cdots + S_N),}{%
+#'     l(\theta; S_0, ..., S_N) = N_0 log(1 - \theta) + 2 N_1 log \theta -
 #'     \theta q (S_0 + ... + S_N),}
 #'    where \eqn{q} is the threshold exceedance probability,
 #'    \eqn{N_0} is the number of sample K-gaps that are equal to zero and
 #'    (apart from an adjustment for the contributions of \eqn{S_0} and
 #'    \eqn{S_N}) \eqn{N_1} is the number of positive sample K-gaps.
-#'    Specifically, \eqn{N_1} is equal to the number of \eqn{S_1, ..., S_(N-1)}
+#'    Specifically, \eqn{N_1} is equal to the number of
+#'    \eqn{S_1, \ldots, S_{N-1}}{S_1, ..., S_(N-1)}
 #'    that are positive plus \eqn{(I_0 + I_N) / 2}, where \eqn{I_0 = 1} if
 #'    \eqn{S_0} is greater than zero and similarly for \eqn{I_N}.
 #'    The differing treatment of uncensored and censored K-gaps reflects
@@ -294,13 +302,13 @@ kgaps_mle <- function(data, thresh, k = 1, inc_cens = FALSE, conf = NULL) {
 #'     \item {\code{N1} : } {contribution from non-zero K-gaps (see
 #'       \strong{Details})}
 #'     \item {\code{sum_qs} : } {the sum of the (scaled) K-gaps, i.e.
-#'       \eqn{q (S_0 + ... + S_N)}, where \eqn{q} is estimated by the
-#'       proportion of threshold exceedances.}
+#'       \eqn{q (S_0 + \cdots + S_N)}{q (S_0 + ... + S_N)}, where \eqn{q} is
+#'       estimated by the proportion of threshold exceedances.}
 #'   }
 #' @references Suveges, M. and Davison, A. C. (2010) Model
 #'   misspecification in peaks over threshold analysis, \emph{The Annals of
 #'   Applied Statistics}, \strong{4}(1), 203-221.
-#'   \url{http://dx.doi.org/10.1214/09-AOAS292}
+#'   \url{https://doi.org/10.1214/09-AOAS292}
 #' @references Attalides, N. (2015) Threshold-based extreme value modelling,
 #'   PhD thesis, University College London.
 #'   \url{http://discovery.ucl.ac.uk/1471121/1/Nicolas_Attalides_Thesis.pdf}

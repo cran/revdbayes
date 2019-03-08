@@ -12,7 +12,8 @@ gev_quant(pars, prob, shape, scale, min_xi = -Inf, max_xi = Inf,
 GEV parameters (\eqn{\mu, \sigma, \xi}).}
 
 \item{prob}{A numeric vector of length 3 containing exceedance
-probabilities (\eqn{p1, p2, p3}) such that \eqn{p1 > p2 > p3}.
+probabilities (\eqn{p_1, p_2, p_3}{p1, p2, p3}) such that
+\eqn{p_1 > p_2 > p_3}{p1 > p2 > p3}.
 If the values in \code{quant} are not ordered from largest to smallest
 then they will be ordered inside \code{set_prior} without warning.}
 
@@ -38,8 +39,8 @@ prior see \code{\link{set_prior}}.
 }
 \details{
 See
-  \href{http://dx.doi.org/10.2307/2986068}{Coles and Tawn (1996)} and/or
-  \href{http://dx.doi.org/10.1201/b19721-14}{Stephenson (2016)}
+  \href{https://doi.org/10.2307/2986068}{Coles and Tawn (1996)} and/or
+  \href{https://doi.org/10.1201/b19721}{Stephenson (2016)}
   for details.
 
   Note that the lower end point of the distribution of the distribution
@@ -50,10 +51,10 @@ See
 \references{
 Coles, S. G. and Tawn, J. A. (1996) A Bayesian analysis of
   extreme rainfall data. \emph{Appl. Statist.}, \strong{45}, 463-478.
-  \url{http://dx.doi.org/10.2307/2986068}.
+  \url{https://doi.org/10.2307/2986068}.
 
 Stephenson, A. (2016) Bayesian inference for extreme value
   modelling.  In \emph{Extreme Value Modeling and Risk Analysis: Methods
   and Applications} (eds D. K. Dey and J. Yan), 257-280, Chapman and Hall,
-  London. \url{http://dx.doi.org/10.1201/b19721-14}.
+  London. \url{https://doi.org/10.1201/b19721}.
 }

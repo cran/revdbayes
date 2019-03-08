@@ -4,8 +4,9 @@
 \alias{kgaps_post}
 \title{Random sampling from K-gaps posterior distribution}
 \usage{
-kgaps_post(data, thresh, k = 1, n = 1000, inc_cens = FALSE, alpha = 1,
-  beta = 1, param = c("logit", "theta"), use_rcpp = TRUE)
+kgaps_post(data, thresh, k = 1, n = 1000, inc_cens = FALSE,
+  alpha = 1, beta = 1, param = c("logit", "theta"),
+  use_rcpp = TRUE)
 }
 \arguments{
 \item{data}{A numeric vector of raw data.  No missing values are allowed.}
@@ -30,7 +31,8 @@ beta(\eqn{\alpha}, \eqn{\beta}) prior for \eqn{\theta}.}
 
 \item{param}{A character scalar.  If \code{param = "logit"} (the default)
 then we simulate from the posterior distribution of
-\eqn{\phi = logit(\theta)} and then transform back to the
+\eqn{\phi = \log(\theta / (1-\theta))}{\phi = log(\theta / (1-\theta))}
+and then transform back to the
 \eqn{\theta}-scale.  If \code{param = "theta"} then we simulate
 directly from the posterior distribution of \eqn{\theta}, unless
 the sample K-gaps are all equal to zero or all positive, when we revert
@@ -63,8 +65,10 @@ for threshold interexceedance times of Suveges and Davison (2010).
 A beta(\eqn{\alpha}, \eqn{\beta}) prior distribution is used for
   \eqn{\theta} so that the posterior from which values are simulated is
   proportional to
-  \deqn{\theta ^ (2 N_1 + \alpha - 1) * (1 - \theta) ^ (N_0 + \beta - 1) *
-    exp(- \theta q (S_0 + ... + S_N)).}
+  \deqn{\theta ^ {2 N_1 + \alpha - 1} (1 - \theta) ^ {N_0 + \beta - 1}
+    \exp\{- \theta q (S_0 + \cdots + S_N)\}.}{%
+    \theta ^ (2 N_1 + \alpha - 1) * (1 - \theta) ^ (N_0 + \beta - 1) *
+    exp(- \theta q (S_0 + \dots + S_N)).}
   See \code{\link{kgaps_stats}} for a description of the variables
   involved in the contribution of the likelihood to this expression.
 
@@ -74,8 +78,9 @@ A beta(\eqn{\alpha}, \eqn{\beta}) prior distribution is used for
   of acceptance, and to ensure that the simulation will work even in
   extreme cases where the posterior density of \eqn{\theta} is unbounded as
   \eqn{\theta} approaches 0 or 1, we simulate from the posterior
-  distribution of \eqn{\phi = logit(\theta)} and then transform back to the
-  \eqn{\theta}-scale.
+  distribution of
+  \eqn{\phi = \log(\theta / (1-\theta))}{\phi = log(\theta / (1-\theta))}
+  and then transform back to the \eqn{\theta}-scale.
 }
 \examples{
 thresh <- quantile(newlyn, probs = 0.90)
@@ -86,7 +91,7 @@ plot(k_postsim)
 Suveges, M. and Davison, A. C. (2010) Model
   misspecification in peaks over threshold analysis, \emph{The Annals of
   Applied Statistics}, \strong{4}(1), 203-221.
-  \url{http://dx.doi.org/10.1214/09-AOAS292}
+  \url{https://doi.org/10.1214/09-AOAS292}
 
 Attalides, N. (2015) Threshold-based extreme value modelling,
   PhD thesis, University College London.

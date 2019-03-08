@@ -22,9 +22,17 @@ process_data <- function(model, data, thresh, noy, use_noy, ros) {
   #   lik_args   : basic sample summaries to add to lik_args in rpost().
   #
   lik_args <- list()
+  # is.atomic(x) || is.list(x) is lik is.vector(x) but attributes are allowed
   if (model == "gp" | model == "bingp") {
+    if (!(is.atomic(data) || is.list(data)) || !is.numeric(data)) {
+      stop("''data'' must be a numeric vector")
+    }
     nas <- is.na(data)
     data <- data[!nas]
+    # Check that the threshold is not lower than the smallest observation
+    if (thresh < min(data)) {
+      stop("the threshold is lower than the smallest observation")
+    }
     if (model == "bingp") {
       lik_args$n_raw <- length(data)              # number of raw observations
     }
@@ -39,6 +47,9 @@ process_data <- function(model, data, thresh, noy, use_noy, ros) {
     return(lik_args)
   }
   if (model == "gev") {
+    if (!(is.atomic(data) || is.list(data)) || !is.numeric(data)) {
+      stop("''data'' must be a numeric vector")
+    }
     nas <- is.na(data)
     data <- data[!nas]
     lik_args$data <- data                           # sample threshold excesses
@@ -50,8 +61,15 @@ process_data <- function(model, data, thresh, noy, use_noy, ros) {
     return(lik_args)
   }
   if (model == "pp") {
+    if (!(is.atomic(data) || is.list(data)) || !is.numeric(data)) {
+      stop("''data'' must be a numeric vector")
+    }
     nas <- is.na(data)
     data <- data[!nas]
+    # Check that the threshold is not lower than the smallest observation
+    if (thresh < min(data)) {
+      stop("the threshold is lower than the smallest observation")
+    }
     lik_args$data <- data[data > thresh]    # threshold exceedances
     lik_args$n_exc <- length(lik_args$data) # number of threshold excesses
     lik_args$thresh <- thresh               # threshold
@@ -67,9 +85,17 @@ process_data <- function(model, data, thresh, noy, use_noy, ros) {
     return(lik_args)
   }
   if (model == "os") {
+    if (!is.data.frame(data) && !is.matrix(data) &&
+        !(is.atomic(data) || is.list(data))) {
+      stop("''data'' must be a matrix, dataframe or vector")
+    }
+    # Make data a matrix
+    data <- as.matrix(data)
+    if (!all(apply(data, 2, is.numeric))) {
+      stop("''data'' must contain numeric values")
+    }
     # Each row contains order statistics for a given block.
     # Remove any row that has only missing values.
-    data <- as.matrix(data)
     data_col <- dim(data)[2]
     nas <- !apply(is.na(data), 1, all)
     data <- data[nas, , drop = FALSE]

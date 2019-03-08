@@ -30,7 +30,7 @@ All elements of \code{scale} must be positive.}
 log(p).}
 
 \item{lower.tail}{A logical scalar.  If TRUE (default), probabilities
-are P[X <= x], otherwise, P[X > x].}
+are \eqn{P[X \leq x]}{P[X <= x]}, otherwise, \eqn{P[X > x]}{P[X > x]}.}
 
 \item{p}{A numeric vector of probabilities in [0,1].}
 
@@ -51,7 +51,8 @@ random generation for the generalised Pareto (GP) distribution.
 The distribution function of a GP distribution with parameters
  \code{location} = \eqn{\mu}, \code{scale} = \eqn{\sigma} (>0) and
  \code{shape} = \eqn{\xi} is
- \deqn{F(x) = 1 - [1 + \xi (x - \mu) / \sigma] ^ (-1/\xi) }
+ \deqn{F(x) = 1 - [1 + \xi (x - \mu) / \sigma] ^ {-1/\xi}}{%
+       F(x) = 1 - [1 + \xi (x - \mu) / \sigma] ^ (-1/\xi)}
  for \eqn{1 + \xi (x - \mu) / \sigma > 0}.  If \eqn{\xi = 0} the
  distribution function is defined as the limit as \eqn{\xi} tends to zero.
  The support of the distribution depends on \eqn{\xi}: it is
@@ -90,9 +91,9 @@ rgp(6, scale = 0.5, shape = 0.8)
 \references{
 Pickands, J. (1975) Statistical inference using extreme
   order statistics. \emph{Annals of Statistics}, \strong{3}, 119-131.
-  \url{http://dx.doi.org/10.1214/aos/1176343003}
+  \url{https://doi.org/10.1214/aos/1176343003}
 
 Coles, S. G. (2001) \emph{An Introduction to Statistical
   Modeling of Extreme Values}, Springer-Verlag, London.
-  Chapter 4: \url{http://dx.doi.org/10.1007/978-1-4471-3675-0_4}
+  Chapter 4: \url{https://doi.org/10.1007/978-1-4471-3675-0_4}
 }
