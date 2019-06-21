@@ -75,7 +75,7 @@ Of the in-built named priors available in revdbayes only
   Attalides (2016) consider the issue of posterior propriety in Bayesian
   extreme value analyses.  In most of improper priors below the prior for
   the scale parameter \eqn{\sigma} is taken to be \eqn{1/\sigma},
-  i.e. a flat prior for \eqn{log \sigma}.  Here we denote the scale
+  i.e. a flat prior for \eqn{\log \sigma}{log \sigma}.  Here we denote the scale
   parameter of the GP distribution by \eqn{\sigma}, whereas we use
   \eqn{\sigma_u} in the revdbayes vignette.
 
@@ -227,7 +227,7 @@ u_prior_fn <- function(x, ab) {
   return(-log(x[1]) + (ab[1] - 1) * log(1 + x[2]) +
          (ab[2] - 1) * log(1 - x[2]))
 }
-up <- set_prior(prior = u_prior_fn, ab = c(2, 2))
+up <- set_prior(prior = u_prior_fn, ab = c(2, 2), model = "gp")
 
 # A user-defined prior using a pointer to a C++ function
 ptr_gp_flat <- create_prior_xptr("gp_flat")

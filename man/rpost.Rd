@@ -7,8 +7,9 @@
 rpost(n, model = c("gev", "gp", "bingp", "pp", "os"), data, prior, ...,
   nrep = NULL, thresh = NULL, noy = NULL, use_noy = TRUE,
   npy = NULL, ros = NULL, bin_prior = structure(list(prior =
-  "bin_beta", ab = c(1/2, 1/2), class = "binprior")), init_ests = NULL,
-  mult = 2, use_phi_map = FALSE)
+  "bin_beta", ab = c(1/2, 1/2), class = "binprior")),
+  bin_param = "logit", init_ests = NULL, mult = 2,
+  use_phi_map = FALSE)
 }
 \arguments{
 \item{n}{A numeric scalar. The size of posterior sample required.}
@@ -54,10 +55,11 @@ Currently only implemented if \code{model = "gev"} or \code{"gp"} or
 \code{model = "os"}.}
 
 \item{thresh}{A numeric scalar.  Extreme value threshold applied to data.
-Only relevant when \code{model = "gp"} or \code{model = "pp"}.  Must
-be supplied when \code{model = "pp"}.  If \code{model = "gp"} and
-\code{thresh} is not supplied then \code{thresh = 0} is used and
-\code{data} should contain threshold excesses.}
+Only relevant when \code{model = "gp"}, \code{"pp"} or \code{"bingp"}.
+Must be supplied when \code{model = "pp"} or \code{"bingp"}.
+If \code{model = "gp"} and \code{thresh} is not supplied then
+\code{thresh = 0} is used and \code{data} should contain threshold
+excesses.}
 
 \item{noy}{A numeric scalar. The number of blocks of observations,
 excluding any missing values.  A block is often a year.
@@ -93,6 +95,10 @@ in the analysis.}
 \eqn{p}, created by \code{\link{set_bin_prior}}.  Only relevant if
 \code{model = "bingp"}.  If this is not supplied then the Jeffreys
 beta(1/2, 1/2) prior is used.}
+
+\item{bin_param}{A character scalar.  The argument \code{param} passed to
+\code{\link{binpost}}.  Only relevant if a user-supplied prior function
+is set using \code{\link{set_bin_prior}}.}
 
 \item{init_ests}{A numeric vector.  Initial parameter estimates for search
 for the mode of the posterior distribution.}
@@ -216,6 +222,16 @@ fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
 bp <- set_bin_prior(prior = "jeffreys")
 bgpg <- rpost(n = 1000, model = "bingp", prior = fp, thresh = u, data = gom,
               bin_prior = bp)
+plot(bgpg, pu_only = TRUE)
+plot(bgpg, add_pu = TRUE)
+
+# Setting the same binomial (Jeffreys) prior by hand
+beta_prior_fn <- function(p, ab) {
+  return(stats::dbeta(p, shape1 = ab[1], shape2 = ab[2], log = TRUE))
+}
+jeffreys <- set_bin_prior(beta_prior_fn, ab = c(1 / 2, 1 / 2))
+bgpg <- rpost(n = 1000, model = "bingp", prior = fp, thresh = u, data = gom,
+              bin_prior = jeffreys)
 plot(bgpg, pu_only = TRUE)
 plot(bgpg, add_pu = TRUE)
 

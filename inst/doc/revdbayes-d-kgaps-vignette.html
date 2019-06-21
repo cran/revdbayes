@@ -12,7 +12,7 @@
 
 <meta name="author" content="Paul J. Northrop" />
 
-<meta name="date" content="2019-03-08" />
+<meta name="date" content="2019-06-21" />
 
 <title>Inference for the extremal index using the K-gaps model</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Inference for the extremal index using the K-gaps model</h1>
 <h4 class="author"><em>Paul J. Northrop</em></h4>
-<h4 class="date"><em>2019-03-08</em></h4>
+<h4 class="date"><em>2019-06-21</em></h4>
 
 
 <div id="TOC">
@@ -82,7 +82,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul>
 </div>
 
-<p>The models considered in the <a href="revdbayes-vignette.html">Introducing revdbayes</a> vignette are based on the assumption that observations of a (univariate) quantity of interest can be treated as independent and identically distributed (iid) variates. In many instances these assumptions are unrealistic. In this vignette we consider the situation when it is not reasonable to make the former assumption, that is, temporal dependence is present. In this circumstance a key issue is the strength of dependence between extreme events. Under conditions that preclude dependence between extreme events that occur far apart in time, the effect of dependence is local in time, resulting in a tendency for extreme to a occur in clusters. The most common measure of the strength of local extremal dependence is the <em>extremal index</em> <span class="math inline">\(\theta\)</span>. For a review of theory and methods for time series extremes see <span class="citation">Chavez-Demoulin and Davison (2012)</span>.</p>
+<p>The models considered in the <a href="revdbayes-a-vignette.html">Introducing revdbayes</a> vignette are based on the assumption that observations of a (univariate) quantity of interest can be treated as independent and identically distributed (iid) variates. In many instances these assumptions are unrealistic. In this vignette we consider the situation when it is not reasonable to make the former assumption, that is, temporal dependence is present. In this circumstance a key issue is the strength of dependence between extreme events. Under conditions that preclude dependence between extreme events that occur far apart in time, the effect of dependence is local in time, resulting in a tendency for extreme to a occur in clusters. The most common measure of the strength of local extremal dependence is the <em>extremal index</em> <span class="math inline">\(\theta\)</span>. For a review of theory and methods for time series extremes see <span class="citation">Chavez-Demoulin and Davison (2012)</span>.</p>
 <div id="k-gaps-model" class="section level2">
 <h2>K-gaps model</h2>
 <p>The extremal index has several interpretations and leading to different models/methods by which inferences about <span class="math inline">\(\theta\)</span> can be made. Here we consider a model based on the behaviour of occurrences of exceedances of a high threshold. The <em>K-gaps model</em> of <span class="citation">Süveges and Davison (2010)</span> extends the model of <span class="citation">Ferro and Segers (2003)</span> by incorporating a <em>run length</em> parameter <span class="math inline">\(K\)</span>. Under this model threshold inter-exceedance times not larger than <span class="math inline">\(K\)</span> are part of the same cluster and other inter-exceedance times have an exponential distribution with rate parameter <span class="math inline">\(\theta\)</span>. Thus, <span class="math inline">\(\theta\)</span> has dual role as the probability that a process leaves one cluster of threshold exceedances and as the reciprocal of the mean time until the process enters the next cluster. For details see <span class="citation">Süveges and Davison (2010)</span>.</p>

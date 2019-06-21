@@ -57,7 +57,7 @@
 #'   Attalides (2016) consider the issue of posterior propriety in Bayesian
 #'   extreme value analyses.  In most of improper priors below the prior for
 #'   the scale parameter \eqn{\sigma} is taken to be \eqn{1/\sigma},
-#'   i.e. a flat prior for \eqn{log \sigma}.  Here we denote the scale
+#'   i.e. a flat prior for \eqn{\log \sigma}{log \sigma}.  Here we denote the scale
 #'   parameter of the GP distribution by \eqn{\sigma}, whereas we use
 #'   \eqn{\sigma_u} in the revdbayes vignette.
 #'
@@ -272,7 +272,7 @@
 #'   return(-log(x[1]) + (ab[1] - 1) * log(1 + x[2]) +
 #'          (ab[2] - 1) * log(1 - x[2]))
 #' }
-#' up <- set_prior(prior = u_prior_fn, ab = c(2, 2))
+#' up <- set_prior(prior = u_prior_fn, ab = c(2, 2), model = "gp")
 #'
 #' # A user-defined prior using a pointer to a C++ function
 #' ptr_gp_flat <- create_prior_xptr("gp_flat")
@@ -848,13 +848,20 @@ hpar_drop <- function(x_list, hpar_vec) {
 #'
 #' Constructs a prior distribution for use as the argument \code{bin_prior} in
 #' \code{\link{rpost}} or in \code{\link{binpost}}.  The user can choose
-#' from a list of in-built priors.
+#' from a list of in-built priors or specify their own prior function,
+#' returning the log of the prior density, using an R function
+#' and arguments for hyperparameters.
 #'
-#' @param prior A character string giving the name of the prior for \eqn{p}.
-#'   See \strong{Details} for a list of the priors available.
-#' @param ... Further arguments to be passed to an in-built prior function.
-#'   This is only relevant if \code{model = "beta"}, when \code{ab} can be
-#'   passed. See \strong{Details}.
+#' @param prior Either
+#' \itemize{
+#'   \item {An R function that returns the value of the log of the prior
+#'   density (see \strong{Examples}), or}
+#'   \item {A character string giving the name of the prior for \eqn{p}.
+#'     See \strong{Details} for a list of priors available.}
+#' }
+#' @param ... Further arguments to be passed to the user-supplied or in-built
+#'   prior function.  For the latter this is only relevant if
+#'   \code{prior = "beta"}, when \code{ab} can be passed. See \strong{Details}.
 #' @details
 #'   \strong{Binomial priors.} The names of the binomial priors set using
 #'   \code{bin_prior} are:
@@ -879,9 +886,24 @@ hpar_drop <- function(x_list, hpar_vec) {
 #'   distribution.
 #' @examples
 #' bp <- set_bin_prior(prior = "jeffreys")
+#'
+#' # Setting the Jeffreys prior by hand
+#' beta_prior_fn <- function(p, ab) {
+#'   return(stats::dbeta(p, shape1 = ab[1], shape2 = ab[2], log = TRUE))
+#' }
+#' jeffreys <- set_bin_prior(beta_prior_fn, ab = c(1 / 2, 1 / 2))
 #' @export
 set_bin_prior <- function(prior = c("jeffreys", "laplace", "haldane", "beta",
                                     "mdi"), ...) {
+  # If prior is a function then return it in the required format.
+  if (is.function(prior)) {
+    temp <- list(prior = prior, ...)
+    return(structure(temp, class = "binprior"))
+  }
+  if (class(prior) == "externalptr") {
+    stop("A user-supplied prior must be specified using an R function")
+  }
+  # Otherwise, call the appropriate function to set the prior with name prior.
   prior <- match.arg(prior)
   temp <- list(prior = paste("bin_", prior, sep=""), ...)
   # Check for unused hyperparameter names and drop them

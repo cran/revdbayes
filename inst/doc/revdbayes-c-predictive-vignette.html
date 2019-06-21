@@ -12,7 +12,7 @@
 
 <meta name="author" content="Paul J. Northrop" />
 
-<meta name="date" content="2019-03-08" />
+<meta name="date" content="2019-06-21" />
 
 <title>Posterior Predictive Extreme Value Inference using the revdbayes Package</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Posterior Predictive Extreme Value Inference using the revdbayes Package</h1>
 <h4 class="author"><em>Paul J. Northrop</em></h4>
-<h4 class="date"><em>2019-03-08</em></h4>
+<h4 class="date"><em>2019-06-21</em></h4>
 
 
 <div id="TOC">
@@ -88,9 +88,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul>
 </div>
 
-<p>This vignette focuses on <em>posterior predictive inference</em> using extreme value models. Posterior predictive inference is the prediction of unobserved variables conditional on observed data, performed by integrating parameter-specific inferences over a posterior distribution for model parameters. In practice, the integration averaging is performed using an empirical average based on samples from the posterior distribution. The vignette <a href="revdbayes-vignette.html">Introducing revdbayes</a> covers the sampling from extreme value posterior distributions and the vignette <a href="revdbayes-using-rcpp-vignette.html">Faster simulation using revdbayes</a> considers how to do this more quickly.</p>
+<p>This vignette focuses on <em>posterior predictive inference</em> using extreme value models. Posterior predictive inference is the prediction of unobserved variables conditional on observed data, performed by integrating parameter-specific inferences over a posterior distribution for model parameters. In practice, the integration averaging is performed using an empirical average based on samples from the posterior distribution. The vignette <a href="revdbayes-a-vignette.html">Introducing revdbayes</a> covers the sampling from extreme value posterior distributions and the vignette <a href="revdbayes-b-using-rcpp-vignette.html">Faster simulation using revdbayes</a> considers how to do this more quickly.</p>
 <p>We consider two uses of posterior predictive inference. In the first we simulate from the posterior predictive distribution many replicates of the observed data. A comparison of these replicates to the observed data provides a way to assess the fit of the model: systematic differences in behaviour between the observed and replicated data suggest features of the data that are not represented well by the model. For greater detail see Chapter 6 of <span class="citation">Gelman et al. (2014)</span>. Secondly, we define as the variable of interest the largest value <span class="math inline">\(M_N\)</span> to be observed over a future time period of length <span class="math inline">\(N\)</span> years and estimate under the extreme value model the conditional distribution of <span class="math inline">\(M_N\)</span> given the observed data. This accounts for uncertainty in model parameters and for uncertainty owing to the variability of future observations.</p>
-<p>We illustrate the code used to perform these two tasks using the <code>portpirie</code> and <code>gom</code> datasets that feature in the vignette <a href="revdbayes-vignette.html">Introducing revdbayes</a>.</p>
+<p>We illustrate the code used to perform these two tasks using the <code>portpirie</code> and <code>gom</code> datasets that feature in the vignette <a href="revdbayes-a-vignette.html">Introducing revdbayes</a>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Set the number of posterior samples required.</span>
 n &lt;-<span class="st"> </span><span class="dv">1000</span>
 <span class="kw">set.seed</span>(<span class="dv">47</span>)

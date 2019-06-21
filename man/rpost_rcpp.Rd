@@ -54,10 +54,11 @@ Currently only implemented if \code{model = "gev"} or \code{"gp"} or
 \code{model = "os"}.}
 
 \item{thresh}{A numeric scalar.  Extreme value threshold applied to data.
-Only relevant when \code{model = "gp"} or \code{model = "pp"}.  Must
-be supplied when \code{model = "pp"}.  If \code{model = "gp"} and
-\code{thresh} is not supplied then \code{thresh = 0} is used and
-\code{data} should contain threshold excesses.}
+Only relevant when \code{model = "gp"}, \code{"pp"} or \code{"bingp"}.
+Must be supplied when \code{model = "pp"} or \code{"bingp"}.
+If \code{model = "gp"} and \code{thresh} is not supplied then
+\code{thresh = 0} is used and \code{data} should contain threshold
+excesses.}
 
 \item{noy}{A numeric scalar. The number of blocks of observations,
 excluding any missing values.  A block is often a year.
@@ -223,7 +224,17 @@ u <- quantile(gom, probs = 0.65)
 fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
 bp <- set_bin_prior(prior = "jeffreys")
 bgpg <- rpost_rcpp(n = 1000, model = "bingp", prior = fp, thresh = u,
-  data = gom, bin_prior = bp)
+                   data = gom, bin_prior = bp)
+plot(bgpg, pu_only = TRUE)
+plot(bgpg, add_pu = TRUE)
+
+# Setting the same binomial (Jeffreys) prior by hand
+beta_prior_fn <- function(p, ab) {
+  return(stats::dbeta(p, shape1 = ab[1], shape2 = ab[2], log = TRUE))
+}
+jeffreys <- set_bin_prior(beta_prior_fn, ab = c(1 / 2, 1 / 2))
+bgpg <- rpost_rcpp(n = 1000, model = "bingp", prior = fp, thresh = u,
+                   data = gom, bin_prior = jeffreys)
 plot(bgpg, pu_only = TRUE)
 plot(bgpg, add_pu = TRUE)
 
