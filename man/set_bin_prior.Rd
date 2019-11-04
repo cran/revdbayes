@@ -4,8 +4,8 @@
 \alias{set_bin_prior}
 \title{Construction of a prior distribution for a binomial probability \eqn{p}}
 \usage{
-set_bin_prior(prior = c("jeffreys", "laplace", "haldane", "beta", "mdi"),
-  ...)
+set_bin_prior(prior = c("jeffreys", "laplace", "haldane", "beta", "mdi",
+  "northrop"), ...)
 }
 \arguments{
 \item{prior}{Either
@@ -30,25 +30,27 @@ A list of class \code{"binprior"}.  The first component is the
 Constructs a prior distribution for use as the argument \code{bin_prior} in
 \code{\link{rpost}} or in \code{\link{binpost}}.  The user can choose
 from a list of in-built priors or specify their own prior function,
-returning the log of the prior density, using an R function
+returning the \strong{log} of the prior density, using an R function
 and arguments for hyperparameters.
 }
 \details{
 \strong{Binomial priors.} The names of the binomial priors set using
   \code{bin_prior} are:
 \itemize{
-  \item {\code{"jeffreys"}: the \emph{Jeffreys} beta(1/2, 1/2) prior.}
-  \item {\code{"laplace"}: the \emph{Bayes-Laplace} beta(1, 1) prior.}
+  \item{\code{"jeffreys"}: the \emph{Jeffreys} beta(1/2, 1/2) prior.}
+  \item{\code{"laplace"}: the \emph{Bayes-Laplace} beta(1, 1) prior.}
   \item{\code{"haldane"}: the \emph{Haldane} beta(0, 0) prior.}
   \item{\code{"beta"}: a beta(\eqn{\alpha, \beta}) prior.  The argument
-    \code{ab} is a vector containing \code{c}(\eqn{\alpha, \beta}).}
-    The default is \code{ab = c(1, 1)}.
+    \code{ab} is a vector containing \code{c}(\eqn{\alpha, \beta}).
+    The default is \code{ab = c(1, 1)}.}
   \item{\code{"mdi"}: the MDI prior
     \eqn{\pi(p) = 1.6186 p^p (1-p)^{1-p}}{\pi(p) = 1.6186 p^p (1-p)^(1-p)},
-        for \eqn{0 < p < 1.}
-  }
+        for \eqn{0 < p < 1.}}
+  \item{\code{"northrop"}: the improper prior
+    \eqn{\pi(p)=\{-\ln(1-p)\}^{-1}(1-p)^{-1}}{\pi(p)=1 / [ -ln(1-p) (1-p) ]},
+        for \eqn{0 < p < 1.}}
 }
-Apart from the MDI prior these are all beta distributions.
+Apart from the last two priors these are all beta distributions.
 }
 \examples{
 bp <- set_bin_prior(prior = "jeffreys")

@@ -1,6 +1,18 @@
-# =========================== process_data =====================================
+#' Internal revdbayes functions
+#'
+#' Internal revdbayes functions
+#' @details
+#' These functions are not intended to be called by the user.
+#' @name revdbayes-internal
+#' @keywords internal
+NULL
 
-process_data <- function(model, data, thresh, noy, use_noy, ros) {
+# =========================== process_data ================================== #
+
+#' @keywords internal
+#' @rdname revdbayes-internal
+process_data <- function(model, data, thresh, noy, use_noy, ros,
+                         weights = NULL) {
   #
   # Removes missings, extracts sample summaries.
   #
@@ -17,6 +29,8 @@ process_data <- function(model, data, thresh, noy, use_noy, ros) {
   #                number of threshold excesses?
   #   ros        : when model == "os", the number of order statistics to
   #                retain from each row of data.
+  #   weights    : a numeric vector of weights by which to multiply the
+  #                contributions to the log-likelihood.
   #
   # Returns: a list containing
   #   lik_args   : basic sample summaries to add to lik_args in rpost().
@@ -26,6 +40,9 @@ process_data <- function(model, data, thresh, noy, use_noy, ros) {
   if (model == "gp" | model == "bingp") {
     if (!(is.atomic(data) || is.list(data)) || !is.numeric(data)) {
       stop("''data'' must be a numeric vector")
+    }
+    if (!is.null(weights) && length(weights) != length(data)) {
+      stop("weights does not have the correct length")
     }
     nas <- is.na(data)
     data <- data[!nas]
@@ -44,6 +61,18 @@ process_data <- function(model, data, thresh, noy, use_noy, ros) {
     lik_args$xm <- max(lik_args$data)             # maximum threshold excess
     lik_args$sum_gp <- sum(lik_args$data)         # sum of threshold excesses
     lik_args$n_check <- lik_args$m
+    # Add weights, if they have been supplied.
+    # (For the moment at least) bin and GP inferences are separate.
+    # lik_args$w and lik_args$sumw apply to threshold excesses (the GP bit)
+    if (!is.null(weights)) {
+      weights <- weights[!nas]
+      lik_args$w <- weights[data > thresh]
+      lik_args$sumw <- sum(lik_args$w)
+      if (model == "bingp") {
+        lik_args$binw <- weights
+        lik_args$sf <- data > thresh
+      }
+    }
     return(lik_args)
   }
   if (model == "gev") {
@@ -131,8 +160,10 @@ process_data <- function(model, data, thresh, noy, use_noy, ros) {
   }
 }
 
-# ========================== create_ru_list ====================================
+# ========================== create_ru_list ================================= #
 
+#' @keywords internal
+#' @rdname revdbayes-internal
 create_ru_list <- function(model, trans, rotate, min_xi, max_xi) {
   #
   # Creates a list of arguments to pass to the functions ru() or ru_rcpp()
@@ -185,8 +216,10 @@ create_ru_list <- function(model, trans, rotate, min_xi, max_xi) {
   return(list(d = d, lower = lower, upper = upper, var_names = var_names))
 }
 
-# =========================== set_which_lam ====================================
+# =========================== set_which_lam ================================= #
 
+#' @keywords internal
+#' @rdname revdbayes-internal
 set_which_lam <- function(model) {
   #
   # Sets which_lam, the indices of the parameter vector that are to be
@@ -205,8 +238,10 @@ set_which_lam <- function(model) {
   }
 }
 
-# =========================== set_range_phi ====================================
+# =========================== set_range_phi ================================= #
 
+#' @keywords internal
+#' @rdname revdbayes-internal
 set_range_phi <- function(model, phi_mid, se_phi, mult) {
   #
   # Sets min_phi and max_phi, the smallest and largest values of the
@@ -241,8 +276,10 @@ set_range_phi <- function(model, phi_mid, se_phi, mult) {
   }
 }
 
-# =========================== box_cox ===========================
+# ============================== box_cox ==================================== #
 
+#' @keywords internal
+#' @rdname revdbayes-internal
 box_cox <- function (x, lambda = 1, gm = 1, lambda_tol = 1e-6,
                      poly_order = 3) {
   #
@@ -253,10 +290,10 @@ box_cox <- function (x, lambda = 1, gm = 1, lambda_tol = 1e-6,
   #                transformed.
   #   lambda     : A numeric scalar.  Transformation parameter.
   #   gm         : A numeric scalar.  Optional scaling parameter.
-  #   lambda_tol : A numeric scalar.  For abs(lambda) < lambda.tol use
+  #   lambda_tol : A numeric scalar.  For abs(lambda) < lambda_tol use
   #                a Taylor series expansion.
   #   poly_order : order of Taylor series polynomial in lambda used as
-  #                an approximation if abs(lambda) < lambda.tol
+  #                an approximation if abs(lambda) < lambda_tol
   #
   # Returns:
   #   A numeric vector.  The transformed value
@@ -278,8 +315,10 @@ box_cox <- function (x, lambda = 1, gm = 1, lambda_tol = 1e-6,
   return(retval)
 }
 
-# =========================== box_cox_vec ===========================
+# =============================== box_cox_vec =============================== #
 
+#' @keywords internal
+#' @rdname revdbayes-internal
 box_cox_vec <- function(x, lambda = 1, lambda_tol = 1e-6) {
   #
   # Computes the Box-Cox transformation of a vector.  If lambda is very close
@@ -289,13 +328,13 @@ box_cox_vec <- function(x, lambda = 1, lambda_tol = 1e-6) {
   #   x          : A numeric vector. (Non-negative) values to be Box-Cox
   #                transformed.
   #   lambda     : A numeric scalar.  Transformation parameter.
-  #   lambda_tol : A numeric scalar.  For abs(lambda) < lambda.tol use
+  #   lambda_tol : A numeric scalar.  For abs(lambda) < lambda_tol use
   #                a Taylor series expansion.
   # Returns:
   #   A numeric vector.  The transformed value
   #     (x^lambda - 1) / lambda
   #
-  if (any(x < 0)) {
+  if (any(x < 0, na.rm = TRUE)) {
     stop("Invalid x: x must be non-negative")
   }
   max_len <- max(length(x), length(lambda))
@@ -306,12 +345,14 @@ box_cox_vec <- function(x, lambda = 1, lambda_tol = 1e-6) {
                           ifelse(is.infinite(x),
                                  ifelse(lambda < 0, -1 / lambda, Inf),
                           ifelse(x == 0, ifelse(lambda > 0, -1 / lambda, -Inf),
-                                 log(x) * (1 + lambda / 2)))))
+                                 log(x) * (1 + log(x) * lambda / 2)))))
   return(retval)
 }
 
-# ====================== box_cox_deriv ==========================
+# ============================= box_cox_deriv =============================== #
 
+#' @keywords internal
+#' @rdname revdbayes-internal
 box_cox_deriv <- function (x, lambda = 1, lambda_tol = 1e-6,
                            poly_order = 3) {
   #
@@ -322,10 +363,10 @@ box_cox_deriv <- function (x, lambda = 1, lambda_tol = 1e-6,
   #   x          : A numeric vector. (Positive) values to be Box-Cox
   #                transformed.
   #   lambda     : A numeric scalar.  Transformation parameter.
-  #   lambda_tol : A numeric scalar.  For abs(lambda) < lambda.tol use
+  #   lambda_tol : A numeric scalar.  For abs(lambda) < lambda_tol use
   #                a Taylor series expansion.
   #   poly_order : order of Taylor series polynomial in lambda used as
-  #                an approximation if abs(lambda) < lambda.tol
+  #                an approximation if abs(lambda) < lambda_tol
   #
   # Returns:
   #   A numeric vector.  The transformed value
@@ -340,8 +381,10 @@ box_cox_deriv <- function (x, lambda = 1, lambda_tol = 1e-6,
   return(retval)
 }
 
-# ========================= check_sample_size ==================================
+# ========================= check_sample_size =============================== #
 
+#' @keywords internal
+#' @rdname revdbayes-internal
 check_sample_size <- function(prior_name, n_check) {
   #
   # Checks that if one of the in-built improper priors is used then the sample
@@ -372,6 +415,10 @@ check_sample_size <- function(prior_name, n_check) {
   }
 }
 
+# ======================= check_sample_size_message ========================= #
+
+#' @keywords internal
+#' @rdname revdbayes-internal
 check_sample_size_message <- function(prior_name, n_check) {
   text1 <- "A sample size of"
   text2 <- "is not large enough to produce a proper posterior when prior"

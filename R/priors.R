@@ -4,12 +4,13 @@
 #'
 #' Constructs a prior distribution for use as the argument \code{prior} in
 #' \code{\link{rpost}} and \code{\link{rpost_rcpp}}.  The user can either
-#' specify their own prior function, returning the log of the prior density,
-#' (using an R function or an external pointer to a compiled C++ function)
-#' and arguments for hyperparameters or choose from a list of in-built
-#' model-specific priors.  Note that the arguments \code{model = "gev"},
-#' \code{model = "pp"} and \code{model =="os"} are equivalent because
-#' a prior is specified is the GEV parameterisation in each of these cases.
+#' specify their own prior function, returning the \strong{log} of the prior
+#' density, (using an R function or an external pointer to a compiled C++
+#' function) and arguments for hyperparameters or choose from a list of
+#' in-built model-specific priors.  Note that the arguments
+#' \code{model = "gev"}, \code{model = "pp"} and \code{model =="os"} are
+#' equivalent because a prior is specified is the GEV parameterisation in each
+#' of these cases.
 #' Note also that for \code{model = "pp"} the prior GEV parameterisation
 #' relates to the value of \code{noy} subsequently supplied to
 #' \code{\link{rpost}} or \code{\link{rpost_rcpp}}.
@@ -230,8 +231,9 @@
 #'   for the Generalized Pareto Distribution.  \emph{Technometrics},
 #'   \strong{35(2)}, 185-191. \url{https://doi.org/10.2307/1269663}.
 #' @references Hosking, J. R. M. and Wallis, J. R. (1987) Parameter and
-#' Quantile Estimation for the Generalized Pareto Distribution. Technometrics,
-#' 29(3), 339-349. \url{https://doi.org/10.2307/1269343}.
+#'   Quantile Estimation for the Generalized Pareto Distribution.
+#'   \emph{Technometrics}, \strong{29(3)}, 339-349.
+#'   \url{https://doi.org/10.2307/1269343}.
 #' @references Martins, E. S. and Stedinger, J. R. (2000) Generalized maximum
 #'   likelihood generalized extreme value quantile estimators for hydrologic
 #'   data, \emph{Water Resources Research}, \strong{36(3)}, 737-744.
@@ -352,7 +354,7 @@ gp_prior <- function(prior = c("norm", "mdi", "flat", "flatflat", "jeffreys",
   # Check for unused hyperparameter names and drop them
   hpar_vec <- switch(prior, norm = c("mean", "cov"), mdi = "a",
                      flat = NULL, jeffreys = NULL, beta = "pq")
-  hpar_vec <- c(hpar_vec, "min_xi", "max_xi")
+  hpar_vec <- c(hpar_vec, "min_xi", "max_xi", "upper")
   temp <- hpar_drop(temp, hpar_vec)
   # Check for problems with min_xi and/or max_xi
   if (!is.null(temp$min_xi) & !is.null(temp$max_xi)) {
@@ -494,13 +496,21 @@ gp_flat <- function(pars, min_xi = -Inf, max_xi = Inf, trendsd = 0) {
 #' @param max_xi  A numeric scalar.  Prior upper bound on \eqn{\xi}.
 #' @param trendsd  Has no function other than to achieve compatibility with
 #'   function in the evdbayes package.
+#' @param upper A positive numeric scalar.  The upper endpoint of the GP
+#'   distribution.
 #' @return The log of the prior density.
 #' @export
-gp_flatflat <- function(pars, min_xi = -Inf, max_xi = Inf, trendsd = 0) {
+gp_flatflat <- function(pars, min_xi = -Inf, max_xi = Inf, trendsd = 0,
+                        upper = NULL) {
   if (pars[1] <= 0 | pars[2] < min_xi | pars[2] > max_xi) {
     return(-Inf)
   }
-  return(1)
+  if (!is.null(upper)) {
+    if (pars[2] > min(0, max_xi) | -pars[1] / pars[2] > upper) {
+      return(-Inf)
+    }
+  }
+  return(0)
 }
 
 #' Jeffreys prior for GP parameters (\eqn{\sigma, \xi})
@@ -788,7 +798,7 @@ gev_flatflat <- function(pars, min_xi = -Inf, max_xi = Inf, trendsd = 0) {
   if (pars[2] <= 0 | pars[3] < min_xi | pars[3] > max_xi) {
     return(-Inf)
   }
-  return(1)
+  return(0)
 }
 
 #' Beta-type prior for GEV shape parameter \eqn{\xi}
@@ -849,7 +859,7 @@ hpar_drop <- function(x_list, hpar_vec) {
 #' Constructs a prior distribution for use as the argument \code{bin_prior} in
 #' \code{\link{rpost}} or in \code{\link{binpost}}.  The user can choose
 #' from a list of in-built priors or specify their own prior function,
-#' returning the log of the prior density, using an R function
+#' returning the \strong{log} of the prior density, using an R function
 #' and arguments for hyperparameters.
 #'
 #' @param prior Either
@@ -866,18 +876,20 @@ hpar_drop <- function(x_list, hpar_vec) {
 #'   \strong{Binomial priors.} The names of the binomial priors set using
 #'   \code{bin_prior} are:
 #' \itemize{
-#'   \item {\code{"jeffreys"}: the \emph{Jeffreys} beta(1/2, 1/2) prior.}
-#'   \item {\code{"laplace"}: the \emph{Bayes-Laplace} beta(1, 1) prior.}
+#'   \item{\code{"jeffreys"}: the \emph{Jeffreys} beta(1/2, 1/2) prior.}
+#'   \item{\code{"laplace"}: the \emph{Bayes-Laplace} beta(1, 1) prior.}
 #'   \item{\code{"haldane"}: the \emph{Haldane} beta(0, 0) prior.}
 #'   \item{\code{"beta"}: a beta(\eqn{\alpha, \beta}) prior.  The argument
-#'     \code{ab} is a vector containing \code{c}(\eqn{\alpha, \beta}).}
-#'     The default is \code{ab = c(1, 1)}.
+#'     \code{ab} is a vector containing \code{c}(\eqn{\alpha, \beta}).
+#'     The default is \code{ab = c(1, 1)}.}
 #'   \item{\code{"mdi"}: the MDI prior
 #'     \eqn{\pi(p) = 1.6186 p^p (1-p)^{1-p}}{\pi(p) = 1.6186 p^p (1-p)^(1-p)},
-#'         for \eqn{0 < p < 1.}
-#'   }
+#'         for \eqn{0 < p < 1.}}
+#'   \item{\code{"northrop"}: the improper prior
+#'     \eqn{\pi(p)=\{-\ln(1-p)\}^{-1}(1-p)^{-1}}{\pi(p)=1 / [ -ln(1-p) (1-p) ]},
+#'         for \eqn{0 < p < 1.}}
 #' }
-#' Apart from the MDI prior these are all beta distributions.
+#' Apart from the last two priors these are all beta distributions.
 #' @return A list of class \code{"binprior"}.  The first component is the
 #'   name of the input prior.  Apart from the MDI prior this will be "beta",
 #'   in which case the other component of the list is a vector of length two
@@ -894,7 +906,7 @@ hpar_drop <- function(x_list, hpar_vec) {
 #' jeffreys <- set_bin_prior(beta_prior_fn, ab = c(1 / 2, 1 / 2))
 #' @export
 set_bin_prior <- function(prior = c("jeffreys", "laplace", "haldane", "beta",
-                                    "mdi"), ...) {
+                                    "mdi", "northrop"), ...) {
   # If prior is a function then return it in the required format.
   if (is.function(prior)) {
     temp <- list(prior = prior, ...)

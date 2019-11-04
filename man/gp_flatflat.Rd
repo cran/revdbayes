@@ -4,7 +4,8 @@
 \alias{gp_flatflat}
 \title{Flat prior for GP parameters (\eqn{\sigma, \xi})}
 \usage{
-gp_flatflat(pars, min_xi = -Inf, max_xi = Inf, trendsd = 0)
+gp_flatflat(pars, min_xi = -Inf, max_xi = Inf, trendsd = 0,
+  upper = NULL)
 }
 \arguments{
 \item{pars}{A numeric vector of length 2.
@@ -17,6 +18,9 @@ Must not be \code{-Inf} because this results in an improper posterior.}
 
 \item{trendsd}{Has no function other than to achieve compatibility with
 function in the evdbayes package.}
+
+\item{upper}{A positive numeric scalar.  The upper endpoint of the GP
+distribution.}
 }
 \value{
 The log of the prior density.

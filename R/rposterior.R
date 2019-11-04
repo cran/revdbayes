@@ -1,4 +1,4 @@
-# =========================== rpost ===========================
+# ================================ rpost ==================================== #
 #
 #' Random sampling from extreme value posterior distributions
 #'
@@ -85,6 +85,12 @@
 #'   centred on the maximum a posterior (MAP) estimate of phi
 #'   (\code{use_phi_map = TRUE}), or on the initial estimate of phi
 #'   (\code{use_phi_map = FALSE}).
+#' @param weights An optional numeric vector of weights by which to multiply
+#'   the observations when constructing the log-likelihood.
+#'   Currently only implemented for \code{model = "gp"} or
+#'   \code{model = "bingp"}.
+#'   In the latter case \code{bin_prior$prior} must be \code{"bin_beta"}.
+#'   \code{weights} must have the same length as \code{data}.
 #' @param ... Further arguments to be passed to \code{\link[rust]{ru}}.  Most
 #'   importantly \code{trans} and \code{rotate} (see \strong{Details}), and
 #'   perhaps \code{r}, \code{ep}, \code{a_algor}, \code{b_algor},
@@ -215,7 +221,7 @@
 #'  \emph{The Annals of Applied Statistics}, \strong{4}(3), 1558-1578.
 #'   \url{https://doi.org/10.1214/10-AOAS333}
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # GP model
 #' u <- quantile(gom, probs = 0.65)
 #' fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
@@ -280,7 +286,8 @@ rpost <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data, prior,
                                              ab = c(1 / 2, 1 / 2),
                                              class = "binprior")),
                   bin_param = "logit",
-                  init_ests = NULL, mult = 2, use_phi_map = FALSE) {
+                  init_ests = NULL, mult = 2, use_phi_map = FALSE,
+                  weights = NULL) {
   #
   model <- match.arg(model)
   save_model <- model
@@ -329,7 +336,7 @@ rpost <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data, prior,
   # result if the posterior scales of the parameters are very different.
   #
   ds <- process_data(model = model, data = data, thresh = thresh, noy = noy,
-                     use_noy = use_noy, ros = ros)
+                     use_noy = use_noy, ros = ros, weights = weights)
   #
   # If model = "bingp" then extract sufficient statistics for the binomial
   # model, and remove n_raw from ds because it isn't used in the GP
@@ -342,9 +349,16 @@ rpost <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data, prior,
     ds_bin <- list()
     ds_bin$m <- ds$m
     ds_bin$n_raw <- ds$n_raw
+    if (is.null(weights)) {
+      temp_bin <- binpost(n = n, prior = bin_prior, ds_bin = ds_bin,
+                          param = bin_param)
+    } else {
+      ds_bin$sf <- ds$sf
+      ds_bin$w <- ds$binw
+      ds$sf <- ds$binw <- NULL
+      temp_bin <- wbinpost(n = n, prior = bin_prior, ds_bin = ds_bin)
+    }
     ds$n_raw <- NULL
-    temp_bin <- binpost(n = n, prior = bin_prior, ds_bin = ds_bin,
-                        param = bin_param)
     add_binomial <- TRUE
     model <- "gp"
   }
@@ -371,7 +385,11 @@ rpost <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data, prior,
   #
   if (model == "gp") {
     logpost <- function(pars, ds) {
-      loglik <- do.call(gp_loglik, c(list(pars = pars), ds))
+      if (is.null(weights)) {
+        loglik <- do.call(gp_loglik, c(list(pars = pars), ds))
+      } else {
+        loglik <- do.call(gp_wloglik, c(list(pars = pars), ds))
+      }
       if (is.infinite(loglik)) return(loglik)
       logprior <- do.call(prior$prior, c(list(pars), prior[-1]))
       return(loglik + logprior)
@@ -765,7 +783,7 @@ rpost <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data, prior,
   return(temp)
 }
 
-# =========================== pu_pp ===========================
+# ================================ pu_pp ==================================== #
 
 pu_pp <- function (q, loc = 0, scale = 1, shape = 0, lower_tail = TRUE){
   if (any(scale < 0)) {
@@ -815,7 +833,7 @@ pu_pp <- function (q, loc = 0, scale = 1, shape = 0, lower_tail = TRUE){
   return(p)
 }
 
-# =========================== binpost ===========================
+# =============================== binpost =================================== #
 
 #' Random sampling from a binomial posterior distribution
 #'
@@ -854,6 +872,11 @@ pu_pp <- function (q, loc = 0, scale = 1, shape = 0, lower_tail = TRUE){
 #'   rejection sampling is used to sample from the posterior with an envelope
 #'   function equal to the density of a
 #'   beta(\code{ds$m} + 1, \code{ds$n_raw - ds$m} + 1) density.
+#'
+#'   If \code{prior$prior == "bin_northrop"} then
+#'   rejection sampling is used to sample from the posterior with an envelope
+#'   function equal to the posterior density that results from using a
+#'   Haldane prior.
 #'
 #'   If \code{prior$prior} is a (user-supplied) R function then
 #'   \code{\link[rust]{ru}} is used to sample from the posterior using the
@@ -918,10 +941,31 @@ binpost <- function(n, prior, ds_bin, param = c("logit", "p")) {
                           log_beta_const = log_beta_const)
     bin_logf_mdi <- function(pu, n_success, n_failure, log_MDI_const,
                              log_beta_const) {
+      if (pu > 1 || pu < 0) return(NA)
       (pu + n_success) * log(pu) + (1 - pu + n_failure) * log(1 - pu) -
         log_MDI_const - log_beta_const
     }
     temp <- list(bin_sim_vals = bin_sim_vals, bin_logf = bin_logf_mdi,
+                 bin_logf_args = bin_logf_args)
+  }
+  if (is.character(prior$prior) && prior$prior == "bin_northrop") {
+    bin_sim_vals <- r_pu_N(n = n, n_success = n_success, n_failure = n_failure)
+    beta_const <- beta(n_success, n_failure)
+    log_beta_const <- log(beta_const)
+    N_post <- function(pu) {
+      pu ^ n_success * (1 - pu) ^ (n_failure - 1) / (-log(1 - pu)) / beta_const
+    }
+    log_N_const <- log(stats::integrate(N_post, 0, 1)$value)
+    bin_logf_args <- list(n_success = n_success, n_failure = n_failure,
+                          log_N_const = log_N_const,
+                          log_beta_const = log_beta_const)
+    bin_logf_N <- function(pu, n_success, n_failure, log_N_const,
+                           log_beta_const) {
+      if (pu > 1 || pu < 0) return(NA)
+      n_success * log(pu) + (n_failure - 1) * log(1 - pu) - log(-log(1 - pu)) -
+        log_N_const - log_beta_const
+    }
+    temp <- list(bin_sim_vals = bin_sim_vals, bin_logf = bin_logf_N,
                  bin_logf_args = bin_logf_args)
   }
   if (is.function(prior$prior)) {
@@ -968,7 +1012,7 @@ binpost <- function(n, prior, ds_bin, param = c("logit", "p")) {
   return(temp)
 }
 
-# =========================== r_pu_MDI ===========================
+# ================================ r_pu_MDI ================================= #
 
 r_pu_MDI <- function(n, n_success, n_failure) {
   #
@@ -992,5 +1036,100 @@ r_pu_MDI <- function(n, n_success, n_failure) {
       p_sim[n_acc] <- p
     }
   }
-  p_sim
+  return(p_sim)
+}
+
+# ================================= r_pu_N ================================== #
+
+r_pu_N <- function(n, n_success, n_failure, alpha = 0, beta = 0) {
+  #
+  # Uses rejection sampling to sample from the posterior distribution of
+  # a binomial probability p, based on the prior pi(p) that is proportional to
+  #             1 / [ -ln(1 - p) * (1 - p) ], for 0 < p < 1.
+  # We use the posterior under a Beta(alpha, beta) prior as the envelope.
+  # The posterior under this prior is Beta(n_success + alpha, n_failure + beta).
+  # The default case, alpha = beta = 0, corresponds to using the posterior
+  # under a Haldane prior as the envelope.  A slight improvement in the
+  # probability of acceptance results from (alpha, beta) = (0.040842 0.005571).
+  #
+  # Args:
+  #   n         : A numeric scalar.  The sample size required.
+  #   n_success : A numeric scalar.  The number of successes.
+  #   n_failure : A numeric scalar.  The number of failures.
+  #   alpha     : A numeric scalar in [0, 1). Argument shape1 of rbeta()          alpha
+  #   beta      : A numeric scalar in [0, 1). Argument shape1 of rbeta()          alpha
+  # Returns:
+  #   A numeric vector containing the n sampled values.
+  #
+  n_acc <- 0
+  p_sim <- NULL
+  while (n_acc < n) {
+    p <- stats::rbeta(1, n_success + alpha, n_failure + beta)
+    u <- stats::runif(1)
+    if (u <= -p / log(1 - p)) {
+      n_acc <- n_acc+1
+      p_sim[n_acc] <- p
+    }
+  }
+  return(p_sim)
+}
+
+# =============================== wbinpost ================================== #
+
+#' Random sampling from a binomial posterior distribution, using weights
+#'
+#' Samples from the posterior distribution of the probability \eqn{p}
+#' of a binomial distribution.  User-supplied weights are applied to each
+#' observation when constructing the log-likelihood.
+#'
+#' @param n A numeric scalar. The size of posterior sample required.
+#' @param prior A function to evaluate the prior, created by
+#'   \code{\link{set_bin_prior}}.
+#'   \code{prior$prior} must be \code{"bin_beta"}.
+#' @param ds_bin A numeric list.  Sufficient statistics for inference
+#'   about the binomial probability \eqn{p}.  Contains
+#' \itemize{
+#'   \item {\code{sf} : a logical vector of success (\code{TRUE}) and failure
+#'     (\code{FALSE}) indicators.}
+#'   \item {\code{w} : a numeric vector of length \code{length(sf)} containing
+#'     the values by which to multiply the observations when constructing the
+#'     log-likelihood.}
+#' }
+#' @details For \code{prior$prior == "bin_beta"} the posterior for \eqn{p}
+#'   is a beta distribution so \code{\link[stats:Beta]{rbeta}} is used to
+#'   sample from the posterior.
+#' @return An object (list) of class \code{"binpost"} with components
+#'   \itemize{
+#'     \item{\code{bin_sim_vals}:} {An \code{n} by 1 numeric matrix of values
+#'       simulated from the posterior for the binomial
+#'       probability \eqn{p}}
+#'     \item{\code{bin_logf}:} {A function returning the log-posterior for
+#'       \eqn{p}.}
+#'     \item{\code{bin_logf_args}:} {A list of arguments to \code{bin_logf}.}
+#'   }
+#' @seealso \code{\link{set_bin_prior}} for setting a prior distribution
+#'   for the binomial probability \eqn{p}.
+#' @examples
+#' u <- quantile(gom, probs = 0.65)
+#' ds_bin <- list(sf = gom > u, w = rep(1, length(gom)))
+#' bp <- set_bin_prior(prior = "jeffreys")
+#' temp <- wbinpost(n = 1000, prior = bp, ds_bin = ds_bin)
+#' graphics::hist(temp$bin_sim_vals, prob = TRUE)
+#' @export
+wbinpost <- function(n, prior, ds_bin) {
+  n_success <- ds_bin$m
+  n_failure <- ds_bin$n_raw - ds_bin$m
+  if (is.character(prior$prior) && prior$prior == "bin_beta") {
+    shape1 <- sum(ds_bin$w * ds_bin$sf) + prior$ab[1]
+    shape2 <- sum(ds_bin$w * (1 - ds_bin$sf)) + prior$ab[2]
+    bin_sim_vals <- stats::rbeta(n = n, shape1 = shape1, shape2 = shape2)
+    bin_logf_args <- list(shape1 = shape1, shape2 = shape2)
+    bin_logf_beta <- function(x, shape1 , shape2) {
+      stats::dbeta(x, shape1 = shape1, shape2 = shape2, log = TRUE)
+    }
+    temp <- list(bin_sim_vals = bin_sim_vals, bin_logf = bin_logf_beta,
+                 bin_logf_args = bin_logf_args)
+  }
+  class(temp) <- "binpost"
+  return(temp)
 }

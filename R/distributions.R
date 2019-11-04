@@ -99,6 +99,9 @@ dgev <- function (x, loc = 0, scale = 1, shape = 0, log = FALSE, m = 1) {
   if (any(scale <= 0)) {
     stop("invalid scale: scale must be positive.")
   }
+  if (length(x) == 0) {
+    return(numeric(0))
+  }
   max_len <- max(length(x), length(loc), length(scale), length(shape),
                  length(m))
   x <- rep_len(x, max_len)
@@ -108,12 +111,13 @@ dgev <- function (x, loc = 0, scale = 1, shape = 0, log = FALSE, m = 1) {
   m <- rep_len(m, max_len)
   x <- (x - loc) / scale
   xx <- 1 + shape * x
-  d <- ifelse(xx < 0, 0,
-           ifelse(xx == 0 & shape == -1, 1,
-                ifelse(xx == 0 & shape < -1, Inf,
-                     ifelse(abs(shape) > 1e-6,
-                          xx ^ (-(1 + 1 / shape)) * exp(-m * xx ^ (-1/ shape)),
-        exp(-x + shape * x * (x - 2) / 2 - m * exp(-x + shape * x ^ 2 / 2))))))
+  d <- ifelse(xx < 0 | is.infinite(x), 0,
+         ifelse(xx == 0 & shape == -1, 1,
+           ifelse(xx == 0 & shape < -1, Inf,
+             ifelse(xx == 0, 0,
+               ifelse(abs(shape) > 1e-6,
+                 xx ^ (-(1 + 1 / shape)) * exp(-m * xx ^ (-1/ shape)),
+       exp(-x + shape * x * (x - 2) / 2 - m * exp(-x + shape * x ^ 2 / 2)))))))
   d <- d * m / scale
   if (log) {
     d <- log(d)
@@ -130,6 +134,9 @@ pgev <- function(q, loc = 0, scale = 1, shape = 0, lower.tail = TRUE,
   if (any(scale <= 0)) {
     stop("invalid scale: scale must be positive.")
   }
+  if (length(q) == 0) {
+    return(numeric(0))
+  }
   max_len <- max(length(q), length(loc), length(scale), length(shape),
                  length(m))
   q <- rep_len(q, max_len)
@@ -139,9 +146,10 @@ pgev <- function(q, loc = 0, scale = 1, shape = 0, lower.tail = TRUE,
   m <- rep_len(m, max_len)
   q <- (q - loc) / scale
   p <- 1 + shape * q
-  p <- ifelse(abs(shape) > 1e-6 | p < 0,
+  p <- ifelse(abs(shape) > 1e-6,
               -m * pmax(p, 0) ^ (-1 / shape),
-              -m * exp(-q + shape * q ^ 2 / 2))
+              ifelse(is.infinite(q), log((1 + sign(q)) / 2),
+                     -m * exp(-q + shape * q ^ 2 / 2)))
   if (lower.tail) {
     if (!log.p) {
       p <- exp(p)
@@ -164,7 +172,10 @@ qgev <- function (p, loc = 0, scale = 1, shape = 0, lower.tail = TRUE,
   if (any(scale <= 0)) {
     stop("invalid scale: scale must be positive.")
   }
-  if (!log.p & any(p < 0 | p > 1)) {
+  if (length(p) == 0) {
+    return(numeric(0))
+  }
+  if (!log.p & any(p < 0 | p > 1, na.rm = TRUE)) {
     stop("invalid p: p must be in [0,1].")
   }
   max_len <- max(length(p), length(loc), length(scale), length(shape),
@@ -277,6 +288,9 @@ dgp <- function (x, loc = 0, scale = 1, shape = 0, log = FALSE) {
   if (any(scale < 0)) {
     stop("invalid scale: scale must be positive.")
   }
+  if (length(x) == 0) {
+    return(numeric(0))
+  }
   max_len <- max(length(x), length(loc), length(scale), length(shape))
   x <- rep_len(x, max_len)
   loc <- rep_len(loc, max_len)
@@ -284,7 +298,7 @@ dgp <- function (x, loc = 0, scale = 1, shape = 0, log = FALSE) {
   shape <- rep_len(shape, max_len)
   x <- (x - loc) / scale
   xx <- 1 + shape * x
-  x <- ifelse(x < 0 | xx < 0, 0,
+  x <- ifelse(x < 0 | xx < 0 | is.infinite(x), 0,
               ifelse(xx == 0 & shape == -1, 1,
                      ifelse(xx == 0 & shape < -1, Inf,
                             ifelse(abs(shape) > 1e-6,
@@ -306,6 +320,9 @@ pgp <- function (q, loc = 0, scale = 1, shape = 0, lower.tail = TRUE,
   if (any(scale < 0)) {
     stop("invalid scale: scale must be positive.")
   }
+  if (length(q) == 0) {
+    return(numeric(0))
+  }
   max_len <- max(length(q), length(loc), length(scale), length(shape))
   q <- rep_len(q, max_len)
   loc <- rep_len(loc, max_len)
@@ -313,9 +330,10 @@ pgp <- function (q, loc = 0, scale = 1, shape = 0, lower.tail = TRUE,
   shape <- rep_len(shape, max_len)
   q <- pmax(q - loc, 0) / scale
   p <- 1 + shape * q
-  p <- ifelse(abs(shape) > 1e-6 | p < 0,
+  p <- ifelse(abs(shape) > 1e-6,
               1 - pmax(p, 0) ^ (-1 / shape),
-              1 - exp(-q + shape * q ^ 2 / 2))
+              ifelse(is.infinite(q), (1 + sign(q)) / 2,
+                     1 - exp(-q + shape * q ^ 2 / 2)))
   if (lower.tail) {
     if (log.p) {
       p <- log(p)
@@ -339,7 +357,10 @@ qgp <- function (p, loc = 0, scale = 1, shape = 0, lower.tail = TRUE,
   if (any(scale < 0)) {
     stop("invalid scale: scale must be positive.")
   }
-  if (!log.p & any(p < 0 | p > 1)) {
+  if (length(p) == 0) {
+    return(numeric(0))
+  }
+  if (!log.p & any(p < 0 | p > 1, na.rm = TRUE)) {
     stop("invalid p: p must be in [0,1].")
   }
   max_len <- max(length(p), length(loc), length(scale), length(shape))

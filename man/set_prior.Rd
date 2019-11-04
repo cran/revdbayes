@@ -46,12 +46,13 @@ A list with class \code{"evprior"}.  The first component is the
 \description{
 Constructs a prior distribution for use as the argument \code{prior} in
 \code{\link{rpost}} and \code{\link{rpost_rcpp}}.  The user can either
-specify their own prior function, returning the log of the prior density,
-(using an R function or an external pointer to a compiled C++ function)
-and arguments for hyperparameters or choose from a list of in-built
-model-specific priors.  Note that the arguments \code{model = "gev"},
-\code{model = "pp"} and \code{model =="os"} are equivalent because
-a prior is specified is the GEV parameterisation in each of these cases.
+specify their own prior function, returning the \strong{log} of the prior
+density, (using an R function or an external pointer to a compiled C++
+function) and arguments for hyperparameters or choose from a list of
+in-built model-specific priors.  Note that the arguments
+\code{model = "gev"}, \code{model = "pp"} and \code{model =="os"} are
+equivalent because a prior is specified is the GEV parameterisation in each
+of these cases.
 Note also that for \code{model = "pp"} the prior GEV parameterisation
 relates to the value of \code{noy} subsequently supplied to
 \code{\link{rpost}} or \code{\link{rpost_rcpp}}.
@@ -253,8 +254,9 @@ Grimshaw, S. D. (1993) Computing Maximum Likelihood Estimates
   \strong{35(2)}, 185-191. \url{https://doi.org/10.2307/1269663}.
 
 Hosking, J. R. M. and Wallis, J. R. (1987) Parameter and
-Quantile Estimation for the Generalized Pareto Distribution. Technometrics,
-29(3), 339-349. \url{https://doi.org/10.2307/1269343}.
+  Quantile Estimation for the Generalized Pareto Distribution.
+  \emph{Technometrics}, \strong{29(3)}, 339-349.
+  \url{https://doi.org/10.2307/1269343}.
 
 Martins, E. S. and Stedinger, J. R. (2000) Generalized maximum
   likelihood generalized extreme value quantile estimators for hydrologic

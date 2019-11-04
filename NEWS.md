@@ -1,3 +1,9 @@
+# revdbayes 1.3.5
+
+## Bug fixes and minor improvements
+
+* The d/p/q function for the GEV and GP distributions now handle correctly cases where the input has length 0 and/or is `NA` and inputs `Inf` and `-Inf`. 
+
 # revdbayes 1.3.4
 
 ## New features
