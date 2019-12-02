@@ -1,7 +1,7 @@
 Package: revdbayes
 Title: Ratio-of-Uniforms Sampling for Bayesian Extreme Value Analysis
-Version: 1.3.5
-Date: 2019-11-04
+Version: 1.3.6
+Date: 2019-11-30
 Authors@R: person(c("Paul", "J."), "Northrop", email = "p.northrop@ucl.ac.uk",
   role = c("aut", "cre", "cph"))
 Description: Provides functions for the Bayesian analysis of extreme value
@@ -15,22 +15,23 @@ Description: Provides functions for the Bayesian analysis of extreme value
     Also provided are d,p,q,r functions for the Generalised Extreme Value 
     ('GEV') and Generalised Pareto ('GP') distributions that deal 
     appropriately with cases where the shape parameter is very close to zero.
-Imports: bayesplot (>= 1.1.0), graphics, methods, Rcpp, rust (>=
-        1.2.2), stats, utils
+Imports: bayesplot (>= 1.1.0), graphics, Rcpp, rust (>= 1.2.2), stats,
+        utils
 License: GPL (>= 2)
 LazyData: TRUE
 Encoding: UTF-8
 Depends: R (>= 3.3.0),
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.1
 Suggests: evdbayes, ggplot2 (>= 2.2.1), knitr, microbenchmark,
         rmarkdown, testthat
 VignetteBuilder: knitr
-URL: http://github.com/paulnorthrop/revdbayes
+URL: https://paulnorthrop.github.io/revdbayes/,
+        http://github.com/paulnorthrop/revdbayes
 BugReports: http://github.com/paulnorthrop/revdbayes/issues
 LinkingTo: Rcpp (>= 0.12.10), RcppArmadillo
 NeedsCompilation: yes
-Packaged: 2019-11-04 11:47:06 UTC; paul
+Packaged: 2019-11-30 22:19:43 UTC; paul
 Author: Paul J. Northrop [aut, cre, cph]
 Maintainer: Paul J. Northrop <p.northrop@ucl.ac.uk>
 Repository: CRAN
-Date/Publication: 2019-11-04 17:00:02 UTC
+Date/Publication: 2019-12-02 10:30:02 UTC

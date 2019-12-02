@@ -1,7 +1,7 @@
-## ---- include = FALSE----------------------------------------------------
+## ---- include = FALSE---------------------------------------------------------
 knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 library(revdbayes)
 # Set a threshold at the 90% quantile
 thresh <- quantile(newlyn, probs = 0.90)
@@ -11,7 +11,7 @@ mle$theta_mle
 mle$theta_se
 mle$theta_ci
 
-## ---- fig.width = 5, fig.align='center'----------------------------------
+## ---- fig.width = 5, fig.align='center'---------------------------------------
 thresh <- quantile(newlyn, probs = 0.90)
 postsim <- kgaps_post(newlyn, thresh)
 plot(postsim, xlab = expression(theta))

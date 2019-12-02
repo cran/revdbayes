@@ -1,4 +1,4 @@
-## ---- include = FALSE----------------------------------------------------
+## ---- include = FALSE---------------------------------------------------------
 knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
 
 required <- c("evdbayes")
@@ -6,30 +6,30 @@ required <- c("evdbayes")
 if (!all(unlist(lapply(required, function(pkg) requireNamespace(pkg, quietly = TRUE)))))
   knitr::opts_chunk$set(eval = FALSE)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 library(revdbayes)
 library(evdbayes)
 # Set the number of posterior samples required.
 n <- 10000
 set.seed(46)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 data(gom)
 thresh <- quantile(gom, probs = 0.65)
 fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 t1 <- system.time(
 gp1 <- rpost(n = n, model = "gp", prior = fp, thresh = thresh, data = gom,
              rotate = FALSE)
 )[3]
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 t2 <- system.time(
 gp2 <- rpost(n = n, model = "gp", prior = fp, thresh = thresh, data = gom)
 )[3]
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 t3 <- system.time(
 gp3 <- rpost(n = n, model = "gp", prior = fp, thresh = thresh, data = gom,
              rotate = FALSE, trans = "BC")
@@ -39,7 +39,7 @@ gp4 <- rpost(n = n, model = "gp", prior = fp, thresh = thresh, data = gom,
              trans = "BC")
 )[3]
 
-## ---- fig.show='hold'----------------------------------------------------
+## ---- fig.show='hold'---------------------------------------------------------
 plot(gp1, ru_scale = FALSE, cex.main = 0.75, cex.lab = 0.75, 
   main = paste("no transformation \n pa = ", round(gp1$pa, 3), 
                ", time = ", round(t1, 2), "s"))
@@ -53,7 +53,7 @@ plot(gp4, ru_scale = TRUE, cex.main = 0.75, cex.lab = 0.75,
   main = paste("Box-Cox and rotation \n pa = ", round(gp4$pa, 3),
                ", time = ", round(t4, 2), "s"))
 
-## ---- echo = FALSE-------------------------------------------------------
+## ---- echo = FALSE------------------------------------------------------------
 thresh <- quantile(gom, probs = 0.95)
 fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
 t2 <- system.time(
@@ -64,7 +64,7 @@ gp4 <- rpost(n = n, model = "gp", prior = fp, thresh = thresh, data = gom,
              trans = "BC")
 )[3]
 
-## ---- fig.show='hold', echo = FALSE--------------------------------------
+## ---- fig.show='hold', echo = FALSE-------------------------------------------
 plot(gp2, ru_scale = TRUE, cex.main = 0.75, cex.lab = 0.75, 
   main = paste("rotation \n pa = ", round(gp2$pa, 3),
                ", time = ", round(t2, 2), "s"))
@@ -72,7 +72,7 @@ plot(gp4, ru_scale = TRUE, cex.main = 0.75, cex.lab = 0.75,
   main = paste("Box-Cox and rotation \n pa = ", round(gp4$pa, 3),
                ", time = ", round(t4, 2), "s"))
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 u_prior_fn <- function(x, ab) {
   #
   # Calculates the the log of the (improper) prior density for GP parameters 
@@ -95,20 +95,20 @@ u_prior_fn <- function(x, ab) {
 up <- set_prior(prior = u_prior_fn, ab = c(2, 2), model = "gp")
 gp_u <- rpost(n = n, model = "gp", prior = up, thresh = thresh, data = gom)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 data(portpirie)
 mat <- diag(c(10000, 10000, 100))
 pn <- set_prior(prior = "norm", model = "gev", mean = c(0,0,0), cov = mat)
 p1 <- rpost(n = n, model = "gev", prior = pn, data = portpirie)
 p1$pa
 
-## ---- fig.width = 7------------------------------------------------------
+## ---- fig.width = 7-----------------------------------------------------------
 plot(p1, cex.main = 0.75, cex.lab = 0.75, 
   main = "original scale")
 plot(p1, ru_scale = TRUE, cex.main = 0.75, cex.lab = 0.75,
      main = "sampling scale")
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # evdbayes
 t0 <- c(3.87, 0.2, -0.05) 
 s <- c(.06, .25, .25)
@@ -116,7 +116,7 @@ b <- 200
 p2 <- posterior(n + b - 1, t0, prior = pn, lh = "gev", data = portpirie, 
                 psd = s, burn = b)
 
-## ---- fig.width = 7------------------------------------------------------
+## ---- fig.width = 7-----------------------------------------------------------
 par(mfrow = c(1,3))
 plot(density(p2[, 1], adj = 2), main = "", xlab = expression(mu))
 lines(density(p1$sim_vals[, 1], adj = 2), lty = 2)
@@ -126,7 +126,7 @@ legend("topright", legend = c("evdbayes", "revdbayes"), lty = 1:2, cex = 0.8)
 plot(density(p2[, 3], adj = 2), main = "", xlab = expression(xi))
 lines(density(p1$sim_vals[, 3], adj = 2), lty = 2)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 u_gev_prior_fn <- function(x, ab) {
   #
   # Calculates the the log of the (improper) prior density for GEV parameters 
@@ -154,7 +154,7 @@ t0 <- c(3.87, 0.2, -0.05)
 s <- c(.06, .25, .25)
 p2 <- posterior(n + 200, t0, prior = up, lh = "gev", data = portpirie, psd = s)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 data(oxford)
 prox <- prior.prob(quant = c(85,88,95), alpha = c(4,2.5,2.25,0.25))
 # evdbayes
@@ -166,7 +166,7 @@ ox.post <- posterior(n + b - 1, t0, prox, lh = "gev", data = oxford, psd = s,
 # revdbayes
 ox_post <- rpost(n = 1000, model = "gev", prior = prox, data = oxford)
 
-## ---- fig.width = 7------------------------------------------------------
+## ---- fig.width = 7-----------------------------------------------------------
 par(mfrow = c(1,3))
 plot(density(ox.post[, 1], adj = 2), main = "", xlab = expression(mu))
 lines(density(ox_post$sim_vals[, 1], adj = 2), lty = 2)
@@ -176,12 +176,12 @@ legend("topright", legend = c("evdbayes", "revdbayes"), lty = 1:2, cex = 0.8)
 plot(density(ox.post[, 3], adj = 2), main = "", xlab = expression(xi))
 lines(density(ox_post$sim_vals[, 3], adj = 2), lty = 2)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 data(rainfall)
 rthresh <- 40
 prrain <- prior.quant(shape = c(38.9,7.1,47), scale = c(1.5,6.3,2.6))
 
-## ---- fig.width = 7------------------------------------------------------
+## ---- fig.width = 7-----------------------------------------------------------
 # Annual maximum parameterisation (number of blocks = number of years of data)
 rn0 <- rpost(n = n, model = "pp", prior = prrain, data = rainfall, 
   thresh = rthresh, noy = 54, rotate = FALSE)
@@ -195,7 +195,7 @@ rn1 <- rpost(n = n, model = "pp", prior = prrain, data = rainfall,
 plot(rn1, ru_scale = TRUE)
 rn1$pa
 
-## ---- fig.width = 7------------------------------------------------------
+## ---- fig.width = 7-----------------------------------------------------------
 # Number of blocks = number of threshold excesses
 n_exc <- sum(rainfall > rthresh, na.rm = TRUE)
 rn2 <- rpost(n = n, model = "pp", prior = prrain, data = rainfall, 
@@ -210,7 +210,7 @@ rn3 <- rpost(n = n, model = "pp", prior = prrain, data = rainfall,
 plot(rn3, ru_scale = TRUE)
 rn3$pa
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # evdbayes
 t0 <- c(43.2, 7.64, 0.32) 
 s <- c(2, .2, .07)
@@ -218,7 +218,7 @@ b <- 2000
 rn.post <- posterior(n + b - 1, t0, prrain, "pp", data = rainfall, 
                      thresh = 40, noy = 54, psd = s, burn = b)
 
-## ---- fig.width = 7------------------------------------------------------
+## ---- fig.width = 7-----------------------------------------------------------
 par(mfrow = c(1,3))
 plot(density(rn.post[, 1], adj = 2), main = "", xlab = expression(mu))
 lines(density(rn1$sim_vals[, 1], adj = 2), lty = 2)
@@ -228,13 +228,13 @@ legend("topright", legend = c("evdbayes", "revdbayes"), lty = 1:2, cex = 0.8)
 plot(density(rn.post[, 3], adj = 2), main = "", xlab = expression(xi))
 lines(density(rn1$sim_vals[, 3], adj = 2), lty = 2)
 
-## ---- fig.width = 7------------------------------------------------------
+## ---- fig.width = 7-----------------------------------------------------------
 data(venice)
 mat <- diag(c(10000, 10000, 100))
 pv <- set_prior(prior = "norm", model = "gev", mean = c(0,0,0), cov = mat)
 osv <- rpost(n = n, model = "os", prior = pv, data = venice)
 plot(osv)
 
-## ---- fig.width = 7------------------------------------------------------
+## ---- fig.width = 7-----------------------------------------------------------
 plot(osv, ru_scale = TRUE)
 

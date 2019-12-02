@@ -4,9 +4,17 @@
 \alias{kgaps_post}
 \title{Random sampling from K-gaps posterior distribution}
 \usage{
-kgaps_post(data, thresh, k = 1, n = 1000, inc_cens = FALSE,
-  alpha = 1, beta = 1, param = c("logit", "theta"),
-  use_rcpp = TRUE)
+kgaps_post(
+  data,
+  thresh,
+  k = 1,
+  n = 1000,
+  inc_cens = FALSE,
+  alpha = 1,
+  beta = 1,
+  param = c("logit", "theta"),
+  use_rcpp = TRUE
+)
 }
 \arguments{
 \item{data}{A numeric vector of raw data.  No missing values are allowed.}
@@ -95,7 +103,6 @@ Suveges, M. and Davison, A. C. (2010) Model
 
 Attalides, N. (2015) Threshold-based extreme value modelling,
   PhD thesis, University College London.
-  \url{http://discovery.ucl.ac.uk/1471121/1/Nicolas_Attalides_Thesis.pdf}
 }
 \seealso{
 \code{\link{kgaps_mle}} for maximum likelihood estimation of the

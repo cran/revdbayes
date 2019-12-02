@@ -3,7 +3,6 @@
 \docType{package}
 \name{revdbayes}
 \alias{revdbayes}
-\alias{revdbayes-package}
 \title{revdbayes: Ratio-of-Uniforms Sampling for Bayesian Extreme Value Analysis}
 \description{
 Uses the multivariate generalized ratio-of-uniforms method to simulate
@@ -47,7 +46,6 @@ Suveges, M. and Davison, A. C. (2010) Model
 
 Attalides, N. (2015) Threshold-based extreme value modelling,
   PhD thesis, University College London.
-  \url{http://discovery.ucl.ac.uk/1471121/1/Nicolas_Attalides_Thesis.pdf}
 }
 \seealso{
 \code{\link{set_prior}} to set a prior density for extreme value
