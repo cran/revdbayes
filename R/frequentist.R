@@ -21,14 +21,35 @@ gp_mle <- function(gp_data) {
   #     nllh : A numeric scalar.  The negated log-likelihood at the MLE.
   #
   # Call Grimshaw (1993) function, note: k is -xi, a is sigma
-  pjn <- grimshaw_gp_mle(gp_data)
   temp <- list()
-  temp$mle <- c(pjn$a, -pjn$k)  # mle for (sigma,xi)
+  pjn <- try(grimshaw_gp_mle(gp_data), silent = TRUE)
+  if (inherits(pjn, "try-error")) {
+    # If grimshaw_gp_mle() errors then use a fallback MLE function
+    pjn <- fallback_gp_mle(init = c(mean(gp_data), 0), data = gp_data,
+                           m = length(gp_data), xm = max(gp_data),
+                           sum_gp = sum(gp_data))
+    temp$mle <- pjn$mle
+  } else {
+    # mle for (sigma,xi)
+    temp$mle <- c(pjn$a, -pjn$k)
+    # Check that the observed information is not singular
+    cov_mtx <- try(solve(gp_obs_info(gp_pars = temp$mle, y = gp_data)),
+                   silent = TRUE)
+    if (inherits(cov_mtx, "try-error")) {
+      # If it is singular then use the fallback MLE function
+      pjn <- fallback_gp_mle(init = c(mean(gp_data), 0), data = gp_data,
+                             m = length(gp_data), xm = max(gp_data),
+                             sum_gp = sum(gp_data))
+      temp$mle <- pjn$mle
+    }
+  }
   sc <- rep(temp$mle[1], length(gp_data))
   xi <- temp$mle[2]
   temp$nllh <- sum(log(sc)) + sum(log(1 + xi * gp_data / sc) * (1 / xi + 1))
   return(temp)
 }
+
+
 
 # =========================== gp_pwm ===========================
 
@@ -52,7 +73,7 @@ gp_mle <- function(gp_data) {
 #'   }
 #' @references Hosking, J. R. M. and Wallis, J. R. (1987) Parameter and
 #'  Quantile Estimation for the Generalized Pareto Distribution.
-#'  Technometrics, 29(3), 339-349. \url{https://doi.org/10.2307/1269343}.
+#'  Technometrics, 29(3), 339-349. \doi{10.2307/1269343}.
 #' @seealso \code{\link{gp}} for details of the parameterisation of the GP
 #'   distribution.
 #' @examples
@@ -122,7 +143,7 @@ gp_pwm <- function(gp_data, u = 0) {
 #' @references Reiss, R.-D., Thomas, M. (2007) Statistical Analysis of
 #'   Extreme Values with Applications to Insurance, Finance, Hydrology and
 #'   Other Fields.Birkhauser.
-#'   \url{https://doi.org/10.1007/978-3-7643-7399-3}.
+#'   \doi{10.1007/978-3-7643-7399-3}.
 #' @examples
 #' u <- quantile(gom, probs = 0.65)
 #' gp_lrs((gom - u)[gom > u])
@@ -157,7 +178,7 @@ gp_lrs <- function(x) {
 
 # =========================== gp_obs_info ===========================
 
-gp_obs_info <- function(gp_pars, y) {
+gp_obs_info <- function(gp_pars, y, eps = 1e-5, m = 3) {
   # Observed information for the generalized Pareto distribution
   #
   # Calculates the observed information matrix for a random sample \code{y}
@@ -166,19 +187,53 @@ gp_obs_info <- function(gp_pars, y) {
   #
   # Args:
   #   gp_pars : A numeric vector. Parameters sigma and xi of the
-  #   generalized Pareto distribution.
+  #             generalized Pareto distribution.
   #   y       : A numeric vector. A sample of positive data values.
-  #
+  #   eps     : A (small, positive) numeric scalar.  If abs(xi) is smaller than
+  #             eps then we approximate the [2, 2] element of the information
+  #             matrix using a Taylor series approximation.
+  #   m       : A non-negative integer.  The order of the polynomial used to
+  #             make this approximation.
   # Returns:
   #   A 2 by 2 numeric matrix.  The observed information matrix.
   #
+  if (eps <= 0) {
+    stop("'eps' must be positive")
+  }
+  if (m < 0) {
+    stop("'m' must be non-negative")
+  }
+  # sigma
   s <- gp_pars[1]
+  # xi
   x <- gp_pars[2]
   i <- matrix(NA, 2, 2)
-  i[1,1] <- -sum((1 - (1 + x) * y * (2 * s + x * y) / (s + x * y) ^ 2) / s ^ 2)
-  i[1,2] <- i[2,1] <- -sum(y * (1 - y / s) / (1 + x * y / s) ^ 2 / s ^ 2)
-  i[2,2] <- sum(2 * log(1 + x * y / s) / x ^ 3 - 2 * y / (s + x * y) / x ^ 2 -
-                  (1 + 1 / x) * y ^ 2 / (s + x * y) ^ 2)
+  i[1, 1] <- -sum((1 - (1 + x) * y * (2 * s + x * y) / (s + x * y) ^ 2) / s ^ 2)
+  i[1, 2] <- i[2, 1] <- -sum(y * (1 - y / s) / (1 + x * y / s) ^ 2 / s ^ 2)
+  # Direct calculation of i22 is unreliable for x close to zero.
+  # If abs(x) < eps then we expand the problematic terms (all but t4 below)
+  # in powers of xi up to xi ^ m. The terms in 1/z and 1/z^2 cancel.
+  z <- x / s
+  t0 <- 1 + z * y
+  t4 <- y ^ 2 / t0 ^ 2
+  if (any(t0 <= 0)) {
+    stop("The log-likelihood is 0 for this combination of data and parameters")
+  }
+  if (abs(x) < eps) {
+    j <- 0:m
+    zy <- z * y
+    sum_fn <- function(zy) {
+      return(sum((-1) ^ j * (j ^ 2 + 3 * j + 2) * zy ^ j / (j + 3)))
+    }
+    tsum <- vapply(zy, sum_fn, 0.0)
+    i[2, 2] <- sum(y ^ 3 * tsum / s ^ 3 - t4 / s ^ 2)
+  } else {
+    t1 <- 2 * log(t0) / z ^ 3
+    t2 <- 2 * y / (z ^ 2 * t0)
+    t3 <- y ^ 2 / (z * t0 ^ 2)
+    i[2, 2] <- sum((t1 - t2 - t3) / s ^ 3 - t4 / s ^ 2)
+  }
+  dimnames(i) <- list(c("sigma[u]", "xi"), c("sigma[u]", "xi"))
   return(i)
 }
 
@@ -198,7 +253,7 @@ gp_obs_info <- function(gp_pars, y) {
 #' @references Grimshaw, S. D. (1993) Computing Maximum Likelihood Estimates
 #'   for the Generalized Pareto Distribution.  Technometrics, 35(2), 185-191.
 #'   and Computing (1991) 1, 129-133.
-#'   \url{https://doi.org/10.1080/00401706.1993.10485040}.
+#'   \doi{10.1080/00401706.1993.10485040}.
 #' @seealso \code{\link{gp}} for details of the parameterisation of the GP
 #'   distribution, in terms of \eqn{\sigma} and \eqn{\xi}.
 #' @examples
@@ -285,7 +340,7 @@ grimshaw_gp_mle <- function(x) {
     #  Newton-Raphson Algorithm to find the zero of the function h()
     #  for a given initial starting point.
     j<-1
-    maxiter<-100  #{Maximum number of mod. Newton-Raphson iterations}
+    maxiter<-500  #{Maximum number of mod. Newton-Raphson iterations}
     while(j<=maxiter){
       #
       #  Determine whether it is better to use Bisection (if N-R is
@@ -362,7 +417,7 @@ grimshaw_gp_mle <- function(x) {
     #  Newton-Raphson Algorithm to find the zero of the function h()
     #  for a given initial starting point.
     j<-1
-    maxiter<-100  #{Maximum number of mod. Newton-Raphson iterations}
+    maxiter<-500  #{Maximum number of mod. Newton-Raphson iterations}
     while(j<=maxiter){
       #
       #  Determine whether it is better to use Bisection (if N-R is
@@ -446,7 +501,7 @@ grimshaw_gp_mle <- function(x) {
     #  Newton-Raphson Algorithm to find the zero of the function h()
     #  for a given initial starting point.
     j<-1
-    maxiter<-100  #{Maximum number of mod. Newton-Raphson iterations}
+    maxiter<-500  #{Maximum number of mod. Newton-Raphson iterations}
     while(j<=maxiter){
       #
       #  Determine whether it is better to use Bisection (if N-R is
@@ -516,7 +571,7 @@ grimshaw_gp_mle <- function(x) {
       dx<-thlo-thhi
 
       j<-1
-      maxiter<-100  #{Maximum number of bisection iterations}
+      maxiter<-500  #{Maximum number of bisection iterations}
       while(j<=maxiter){
         dx<-.5*dx
         thmid<-thzero+dx
@@ -550,7 +605,7 @@ grimshaw_gp_mle <- function(x) {
       dx<-thhi-thlo
 
       j<-1
-      maxiter<-100  #{Maximum number of bisection iterations}
+      maxiter<-500  #{Maximum number of bisection iterations}
       while(j<=maxiter){
         dx<-.5*dx
         thmid<-thzero+dx
@@ -599,7 +654,7 @@ grimshaw_gp_mle <- function(x) {
     #  Newton-Raphson Algorithm to find the zero of the function h()
     #  for a given initial starting point.
     j<-1
-    maxiter<-100  #{Maximum number of mod. Newton-Raphson iterations}
+    maxiter<-500  #{Maximum number of mod. Newton-Raphson iterations}
     while(j<=maxiter){
       #
       #  Determine whether it is better to use Bisection (if N-R is
@@ -669,7 +724,7 @@ grimshaw_gp_mle <- function(x) {
       dx<-thlo-thhi
 
       j<-1
-      maxiter<-100  #{Maximum number of bisection iterations}
+      maxiter<-500  #{Maximum number of bisection iterations}
       while(j<=maxiter){
         dx<-.5*dx
         thmid<-thzero+dx
@@ -703,7 +758,7 @@ grimshaw_gp_mle <- function(x) {
       dx<-thhi-thlo
 
       j<-1
-      maxiter<-100  #{Maximum number of bisection iterations}
+      maxiter<-500  #{Maximum number of bisection iterations}
       while(j<=maxiter){
         dx<-.5*dx
         thmid<-thzero+dx
@@ -823,8 +878,8 @@ gev_fish <- function(theta) {
   # Returns: a 3 by 3 matrix
   #
   sigma <- theta[2]
-  gam <- 0.5772157
-  zet <- 1.2020569
+  gam <- 0.5772156649015323
+  zet <- 1.2020569031595945
   i_mm <- 1 / sigma^2
   i_ss <- (pi ^ 2 / 6 - (1 - gam) ^ 2 ) / sigma^2
   i_xx <- pi ^ 2 / 6 - pi ^ 2 * gam / 2 + gam ^ 2 - gam ^ 3 - 2 * zet +

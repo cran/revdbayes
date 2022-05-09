@@ -1,3 +1,31 @@
+# revdbayes 1.4.9
+
+## New features
+
+* The function `kgaps_post()` can now accept a `data` argument that
+    - is a matrix of independent subsets of data, such as monthly or seasonal time series from different years,
+    - contains missing values, that is, `NA`s. 
+
+* A new function `dgaps_post()` produces random samples from a posterior distribution for the extremal index based on what we call the D-gaps model of Holesovsky, J. and Fusek, M. Estimation of the extremal index using censored distributions. Extremes 23, 197–213 (2020). doi: 10.1007/s10687-020-00374-3. `dgaps_post()` has the same functionality as `kgaps_post()`. 
+
+## Bug fixes and minor improvements
+
+* The print method `print.evpost` avoids printing a long list by printing only the original function call.
+
+* The default value of `inc_cens` in `kgaps_post()` is now `inc_cens = TRUE`.
+
+* In the (extremely rare) cases where `grimshaw_gp_mle()` errors or returns an estimate for which the observation information is singular, a fallback function is used, which maximises the log-likelihood using `stats::optim()`
+
+* In the generalised Pareto example in the introductory vignette, it is now noted that for the Gulf of Mexico data a threshold set at the 95% threshold results in only a small number (16) of threshold excesses. 
+
+* In the GP section of the introductory vignette a link is given to the binomial-GP analysis in the Posterior Predictive Extreme Value Inference vignette.
+
+* In the introductory vignette: corrected references to plots as "on the left" when in fact they were below, and corrected "random example" to "random sample".
+
+* The microbenchmark results have been reinstated in the "Faster simulation using revdbayes" vignette.
+
+* Activated 3rd edition of the `testthat` package
+
 # revdbayes 1.3.9
 
 ## Bug fixes and minor improvements
@@ -86,7 +114,7 @@
 
 ## Bug fixes and minor improvements
 
-* Added the attribute `attr(gom, "npy")` (with value 3) to the `gom` dataset.  This is for compatability with the **threshr** package.
+* Added the attribute `attr(gom, "npy")` (with value 3) to the `gom` dataset.  This is for compatibility with the **threshr** package.
 
 * Give an explicit error message if `plot.evpost` is called with the logically incompatible arguments `add_pu = TRUE` and `pu_only = TRUE`.
 

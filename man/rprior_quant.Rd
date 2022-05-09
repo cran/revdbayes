@@ -65,16 +65,9 @@ Coles, S. G. and Tawn, J. A. (1996) A Bayesian analysis of
 Stephenson, A. 2016. Bayesian Inference for Extreme Value
   Modelling. In \emph{Extreme Value Modeling and Risk Analysis: Methods and
   Applications}, edited by D. K. Dey and J. Yan, 257-80. London:
-  Chapman and Hall. \url{https://doi.org/10.1201/b19721}
+  Chapman and Hall. \doi{10.1201/b19721}
 }
 \seealso{
-\code{\link[evdbayes:prior]{prior.quant}} to set this prior
-  using the evdbayes package.
-
-\code{\link[evdbayes:prior]{posterior}}: evdbayes function that
-  can sample from this prior distribution (using MCMC) if the argument
-  \code{lh = "none"} is given.
-
 \code{\link{rpost}} and \code{\link{rpost_rcpp}} for sampling
   from an extreme value posterior distribution.
 }

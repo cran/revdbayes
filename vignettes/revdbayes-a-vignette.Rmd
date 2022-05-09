@@ -10,6 +10,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: revdbayes.bib
+csl: taylor-and-francis-chicago-author-date.csl
 ---
 
 ```{r, include = FALSE}
@@ -50,7 +51,7 @@ algorithm to be set and results in a dependent sample from the posterior.  Diagn
 values, are used to check convergence and to decide which values should 
 be discarded prior to approximate convergence.  An advantage of using a direct 
 method of simulation, such as the generalised ratio-of-uniforms method, is that
-it produces a random example from the posterior distribution.  This method 
+it produces a random sample from the posterior distribution.  This method 
 also involves tuning parameters, but the revdbayes package has been 
 designed to set those automatically.
 
@@ -177,7 +178,7 @@ ratio-of-uniforms algorithm is applied, i.e. after any transformation
 (Box-Cox and/or rotation of axes) and relocation of the mode to the 
 origin.
 
-```{r, fig.show='hold'}
+```{r, fig.show='hold', out.width="45%"}
 plot(gp1, ru_scale = FALSE, cex.main = 0.75, cex.lab = 0.75, 
   main = paste("no transformation \n pa = ", round(gp1$pa, 3), 
                ", time = ", round(t1, 2), "s"))
@@ -205,7 +206,10 @@ sampling is slower than the default setting of `rotate = TRUE` and
 resulting from the addition of the Box-Cox transformation is not sufficient 
 to offset the extra time needed to compute the posterior density.  
 
-```{r, echo = FALSE}
+We repeat the rotation only and Box-Cox transformation plus rotation analyses 
+for a much higher threshold, set at the 95\% sample quantile.  
+
+```{r, echo = TRUE}
 thresh <- quantile(gom, probs = 0.95)
 fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
 t2 <- system.time(
@@ -217,17 +221,11 @@ gp4 <- rpost(n = n, model = "gp", prior = fp, thresh = thresh, data = gom,
 )[3]
 ```
 
-Repeating the rotation only and Box-Cox transformation plus rotation analyses 
-for a much higher threshold, set at the 95\% sample
-quantile, produces the following plots.  Strong asymmetry in the posterior 
-distribution means that the combination of marginal Box-Cox transformation 
-and rotation produces a larger improvement in $p_a$ and means that now
-this strategy is competitive with using rotation alone in terms of computation
-time. Box-Cox transformation also produces a distribution for which the 
-optimisations involved in the ratio-of-uniforms method will have greater 
-stability.
+It is optimistic to use such a high threshold in this example, because it results in only 16 threshold excesses.  In the rotation only case, a convergence warning is triggered by one of the optimisations used to created the bounding box of the ratio-of-uniforms method.  This appears to be a spurious warning, because the plots of the simulations below seem fine.  When a Box-Cox transformation is used there are no warnings, because the optimisations have greater stability and it is now easier for the convergence of the optimisations to be confirmed. 
 
-```{r, fig.show='hold', echo = FALSE}
+Strong asymmetry in the posterior distribution means that the combination of marginal Box-Cox transformation and rotation produces a larger improvement in $p_a$ and means that now this strategy is competitive with using rotation alone in terms of computation time. 
+
+```{r, fig.show='hold', echo = FALSE, out.width="45%"}
 plot(gp2, ru_scale = TRUE, cex.main = 0.75, cex.lab = 0.75, 
   main = paste("rotation \n pa = ", round(gp2$pa, 3),
                ", time = ", round(t2, 2), "s"))
@@ -274,6 +272,8 @@ up <- set_prior(prior = u_prior_fn, ab = c(2, 2), model = "gp")
 gp_u <- rpost(n = n, model = "gp", prior = up, thresh = thresh, data = gom)
 ```
 
+See also the "Posterior predictive extreme value inference" section of the [Posterior Predictive Extreme Value Inference using the revdbayes Package](revdbayes-c-predictive-vignette.html) for an analysis that adds inferences about the probability of threshold exceedance to the analysis of threshold excesses using a GP distribution.
+
 ## Generalised Extreme Value (GEV) model
 
 We consider two examples involving the GEV distribution, which is used
@@ -303,9 +303,9 @@ p1$pa
 
 The proportion of accepted values is close to the best we can hope for in this
 3-dimensional example, i.e. 0.316.  The following plots illustrate the effect 
-of `rotate = TRUE`.  The plot on the left shows the simulated values of 
+of `rotate = TRUE`.  The first set of plots below show the simulated values of 
 the GEV parameters.  There is some association between the parameters 
-*a posteriori*, albeit weak association.  The plot on the right shows the
+*a posteriori*, albeit weak association.  The second set of plots show the
 values simulated on the scale used in the ratio-of-uniforms algorithm.  The
 association has been reduced by rotating the parameter axes.  The increase in 
 the proportion of accepted values is only modest in this example (from 
@@ -333,7 +333,7 @@ p2 <- posterior(n + b - 1, t0, prior = pn, lh = "gev", data = portpirie,
 ```
 
 ```{r, fig.width = 7}
-par(mfrow = c(1,3))
+oldpar <- par(mfrow = c(1,3))
 plot(density(p2[, 1], adj = 2), main = "", xlab = expression(mu))
 lines(density(p1$sim_vals[, 1], adj = 2), lty = 2)
 plot(density(p2[, 2], adj = 2), main = "", xlab = expression(sigma))
@@ -341,6 +341,7 @@ lines(density(p1$sim_vals[, 2], adj = 2), lty = 2)
 legend("topright", legend = c("evdbayes", "revdbayes"), lty = 1:2, cex = 0.8)
 plot(density(p2[, 3], adj = 2), main = "", xlab = expression(xi))
 lines(density(p1$sim_vals[, 3], adj = 2), lty = 2)
+par(oldpar)
 ```
 
 Now we show that a user-defined prior created using `set_prior` can
@@ -395,7 +396,7 @@ ox_post <- rpost(n = 1000, model = "gev", prior = prox, data = oxford)
 ```
 
 ```{r, fig.width = 7}
-par(mfrow = c(1,3))
+oldpar <- par(mfrow = c(1,3))
 plot(density(ox.post[, 1], adj = 2), main = "", xlab = expression(mu))
 lines(density(ox_post$sim_vals[, 1], adj = 2), lty = 2)
 plot(density(ox.post[, 2], adj = 2), main = "", xlab = expression(sigma))
@@ -403,6 +404,7 @@ lines(density(ox_post$sim_vals[, 2], adj = 2), lty = 2)
 legend("topright", legend = c("evdbayes", "revdbayes"), lty = 1:2, cex = 0.8)
 plot(density(ox.post[, 3], adj = 2), main = "", xlab = expression(xi))
 lines(density(ox_post$sim_vals[, 3], adj = 2), lty = 2)
+par(oldpar)
 ```
 
 We do not illustrate the use of marginal Box-Cox
@@ -476,10 +478,9 @@ rthresh <- 40
 prrain <- prior.quant(shape = c(38.9,7.1,47), scale = c(1.5,6.3,2.6))
 ```
 
-The plot on the left below relates to the standard parameterisation.
-There is posterior dependence between all parameters.  The plot on the right 
-shows that rotating the posterior using `rotate = TRUE` reduce the 
-dependence.
+The first set of plots below relate to the standard parameterisation.
+There is posterior dependence between all parameters.  The second set of plots
+show that rotating the posterior using `rotate = TRUE` reduces the dependence.
 
 ```{r, fig.width = 7}
 # Annual maximum parameterisation (number of blocks = number of years of data)
@@ -498,9 +499,9 @@ rn1$pa
 
 Using the @WTJ2010 parameterisation reduces the posterior dependence
 between $\mu$ and the other two parameters, but not between $\sigma$ and
-$\xi$ (plot on the left).  Using the @WTJ2010 parameterisation and 
-`rotate = TRUE` also reduces posterior dependence between all 
-parameters but the earlier plot suggests that using `rotate = TRUE`
+$\xi$ (see plot on the right labelled with $\rho_1$ and $\rho_2$).  Using the
+@WTJ2010 parameterisation and `rotate = TRUE` also reduces posterior dependence
+between all parameters but the earlier plot suggests that using `rotate = TRUE`
 alone is sufficient in this example.
 
 ```{r, fig.width = 7}
@@ -543,7 +544,7 @@ rn.post <- posterior(n + b - 1, t0, prrain, "pp", data = rainfall,
 ```
 
 ```{r, fig.width = 7}
-par(mfrow = c(1,3))
+oldpar <- par(mfrow = c(1,3))
 plot(density(rn.post[, 1], adj = 2), main = "", xlab = expression(mu))
 lines(density(rn1$sim_vals[, 1], adj = 2), lty = 2)
 plot(density(rn.post[, 2], adj = 2), main = "", xlab = expression(sigma))
@@ -551,6 +552,7 @@ lines(density(rn1$sim_vals[, 2], adj = 2), lty = 2)
 legend("topright", legend = c("evdbayes", "revdbayes"), lty = 1:2, cex = 0.8)
 plot(density(rn.post[, 3], adj = 2), main = "", xlab = expression(xi))
 lines(density(rn1$sim_vals[, 3], adj = 2), lty = 2)
+par(oldpar)
 ```
 
 We do not illustrate the use of marginal Box-Cox

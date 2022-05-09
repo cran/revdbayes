@@ -49,14 +49,14 @@
 #'   If \code{use_noy = FALSE} then sampling is based on a likelihood in
 #'   which the number of blocks (years) is set equal to the number of threshold
 #'   excesses, to reduce posterior dependence between the parameters
-#'   (\href{https://doi.org/10.1214/10-AOAS333}{Wadsworth \emph{et al}. (2010)}).
+#'   (Wadsworth \emph{et al}., 2010).
 #'   The sampled values are transformed back to the required parameterisation
 #'   before returning them to the user.  If \code{use_noy = TRUE} then the
 #'   user's value of \code{noy} is used in the likelihood.
 #' @param npy A numeric scalar. The mean number of observations per year
 #'   of data, after excluding any missing values, i.e. the number of
-#'   non-missing observations divided by total number of years of non-missing
-#'   data.
+#'   non-missing observations divided by total number of years' worth of
+#'   non-missing data.
 #'
 #'   The value of \code{npy} does not affect any calculation in
 #'   \code{rpost}, it only affects subsequent extreme value inferences using
@@ -100,8 +100,7 @@
 #'
 #' \emph{Binomial-GP}: \code{model = "bingp"}.  The GP model for threshold
 #'   excesses supplemented by a binomial(\code{length(data)}, \eqn{p})
-#'   model for the number of threshold excesses.  See
-#'   \href{https://doi.org/10.1111/rssc.12159}{Northrop et al. (2017)}
+#'   model for the number of threshold excesses.  See Northrop et al. (2017)
 #'   for details.  Currently, the GP and binomial parameters are assumed to
 #'   be independent \emph{a priori}.
 #'
@@ -190,8 +189,6 @@
 #'   \code{\link[rust]{rust}} package is used inside \code{rpost} to set the
 #'   Box-Cox transformation parameter lambda when the \code{trans = "BC"}
 #'   argument is given.
-#' @seealso \code{\link[evdbayes]{posterior}} for sampling from an extreme
-#'   value posterior using the evdbayes package.
 #' @references Coles, S. G. and Powell, E. A. (1996) Bayesian methods in
 #'   extreme value modelling: a review and new developments.
 #'   \emph{Int. Statist. Rev.}, \strong{64}, 119-136.
@@ -200,16 +197,16 @@
 #'   with application to ocean storm severity.
 #'   \emph{Journal of the Royal Statistical Society Series C: Applied
 #'   Statistics}, \strong{66}(1), 93-120.
-#'   \url{https://doi.org/10.1111/rssc.12159}
+#'   \doi{10.1111/rssc.12159}
 #' @references Stephenson, A. (2016) Bayesian Inference for Extreme Value
 #'   Modelling. In \emph{Extreme Value Modeling and Risk Analysis: Methods and
 #'   Applications}, edited by D. K. Dey and J. Yan, 257-80. London:
-#'   Chapman and Hall. \url{https://doi.org/10.1201/b19721}
+#'   Chapman and Hall. \doi{10.1201/b19721}
 #'   value posterior using the evdbayes package.
 #' @references Wadsworth, J. L., Tawn, J. A. and Jonathan, P. (2010)
 #'   Accounting for choice of measurement scale in extreme value modeling.
 #'  \emph{The Annals of Applied Statistics}, \strong{4}(3), 1558-1578.
-#'   \url{https://doi.org/10.1214/10-AOAS333}
+#'   \doi{10.1214/10-AOAS333}
 #' @examples
 #' # GP model
 #' u <- quantile(gom, probs = 0.65)
@@ -389,7 +386,7 @@ rpost_rcpp <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data,
   #
   # Create a pointer to the log-posterior function.
   #
-  if (class(prior$prior) == "externalptr") {
+  if (inherits(prior$prior, "externalptr")) {
     prior_type <- "user"
     post_ptr <- switch(model,
                        gp = gp_logpost_xptr("gp_user"),
@@ -533,6 +530,7 @@ rpost_rcpp <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data,
       temp$bin_logf <- temp_bin$bin_logf
       temp$bin_logf_args <- temp_bin$bin_logf_args
     }
+    temp$call <- match.call(expand.dots = TRUE)
     class(temp) <- "evpost"
     temp$model <- save_model
     if (save_model == "gp") {
@@ -688,6 +686,7 @@ rpost_rcpp <- function(n, model = c("gev", "gp", "bingp", "pp", "os"), data,
     temp$bin_logf <- temp_bin$bin_logf
     temp$bin_logf_args <- temp_bin$bin_logf_args
   }
+  temp$call <- match.call(expand.dots = TRUE)
   class(temp) <- "evpost"
   temp$model <- save_model
   if (save_model == "gp") {

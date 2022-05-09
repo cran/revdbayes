@@ -29,16 +29,16 @@ gpg <- rpost(n = 1000, model = "gp", prior = fp, thresh = u, data = gom, nrep = 
 library(bayesplot)
 library(ggplot2)
 
-## ---- fig.show='hold'---------------------------------------------------------
+## ---- fig.show='hold', out.width="45%"----------------------------------------
 # GEV
 pp_check(gevp, type = "overlaid") + ggtitle("GEV empirical distribution functions")
 pp_check(gevp, type = "overlaid", subtype = "dens") + ggtitle("GEV kernel density estimates")
 
-## ---- fig.show='hold'---------------------------------------------------------
+## ---- fig.show='hold', out.width="45%"----------------------------------------
 pp_check(gpg, type = "multiple") + ggtitle("GP kernel density estimates")
 pp_check(gpg, type = "multiple", subtype = "boxplot") + ggtitle("GP boxplots")
 
-## ---- fig.show='hold'---------------------------------------------------------
+## ---- fig.show='hold', out.width="45%"----------------------------------------
 pp_check(gpg)
 pp_check(gpg, stat = "max")
 pp_check(gpg, stat = c("min", "max"))
@@ -56,12 +56,12 @@ npy_gom <- length(gom)/105
 bgpg <- rpost(n = 1000, model = "bingp", prior = fp, thresh = u, data = gom,
               bin_prior = bp, npy = npy_gom, nrep = 50)
 
-## ---- fig.show='hold'---------------------------------------------------------
+## ---- fig.show='hold', out.width="45%"----------------------------------------
 # GEV (Portpirie)
 plot(predict(gevp, type = "d", n_years = c(100, 1000)), cex = 0.7)
 plot(predict(gevp, type = "p", n_years = c(100, 1000)), cex = 0.7)
 
-## ---- fig.show='hold'---------------------------------------------------------
+## ---- fig.show='hold', out.width="45%"----------------------------------------
 # binGP (Gulf-of-Mexico)
 plot(predict(bgpg, type = "d", n_years = c(100, 1000)), cex = 0.7)
 plot(predict(bgpg, type = "p", n_years = c(100, 1000)), cex = 0.7)

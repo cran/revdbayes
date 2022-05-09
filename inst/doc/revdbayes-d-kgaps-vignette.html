@@ -12,43 +12,44 @@
 
 <meta name="author" content="Paul J. Northrop" />
 
-<meta name="date" content="2020-09-11" />
+<meta name="date" content="2022-05-07" />
 
-<title>Inference for the extremal index using the K-gaps model</title>
+<title>Inference for the extremal index using threshold interexceedance times</title>
 
-<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
-// v0.0.1
-// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+<script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
 
-document.addEventListener('DOMContentLoaded', function() {
-  const codeList = document.getElementsByClassName("sourceCode");
-  for (var i = 0; i < codeList.length; i++) {
-    var linkList = codeList[i].getElementsByTagName('a');
-    for (var j = 0; j < linkList.length; j++) {
-      if (linkList[j].innerHTML === "") {
-        linkList[j].setAttribute('aria-hidden', 'true');
-      }
-    }
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
   }
-});
-</script>
-
-
-<style type="text/css">code{white-space: pre;}</style>
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
 <style type="text/css" data-origin="pandoc">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -68,7 +69,7 @@ pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-le
 div.sourceCode
   {   }
 @media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
@@ -125,187 +126,30 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<style type="text/css">body {
-background-color: #fff;
-margin: 1em auto;
-max-width: 700px;
-overflow: visible;
-padding-left: 2em;
-padding-right: 2em;
-font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-font-size: 14px;
-line-height: 1.35;
+<style type="text/css">
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
 }
-#TOC {
-clear: both;
-margin: 0 0 10px 10px;
-padding: 4px;
-width: 400px;
-border: 1px solid #CCCCCC;
-border-radius: 5px;
-background-color: #f6f6f6;
-font-size: 13px;
-line-height: 1.3;
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
 }
-#TOC .toctitle {
-font-weight: bold;
-font-size: 15px;
-margin-left: 5px;
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
 }
-#TOC ul {
-padding-left: 40px;
-margin-left: -1.5em;
-margin-top: 5px;
-margin-bottom: 5px;
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
 }
-#TOC ul ul {
-margin-left: -2em;
+div.csl-indent {
+  margin-left: 2em;
 }
-#TOC li {
-line-height: 16px;
-}
-table {
-margin: 1em auto;
-border-width: 1px;
-border-color: #DDDDDD;
-border-style: outset;
-border-collapse: collapse;
-}
-table th {
-border-width: 2px;
-padding: 5px;
-border-style: inset;
-}
-table td {
-border-width: 1px;
-border-style: inset;
-line-height: 18px;
-padding: 5px 5px;
-}
-table, table th, table td {
-border-left-style: none;
-border-right-style: none;
-}
-table thead, table tr.even {
-background-color: #f7f7f7;
-}
-p {
-margin: 0.5em 0;
-}
-blockquote {
-background-color: #f6f6f6;
-padding: 0.25em 0.75em;
-}
-hr {
-border-style: solid;
-border: none;
-border-top: 1px solid #777;
-margin: 28px 0;
-}
-dl {
-margin-left: 0;
-}
-dl dd {
-margin-bottom: 13px;
-margin-left: 13px;
-}
-dl dt {
-font-weight: bold;
-}
-ul {
-margin-top: 0;
-}
-ul li {
-list-style: circle outside;
-}
-ul ul {
-margin-bottom: 0;
-}
-pre, code {
-background-color: #f7f7f7;
-border-radius: 3px;
-color: #333;
-white-space: pre-wrap; 
-}
-pre {
-border-radius: 3px;
-margin: 5px 0px 10px 0px;
-padding: 10px;
-}
-pre:not([class]) {
-background-color: #f7f7f7;
-}
-code {
-font-family: Consolas, Monaco, 'Courier New', monospace;
-font-size: 85%;
-}
-p > code, li > code {
-padding: 2px 0px;
-}
-div.figure {
-text-align: center;
-}
-img {
-background-color: #FFFFFF;
-padding: 2px;
-border: 1px solid #DDDDDD;
-border-radius: 3px;
-border: 1px solid #CCCCCC;
-margin: 0 5px;
-}
-h1 {
-margin-top: 0;
-font-size: 35px;
-line-height: 40px;
-}
-h2 {
-border-bottom: 4px solid #f7f7f7;
-padding-top: 10px;
-padding-bottom: 2px;
-font-size: 145%;
-}
-h3 {
-border-bottom: 2px solid #f7f7f7;
-padding-top: 10px;
-font-size: 120%;
-}
-h4 {
-border-bottom: 1px solid #f7f7f7;
-margin-left: 8px;
-font-size: 105%;
-}
-h5, h6 {
-border-bottom: 1px solid #ccc;
-font-size: 105%;
-}
-a {
-color: #0033dd;
-text-decoration: none;
-}
-a:hover {
-color: #6666ff; }
-a:visited {
-color: #800080; }
-a:visited:hover {
-color: #BB00BB; }
-a[href^="http:"] {
-text-decoration: underline; }
-a[href^="https:"] {
-text-decoration: underline; }
-
-code > span.kw { color: #555; font-weight: bold; } 
-code > span.dt { color: #902000; } 
-code > span.dv { color: #40a070; } 
-code > span.bn { color: #d14; } 
-code > span.fl { color: #d14; } 
-code > span.ch { color: #d14; } 
-code > span.st { color: #d14; } 
-code > span.co { color: #888888; font-style: italic; } 
-code > span.ot { color: #007020; } 
-code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; } 
-code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
+
+<link rel="stylesheet" href="data:text/css,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" type="text/css" />
 
 
 
@@ -317,69 +161,64 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">Inference for the extremal index using the K-gaps model</h1>
+<h1 class="title toc-ignore">Inference for the extremal index using threshold interexceedance times</h1>
 <h4 class="author">Paul J. Northrop</h4>
-<h4 class="date">2020-09-11</h4>
+<h4 class="date">2022-05-07</h4>
 
 
 <div id="TOC">
 <ul>
-<li><a href="#k-gaps-model">K-gaps model</a></li>
-<li><a href="#maximum-likelihood-estimation">Maximum likelihood estimation</a></li>
+<li><a href="#k-gaps-and-d-gaps-models"><span class="math inline">\(K\)</span>-gaps and <span class="math inline">\(D\)</span>-gaps models</a></li>
 <li><a href="#bayesian-inference">Bayesian Inference</a></li>
 <li><a href="#references">References</a></li>
 </ul>
 </div>
 
 <p>The models considered in the <a href="revdbayes-a-vignette.html">Introducing revdbayes</a> vignette are based on the assumption that observations of a (univariate) quantity of interest can be treated as independent and identically distributed (iid) variates. In many instances these assumptions are unrealistic. In this vignette we consider the situation when it is not reasonable to make the former assumption, that is, temporal dependence is present. In this circumstance a key issue is the strength of dependence between extreme events. Under conditions that preclude dependence between extreme events that occur far apart in time, the effect of dependence is local in time, resulting in a tendency for extreme to a occur in clusters. The most common measure of the strength of local extremal dependence is the <em>extremal index</em> <span class="math inline">\(\theta\)</span>. For a review of theory and methods for time series extremes see <span class="citation">Chavez-Demoulin and Davison (2012)</span>.</p>
-<div id="k-gaps-model" class="section level2">
-<h2>K-gaps model</h2>
-<p>The extremal index has several interpretations and leading to different models/methods by which inferences about <span class="math inline">\(\theta\)</span> can be made. Here we consider a model based on the behaviour of occurrences of exceedances of a high threshold. The <em>K-gaps model</em> of <span class="citation">Süveges and Davison (2010)</span> extends the model of <span class="citation">Ferro and Segers (2003)</span> by incorporating a <em>run length</em> parameter <span class="math inline">\(K\)</span>. Under this model threshold inter-exceedance times not larger than <span class="math inline">\(K\)</span> are part of the same cluster and other inter-exceedance times have an exponential distribution with rate parameter <span class="math inline">\(\theta\)</span>. Thus, <span class="math inline">\(\theta\)</span> has dual role as the probability that a process leaves one cluster of threshold exceedances and as the reciprocal of the mean time until the process enters the next cluster. For details see <span class="citation">Süveges and Davison (2010)</span>.</p>
-<p>The <strong>revdbayes</strong> packages provides functions for performing maximum likelihood and Bayesian inferences about <span class="math inline">\(\theta\)</span> under the K-gaps model. We illustrate the code using the <code>newlyn</code> dataset, which is analysed in <span class="citation">Fawcett and Walshaw (2012)</span>. For the sake of illustration we use the default setting, <span class="math inline">\(K = 1\)</span>, which may not be appropriate for these data. See <span class="citation">Süveges and Davison (2010)</span> for discussion of this issue and for methodology to inform the choice of <span class="math inline">\(K\)</span>.</p>
-</div>
-<div id="maximum-likelihood-estimation" class="section level2">
-<h2>Maximum likelihood estimation</h2>
-<p>The function <code>kgaps_mle</code> finds the maximum likelihood estimate and its estimated standard error and (optionally) a <code>conf</code>% level likelihood-based confidence interval for <span class="math inline">\(\theta\)</span>.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">library</span>(revdbayes)</span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="co"># Set a threshold at the 90% quantile</span></span>
-<span id="cb1-3"><a href="#cb1-3"></a>thresh &lt;-<span class="st"> </span><span class="kw">quantile</span>(newlyn, <span class="dt">probs =</span> <span class="fl">0.90</span>)</span>
-<span id="cb1-4"><a href="#cb1-4"></a><span class="co"># MLE, SE and 95% likelihood-based confidence interval</span></span>
-<span id="cb1-5"><a href="#cb1-5"></a>mle &lt;-<span class="st"> </span><span class="kw">kgaps_mle</span>(newlyn, thresh, <span class="dt">conf =</span> <span class="dv">95</span>)</span>
-<span id="cb1-6"><a href="#cb1-6"></a>mle<span class="op">$</span>theta_mle</span>
-<span id="cb1-7"><a href="#cb1-7"></a><span class="co">#&gt; [1] 0.3779466</span></span>
-<span id="cb1-8"><a href="#cb1-8"></a>mle<span class="op">$</span>theta_se</span>
-<span id="cb1-9"><a href="#cb1-9"></a><span class="co">#&gt; [1] 0.02275285</span></span>
-<span id="cb1-10"><a href="#cb1-10"></a>mle<span class="op">$</span>theta_ci</span>
-<span id="cb1-11"><a href="#cb1-11"></a><span class="co">#&gt; [1] 0.3344465 0.4235232</span></span></code></pre></div>
+<div id="k-gaps-and-d-gaps-models" class="section level2">
+<h2><span class="math inline">\(K\)</span>-gaps and <span class="math inline">\(D\)</span>-gaps models</h2>
+<p>The extremal index has several interpretations and leading to different models/methods by which inferences about <span class="math inline">\(\theta\)</span> can be made. Here we consider a model based on the behaviour of occurrences of exceedances of a high threshold. The <span class="math inline">\(K\)</span>-gaps model of <span class="citation">Süveges and Davison (2010)</span> extends the model of <span class="citation">Ferro and Segers (2003)</span> by incorporating a <em>run length</em> parameter <span class="math inline">\(K\)</span>. Under this model threshold inter-exceedance times not larger than <span class="math inline">\(K\)</span> are part of the same cluster and other inter-exceedance times have an exponential distribution with rate parameter <span class="math inline">\(\theta\)</span>. Thus, <span class="math inline">\(\theta\)</span> has dual role as the probability that a process leaves one cluster of threshold exceedances and as the reciprocal of the mean time until the process enters the next cluster. For details see <span class="citation">Süveges and Davison (2010)</span>.</p>
+<p>A related approach <span class="citation">(Holesovsky and Fusek 2020)</span>, which we will call <span class="math inline">\(D\)</span>-gaps, involves a censoring parameter <span class="math inline">\(D\)</span>. This estimator is similar to the <span class="math inline">\(K\)</span>-gaps estimator, but the treatment of small inter-exceedance times is different. Threshold inter-exceedances times that are not larger than  units are left-censored and contribute to a log-likelihood only the information that they are <span class="math inline">\(\leq D\)</span>.</p>
+<p>The <strong>exdex</strong> package <span class="citation">(Northrop and Christodoulides 2022)</span> packages provides functions for performing maximum likelihood about <span class="math inline">\(\theta\)</span> under the <span class="math inline">\(K\)</span>-gaps and <span class="math inline">\(D\)</span>-gaps models.</p>
 </div>
 <div id="bayesian-inference" class="section level2">
 <h2>Bayesian Inference</h2>
-<p>The function <code>kgaps_post</code> simulates a random sample from the posterior distribution of <span class="math inline">\(\theta\)</span> based on a Beta(<span class="math inline">\(\alpha, \beta\)</span>) prior. The use can choose the values of <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span>. The default setting is <span class="math inline">\(\alpha = \beta = 1\)</span>, that is, a U(0,1) prior for <span class="math inline">\(\theta\)</span>. See <span class="citation">Attalides (2015)</span> for further information and for a methods for selecting the value of the threshold in this situation. The plot produced below is is histogram of the sample from the posterior with the posterior density superimposed.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>thresh &lt;-<span class="st"> </span><span class="kw">quantile</span>(newlyn, <span class="dt">probs =</span> <span class="fl">0.90</span>)</span>
-<span id="cb2-2"><a href="#cb2-2"></a>postsim &lt;-<span class="st"> </span><span class="kw">kgaps_post</span>(newlyn, thresh)</span>
-<span id="cb2-3"><a href="#cb2-3"></a><span class="kw">plot</span>(postsim, <span class="dt">xlab =</span> <span class="kw">expression</span>(theta))</span></code></pre></div>
-<p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+<p>We use the <code>newlyn</code> dataset, which is analysed in <span class="citation">Fawcett and Walshaw (2012)</span>. For the sake of illustration we use the default setting, <span class="math inline">\(K = 1\)</span>, which may not be appropriate for these data. See <span class="citation">Süveges and Davison (2010)</span> for discussion of this issue and for methodology to inform the choice of <span class="math inline">\(K\)</span>.</p>
+<p>The function <code>kgaps_post</code> simulates a random sample from the posterior distribution of <span class="math inline">\(\theta\)</span> based on a Beta(<span class="math inline">\(\alpha, \beta\)</span>) prior. The user can choose the values of <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span>. The default setting is <span class="math inline">\(\alpha = \beta = 1\)</span>, that is, a U(0,1) prior for <span class="math inline">\(\theta\)</span>. See <span class="citation">Attalides (2015)</span> for further information and for a methods for selecting the value of the threshold in this situation. The plot produced below is is histogram of the sample from the posterior with the posterior density superimposed.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(revdbayes)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Set a threshold at the 90% quantile</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>thresh <span class="ot">&lt;-</span> <span class="fu">quantile</span>(newlyn, <span class="at">probs =</span> <span class="fl">0.90</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>postsim <span class="ot">&lt;-</span> <span class="fu">kgaps_post</span>(newlyn, thresh, <span class="at">k =</span> <span class="dv">1</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(postsim, <span class="at">xlab =</span> <span class="fu">expression</span>(theta))</span></code></pre></div>
+<p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+<p>The function <code>dgaps_post</code> has the same functionality as <code>kgaps-post</code>, except that the argument <code>k</code> is replaced by an argument <code>D</code>.</p>
 </div>
 <div id="references" class="section level2">
 <h2>References</h2>
 <script type="text/x-mathjax-config">
    MathJax.Hub.Config({  "HTML-CSS": { minScaleAdjust: 125, availableFonts: [] }  });
 </script>
-<div id="refs" class="references">
-<div id="ref-Attalides2015">
-<p>Attalides, N. 2015. “Threshold-Based Extreme Value Modelling.” PhD thesis, University College London.</p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-Attalides2015" class="csl-entry">
+Attalides, N. 2015. <span>“Threshold-Based Extreme Value Modelling.”</span> PhD thesis, University College London.
 </div>
-<div id="ref-CDD2012">
-<p>Chavez-Demoulin, V., and A. C. Davison. 2012. “Modelling Time Series Extremes.” <em>REVSTAT-Statistical Journal</em> 10 (1): 109–33. <a href="https://www.ine.pt/revstat/pdf/rs120105.pdf">https://www.ine.pt/revstat/pdf/rs120105.pdf</a>.</p>
+<div id="ref-CDD2012" class="csl-entry">
+Chavez-Demoulin, V., and A. C. Davison. 2012. <span>“Modelling Time Series Extremes.”</span> <em>REVSTAT-Statistical Journal</em> 10 (1): 109–133.
 </div>
-<div id="ref-FW2012">
-<p>Fawcett, L., and D. Walshaw. 2012. “Estimating Return Levels from Serially Dependent Extremes.” <em>Environmetrics</em> 23 (3): 272–83. <a href="https://doi.org/10.1002/env.2133">https://doi.org/10.1002/env.2133</a>.</p>
+<div id="ref-FW2012" class="csl-entry">
+Fawcett, L., and D. Walshaw. 2012. <span>“Estimating Return Levels from Serially Dependent Extremes.”</span> <em>Environmetrics</em> 23 (3): 272–283. doi:<a href="https://doi.org/10.1002/env.2133">10.1002/env.2133</a>.
 </div>
-<div id="ref-FS2003">
-<p>Ferro, C. A. T., and J. Segers. 2003. “Inference for Clusters of Extreme Values.” <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em> 65 (2): 545–56. <a href="https://doi.org/10.1111/1467-9868.00401">https://doi.org/10.1111/1467-9868.00401</a>.</p>
+<div id="ref-FS2003" class="csl-entry">
+Ferro, C. A. T., and J. Segers. 2003. <span>“Inference for Clusters of Extreme Values.”</span> <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em> 65 (2). Blackwell Publishing: 545–556. doi:<a href="https://doi.org/10.1111/1467-9868.00401">10.1111/1467-9868.00401</a>.
 </div>
-<div id="ref-SD2010">
-<p>Süveges, M., and A. C. Davison. 2010. “Model Misspecification in Peaks over Threshold Analysis.” <em>The Annals of Applied Statistics</em> 4 (1): 203–21. <a href="https://doi.org/10.1214/09-AOAS292">https://doi.org/10.1214/09-AOAS292</a>.</p>
+<div id="ref-HF2020" class="csl-entry">
+Holesovsky, J. P., and M. Fusek. 2020. <span>“Estimation of the Extremal Index Using Censored Distributions.”</span> <em>Extremes</em> 23: 197–213. doi:<a href="https://doi.org/10.1007/s10687-020-00374-3">10.1007/s10687-020-00374-3</a>.
+</div>
+<div id="ref-exdex" class="csl-entry">
+Northrop, P. J., and C. Christodoulides. 2022. <em><span class="nocase">e</span>xdex: Estimation of the Extremal Index</em>. <a href="https://CRAN.R-project.org/package=exdex">https://CRAN.R-project.org/package=exdex</a>.
+</div>
+<div id="ref-SD2010" class="csl-entry">
+Süveges, M., and A. C. Davison. 2010. <span>“Model Misspecification in Peaks over Threshold Analysis.”</span> <em>The Annals of Applied Statistics</em> 4 (1): 203–221. doi:<a href="https://doi.org/10.1214/09-AOAS292">10.1214/09-AOAS292</a>.
 </div>
 </div>
 </div>

@@ -47,10 +47,8 @@
 #'   \code{prior = "norm"} (\code{\link{gev_norm}}) or
 #'   \code{prior = "loglognorm"} (\code{\link{gev_loglognorm}}) are proper.
 #'   If \code{model = "gev"} these priors are equivalent to priors available
-#'   in the evdbayes package, namely \code{\link[evdbayes:prior]{prior.prob}},
-#'   \code{\link[evdbayes:prior]{prior.quant}},
-#'   \code{\link[evdbayes:prior]{prior.norm}} and
-#'   \code{\link[evdbayes:prior]{prior.loglognorm}}.
+#'   in the evdbayes package, namely \code{prior.prob},
+#'   \code{prior.quant}, \code{prior.norm} and \code{prior.loglognorm}.
 #'
 #'   The other in-built priors are improper, that is, the integral of the
 #'   prior function over its support is not finite.  Such priors do not
@@ -58,8 +56,8 @@
 #'   Attalides (2016) consider the issue of posterior propriety in Bayesian
 #'   extreme value analyses.  In most of improper priors below the prior for
 #'   the scale parameter \eqn{\sigma} is taken to be \eqn{1/\sigma},
-#'   i.e. a flat prior for \eqn{\log \sigma}{log \sigma}.  Here we denote the scale
-#'   parameter of the GP distribution by \eqn{\sigma}, whereas we use
+#'   i.e. a flat prior for \eqn{\log \sigma}{log \sigma}.  Here we denote the
+#'   scale parameter of the GP distribution by \eqn{\sigma}, whereas we use
 #'   \eqn{\sigma_u} in the revdbayes vignette.
 #'
 #'   For all in-built priors the arguments \code{min_xi} and \code{max_xi} may
@@ -209,17 +207,10 @@
 #'   \code{\link{gev_mdi}}, \code{\link{gev_flat}}, \code{\link{gev_flatflat}},
 #'   \code{\link{gev_beta}}, \code{\link{gev_prob}}, \code{\link{gev_quant}}
 #'   to see the arguments for priors for GEV parameters.
-#' @seealso \code{\link[evdbayes:prior]{prior.prob}},
-#'   \code{\link[evdbayes:prior]{prior.quant}},
-#'   \code{\link[evdbayes:prior]{prior.norm}}
-#'   and \code{\link[evdbayes:prior]{prior.loglognorm}} for setting a prior
-#'   distribution using the evdbayes package.
-#' @seealso \code{\link[evdbayes]{posterior}} for sampling from an extreme
-#'   value posterior using the evdbayes package.
 #' @references Castellanos, E. M. and Cabras, S. (2007) A default Bayesian
 #'   procedure for the generalized Pareto distribution.
 #'   \emph{Journal of Statistical Planning and Inference} \strong{137(2)},
-#'   473-483. \url{https://doi.org/10.1016/j.jspi.2006.01.006}.
+#'   473-483. \doi{10.1016/j.jspi.2006.01.006}.
 #' @references Coles, S. G. and Tawn, J. A. (1996) A Bayesian analysis of
 #'   extreme rainfall data. \emph{Appl. Statist.}, \strong{45}, 463-478.
 #' @references Crowder, M. (1992) Bayesian priors based on parameter
@@ -229,33 +220,33 @@
 #' @references Grimshaw, S. D. (1993) Computing Maximum Likelihood Estimates
 #'   for the Generalized Pareto Distribution.  \emph{Technometrics},
 #'   \strong{35(2)}, 185-191.
-#'   \url{https://doi.org/10.1080/00401706.1993.10485040}.
+#'   \doi{10.1080/00401706.1993.10485040}.
 #' @references Hosking, J. R. M. and Wallis, J. R. (1987) Parameter and
 #'   Quantile Estimation for the Generalized Pareto Distribution.
 #'   \emph{Technometrics}, \strong{29(3)}, 339-349.
-#'   \url{https://doi.org/10.2307/1269343}.
+#'   \doi{10.2307/1269343}.
 #' @references Martins, E. S. and Stedinger, J. R. (2000) Generalized maximum
 #'   likelihood generalized extreme value quantile estimators for hydrologic
 #'   data, \emph{Water Resources Research}, \strong{36(3)}, 737-744.
-#'   \url{https://doi.org/10.1029/1999WR900330}.
+#'   \doi{10.1029/1999WR900330}.
 #' @references Martins, E. S. and Stedinger, J. R. (2001) Generalized maximum
 #'   likelihood Pareto-Poisson estimators for partial duration series,
 #'   \emph{Water Resources Research}, \strong{37(10)}, 2551-2557.
-#'   \url{https://doi.org/10.1029/2001WR000367}.
+#'   \doi{10.1029/2001WR000367}.
 #' @references Northrop, P.J. and Attalides, N. (2016) Posterior propriety in
 #'   Bayesian extreme value analyses using reference priors
 #'   \emph{Statistica Sinica}, \strong{26}(2), 721--743
-#'   \url{https://doi.org/10.5705/ss.2014.034}.
+#'   \doi{10.5705/ss.2014.034}.
 #' @references Northrop, P. J., Attalides, N. and Jonathan, P. (2017)
 #'   Cross-validatory extreme value threshold selection and uncertainty
 #'   with application to ocean storm severity.
 #'   \emph{Journal of the Royal Statistical Society Series C: Applied
 #'   Statistics}, \strong{66}(1), 93-120.
-#'   \url{https://doi.org/10.1111/rssc.12159}
+#'   \doi{10.1111/rssc.12159}
 #' @references Stephenson, A. (2016) Bayesian inference for extreme value
 #'   modelling.  In \emph{Extreme Value Modeling and Risk Analysis: Methods
 #'   and Applications} (eds D. K. Dey and J. Yan), 257-280, Chapman and Hall,
-#'   London. \url{https://doi.org/10.1201/b19721}.
+#'   London. \doi{10.1201/b19721}.
 #' @examples
 #' # Normal prior for GEV parameters (mu, log(sigma), xi).
 #' mat <- diag(c(10000, 10000, 100))
@@ -307,7 +298,7 @@ set_prior <- function(prior = c("norm", "loglognorm", "mdi", "flat",
   # If prior is a pointer to an external C++ function then just return it in
   # the required format.  We don't need to worry about adding the argument
   # trendsd because we don't need the prior to work with the evdbayes package.
-  if (class(prior) == "externalptr") {
+  if (inherits(prior, "externalptr")) {
     temp <- list(prior = prior, ...)
     return(structure(temp, class = "evprior", model = model))
   }
@@ -456,7 +447,7 @@ gp_norm <- function(pars, mean, icov, min_xi = -Inf, max_xi = Inf,
 #' @references Northrop, P.J. and Attalides, N. (2016) Posterior propriety in
 #'   Bayesian extreme value analyses using reference priors
 #'   \emph{Statistica Sinica}, \strong{26(2)}, 721--743
-#'   \url{https://doi.org/10.5705/ss.2014.034}.
+#'   \doi{10.5705/ss.2014.034}.
 #' @export
 gp_mdi <- function(pars, a = 1, min_xi = -1, max_xi = Inf, trendsd = 0) {
   if (pars[1] <= 0 | pars[2] < min_xi | pars[2] > max_xi) {
@@ -912,7 +903,7 @@ set_bin_prior <- function(prior = c("jeffreys", "laplace", "haldane", "beta",
     temp <- list(prior = prior, ...)
     return(structure(temp, class = "binprior"))
   }
-  if (class(prior) == "externalptr") {
+  if (inherits(prior, "externalptr")) {
     stop("A user-supplied prior must be specified using an R function")
   }
   # Otherwise, call the appropriate function to set the prior with name prior.
