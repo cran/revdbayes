@@ -12,29 +12,42 @@
 
 <meta name="author" content="Paul J. Northrop" />
 
-<meta name="date" content="2022-05-07" />
+<meta name="date" content="2022-11-11" />
 
 <title>Posterior Predictive Extreme Value Inference using the revdbayes Package</title>
 
-<script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
 
 <style type="text/css">
-  code{white-space: pre-wrap;}
-  span.smallcaps{font-variant: small-caps;}
-  span.underline{text-decoration: underline;}
-  div.column{display: inline-block; vertical-align: top; width: 50%;}
-  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-  ul.task-list{list-style: none;}
-    </style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
 
 
 <style type="text/css">
-  code {
-    white-space: pre;
-  }
-  .sourceCode {
-    overflow: visible;
-  }
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
@@ -52,55 +65,54 @@ pre > code.sourceCode { white-space: pre-wrap; }
 pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
-  { counter-reset: source-line 0; }
+{ counter-reset: source-line 0; }
 pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
+{ position: relative; left: -4em; counter-increment: source-line; }
 pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
 div.sourceCode
-  {   }
+{ }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
 </style>
 <script>
 // apply pandoc div.sourceCode style to pre.sourceCode instead
@@ -109,13 +121,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
+    var j = 0;
+    while (j < rules.length) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -127,29 +146,209 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 <style type="text/css">
-/* for pandoc --citeproc since 2.11 */
+
 div.csl-bib-body { }
 div.csl-entry {
-  clear: both;
+clear: both;
 }
 .hanging div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
+margin-left:2em;
+text-indent:-2em;
 }
 div.csl-left-margin {
-  min-width:2em;
-  float:left;
+min-width:2em;
+float:left;
 }
 div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
+margin-left:2em;
+padding-left:1em;
 }
 div.csl-indent {
-  margin-left: 2em;
+margin-left: 2em;
 }
 </style>
 
-<link rel="stylesheet" href="data:text/css,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" type="text/css" />
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
 
 
 
@@ -161,36 +360,70 @@ div.csl-indent {
 
 
 
-<h1 class="title toc-ignore">Posterior Predictive Extreme Value Inference using the revdbayes Package</h1>
+<h1 class="title toc-ignore">Posterior Predictive Extreme Value
+Inference using the revdbayes Package</h1>
 <h4 class="author">Paul J. Northrop</h4>
-<h4 class="date">2022-05-07</h4>
+<h4 class="date">2022-11-11</h4>
 
 
 <div id="TOC">
 <ul>
-<li><a href="#posterior-predictive-model-checking">Posterior predictive model checking</a>
+<li><a href="#posterior-predictive-model-checking" id="toc-posterior-predictive-model-checking">Posterior predictive model
+checking</a>
 <ul>
-<li><a href="#overlaid-density-and-distribution-functions">Overlaid density and distribution functions</a></li>
-<li><a href="#multiple-plots">Multiple plots</a></li>
-<li><a href="#posterior-predictive-test-statistics">Posterior predictive test statistics</a></li>
+<li><a href="#overlaid-density-and-distribution-functions" id="toc-overlaid-density-and-distribution-functions">Overlaid density
+and distribution functions</a></li>
+<li><a href="#multiple-plots" id="toc-multiple-plots">Multiple
+plots</a></li>
+<li><a href="#posterior-predictive-test-statistics" id="toc-posterior-predictive-test-statistics">Posterior predictive test
+statistics</a></li>
 </ul></li>
-<li><a href="#posterior-predictive-extreme-value-inference">Posterior predictive extreme value inference</a>
+<li><a href="#posterior-predictive-extreme-value-inference" id="toc-posterior-predictive-extreme-value-inference">Posterior
+predictive extreme value inference</a>
 <ul>
-<li><a href="#posterior-predictive-density-and-distribution-functions">Posterior predictive density and distribution functions</a></li>
-<li><a href="#posterior-predictive-intervals">Posterior predictive intervals</a></li>
+<li><a href="#posterior-predictive-density-and-distribution-functions" id="toc-posterior-predictive-density-and-distribution-functions">Posterior
+predictive density and distribution functions</a></li>
+<li><a href="#posterior-predictive-intervals" id="toc-posterior-predictive-intervals">Posterior predictive
+intervals</a></li>
 </ul></li>
-<li><a href="#references">References</a></li>
+<li><a href="#references" id="toc-references">References</a></li>
 </ul>
 </div>
 
-<p>This vignette focuses on <em>posterior predictive inference</em> using extreme value models. Posterior predictive inference is the prediction of unobserved variables conditional on observed data, performed by integrating parameter-specific inferences over a posterior distribution for model parameters. In practice, the integration averaging is performed using an empirical average based on samples from the posterior distribution. The vignette <a href="revdbayes-a-vignette.html">Introducing revdbayes</a> covers the sampling from extreme value posterior distributions and the vignette <a href="revdbayes-b-using-rcpp-vignette.html">Faster simulation using revdbayes</a> considers how to do this more quickly.</p>
-<p>We consider two uses of posterior predictive inference. In the first we simulate from the posterior predictive distribution many replicates of the observed data. A comparison of these replicates to the observed data provides a way to assess the fit of the model: systematic differences in behaviour between the observed and replicated data suggest features of the data that are not represented well by the model. For greater detail see Chapter 6 of <span class="citation">Gelman et al. (2014)</span>. Secondly, we define as the variable of interest the largest value <span class="math inline">\(M_N\)</span> to be observed over a future time period of length <span class="math inline">\(N\)</span> years and estimate under the extreme value model the conditional distribution of <span class="math inline">\(M_N\)</span> given the observed data. This accounts for uncertainty in model parameters and for uncertainty owing to the variability of future observations.</p>
-<p>We illustrate the code used to perform these two tasks using the <code>portpirie</code> and <code>gom</code> datasets that feature in the vignette <a href="revdbayes-a-vignette.html">Introducing revdbayes</a>.</p>
+<p>This vignette focuses on <em>posterior predictive inference</em>
+using extreme value models. Posterior predictive inference is the
+prediction of unobserved variables conditional on observed data,
+performed by integrating parameter-specific inferences over a posterior
+distribution for model parameters. In practice, the integration
+averaging is performed using an empirical average based on samples from
+the posterior distribution. The vignette <a href="revdbayes-a-vignette.html">Introducing revdbayes</a> covers the
+sampling from extreme value posterior distributions and the vignette <a href="revdbayes-b-using-rcpp-vignette.html">Faster simulation using
+revdbayes</a> considers how to do this more quickly.</p>
+<p>We consider two uses of posterior predictive inference. In the first
+we simulate from the posterior predictive distribution many replicates
+of the observed data. A comparison of these replicates to the observed
+data provides a way to assess the fit of the model: systematic
+differences in behaviour between the observed and replicated data
+suggest features of the data that are not represented well by the model.
+For greater detail see Chapter 6 of <span class="citation">Gelman et al.
+(2014)</span>. Secondly, we define as the variable of interest the
+largest value <span class="math inline">\(M_N\)</span> to be observed
+over a future time period of length <span class="math inline">\(N\)</span> years and estimate under the extreme
+value model the conditional distribution of <span class="math inline">\(M_N\)</span> given the observed data. This
+accounts for uncertainty in model parameters and for uncertainty owing
+to the variability of future observations.</p>
+<p>We illustrate the code used to perform these two tasks using the
+<code>portpirie</code> and <code>gom</code> datasets that feature in the
+vignette <a href="revdbayes-a-vignette.html">Introducing
+revdbayes</a>.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the number of posterior samples required.</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">47</span>)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(revdbayes)</span></code></pre></div>
-<p>We produce posterior samples for later use. The argument <code>nrep = 50</code> to <code>rpost</code> results in 50 simulated replicates of the data being returned in <code>object$data_rep</code>.</p>
+<p>We produce posterior samples for later use. The argument
+<code>nrep = 50</code> to <code>rpost</code> results in 50 simulated
+replicates of the data being returned in
+<code>object$data_rep</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">### GEV model for Port Pirie Annual Maximum Sea Levels </span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(portpirie)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>mat <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="fu">c</span>(<span class="dv">10000</span>, <span class="dv">10000</span>, <span class="dv">100</span>))</span>
@@ -198,24 +431,36 @@ div.csl-indent {
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>gevp  <span class="ot">&lt;-</span> <span class="fu">rpost</span>(<span class="at">n =</span> n, <span class="at">model =</span> <span class="st">&quot;gev&quot;</span>, <span class="at">prior =</span> pn, <span class="at">data =</span> portpirie, <span class="at">nrep =</span> <span class="dv">50</span>)</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="do">### GP model for Gulf-of-Mexico significant wave heights</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(gom)</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="fu">quantile</span>(gom, <span class="at">probs =</span> <span class="fl">0.65</span>)</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>fp <span class="ot">&lt;-</span> <span class="fu">set_prior</span>(<span class="at">prior =</span> <span class="st">&quot;flat&quot;</span>, <span class="at">model =</span> <span class="st">&quot;gp&quot;</span>, <span class="at">min_xi =</span> <span class="sc">-</span><span class="dv">1</span>)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>gpg <span class="ot">&lt;-</span> <span class="fu">rpost</span>(<span class="at">n =</span> <span class="dv">1000</span>, <span class="at">model =</span> <span class="st">&quot;gp&quot;</span>, <span class="at">prior =</span> fp, <span class="at">thresh =</span> u, <span class="at">data =</span> gom, <span class="at">nrep =</span> <span class="dv">50</span>)</span></code></pre></div>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="fu">quantile</span>(gom, <span class="at">probs =</span> <span class="fl">0.65</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>fp <span class="ot">&lt;-</span> <span class="fu">set_prior</span>(<span class="at">prior =</span> <span class="st">&quot;flat&quot;</span>, <span class="at">model =</span> <span class="st">&quot;gp&quot;</span>, <span class="at">min_xi =</span> <span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>gpg <span class="ot">&lt;-</span> <span class="fu">rpost</span>(<span class="at">n =</span> <span class="dv">1000</span>, <span class="at">model =</span> <span class="st">&quot;gp&quot;</span>, <span class="at">prior =</span> fp, <span class="at">thresh =</span> u, <span class="at">data =</span> gom, <span class="at">nrep =</span> <span class="dv">50</span>)</span></code></pre></div>
 <div id="posterior-predictive-model-checking" class="section level2">
 <h2>Posterior predictive model checking</h2>
-<p>The <code>pp_check</code> method <code>pp_check.evpost</code> provides an interface to the posterior predictive checking graphics available in the <em>bayesplot</em> package <span class="citation">(Gabry and Mahr 2017)</span>. For details see the bayesplot vignette <a href="https://CRAN.R-project.org/package=bayesplot">Graphical posterior predictive checks</a>. <em>bayesplot</em> functions return a <code>ggplot</code> object that can be customised using the <em>ggplot2</em> package <span class="citation">(Wickham 2009)</span>.</p>
+<p>The <code>pp_check</code> method <code>pp_check.evpost</code>
+provides an interface to the posterior predictive checking graphics
+available in the <em>bayesplot</em> package <span class="citation">(Gabry and Mahr 2017)</span>. For details see the
+bayesplot vignette <a href="https://CRAN.R-project.org/package=bayesplot">Graphical posterior
+predictive checks</a>. <em>bayesplot</em> functions return a
+<code>ggplot</code> object that can be customised using the
+<em>ggplot2</em> package <span class="citation">(Wickham
+2009)</span>.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; This is bayesplot version 1.8.1</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; This is bayesplot version 1.9.0</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; - Online documentation and vignettes at mc-stan.org/bayesplot</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; - bayesplot theme set to bayesplot::theme_default()</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    * Does _not_ affect other ggplot2 plots</span></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    * See ?bayesplot_theme_set for details on theme setting</span></span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div>
-<p>We show three examples of the graphical posterior predictive checks that are available from <em>bayesplot</em>.</p>
+<p>We show three examples of the graphical posterior predictive checks
+that are available from <em>bayesplot</em>.</p>
 <div id="overlaid-density-and-distribution-functions" class="section level3">
 <h3>Overlaid density and distribution functions</h3>
-<p>Calling <code>pp_check</code> with <code>type = &quot;overlaid&quot;</code> produces plots in which either the empirical distribution functions or kernel density estimates of the observed and replicated data are compared. If the model fits well then the observed data should look like a typical replication from the posterior predictive distribution, which seems to be the case here.</p>
+<p>Calling <code>pp_check</code> with <code>type = &quot;overlaid&quot;</code>
+produces plots in which either the empirical distribution functions or
+kernel density estimates of the observed and replicated data are
+compared. If the model fits well then the observed data should look like
+a typical replication from the posterior predictive distribution, which
+seems to be the case here.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># GEV</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pp_check</span>(gevp, <span class="at">type =</span> <span class="st">&quot;overlaid&quot;</span>) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">&quot;GEV empirical distribution functions&quot;</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">pp_check</span>(gevp, <span class="at">type =</span> <span class="st">&quot;overlaid&quot;</span>, <span class="at">subtype =</span> <span class="st">&quot;dens&quot;</span>) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">&quot;GEV kernel density estimates&quot;</span>)</span></code></pre></div>
@@ -223,14 +468,26 @@ div.csl-indent {
 </div>
 <div id="multiple-plots" class="section level3">
 <h3>Multiple plots</h3>
-<p>Using <code>type = multiple</code> produces multiple plots, rather than overlaid plots, with <code>subtype</code> indicating the type of plots to be drawn. By default only 8 plots of replicated data are drawn, but this can be changed using the <code>nrep</code> argument. Again, the plot of the observed data is not obviously different from those of the replicated data.</p>
+<p>Using <code>type = multiple</code> produces multiple plots, rather
+than overlaid plots, with <code>subtype</code> indicating the type of
+plots to be drawn. By default only 8 plots of replicated data are drawn,
+but this can be changed using the <code>nrep</code> argument. Again, the
+plot of the observed data is not obviously different from those of the
+replicated data.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pp_check</span>(gpg, <span class="at">type =</span> <span class="st">&quot;multiple&quot;</span>) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">&quot;GP kernel density estimates&quot;</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pp_check</span>(gpg, <span class="at">type =</span> <span class="st">&quot;multiple&quot;</span>, <span class="at">subtype =</span> <span class="st">&quot;boxplot&quot;</span>) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">&quot;GP boxplots&quot;</span>)</span></code></pre></div>
-<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAABDlBMVEUAAAAAADoAAGYAOmYAOpAAZmYAZrYBH0sDOWwzMzM6AAA6AGY6OgA6OpA6ZrY6kJA6kLw6kNtNTU1NTW5NTY5NbqtNjshmAABmADpmAGZmOjpmOpBmZgBmZjpmZrZmkNtmtrZmtttmtv9uTU1uTY5ubqtuq+SOTU2OTW6OTY6ObquOq+SOyP+QOgCQOjqQZpCQkDqQkGaQkLaQkNuQtpCQ29uQ2/+rbk2rq8ir5P+zzeC2ZgC2Zjq2Zma2tma22/+2/7a2/9u2///Ijk3Ijo7I///R4ezbkDrbkJDb25Db27bb/9vb///kq27kq47k////tmb/tpD/yI7/25D/5Kv//7b//8j//9v//+T///8q77GGAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAKB0lEQVR4nO2djX/bxB3Glcxz2wwYDhumbBQI0LGN7IWBt0a8jJTGwJLVresG/f//yO5NL2dLemTdT/PVfr6fT5KTfXp899XpJMftJclIK8muGxA7FASgIAAFASgIQEEACgJsISg9vuxW72hW2VqeTFrqzr267WxTV451QfNEMbn9PLs9Tyxn9gm13UmQqlftyEKltdQ2nf4a5+oqLYI6JPTFF7SamkbMk9G13hircpqM3ZPzjiPI78hq2ibI1LgPc0GVDgm98QStps7BQgu6Pddq1IhwY2goQR1yQZWuLeuDJyjNXZgxawWp4TQpm5EmekCp81A3KT3+7vxopqam1J597uFS0GqaJL80goo9XF39zAcPzHylIpOj1xI9aFMzcrOyvqumq6g9Va4JOJq5810/bRulf/j7DCGoGEAWJyitjqDlr7SBsa76nWrke1+cqFb9/sycjfbhy1KQnp9VVybVPWzd27+oKunYzlc6dzU1J3V+qrgoV828tK77pQv4xbsznaK/lidjN4LW9xlA0PLEHsCFmaidoMpRPb5cvp53Y660zY06/f32fHRdPuwE2f21JW8PU3eq9lw9sKPNdG+hd1q+4Y6Uq19Wy0emeUlzmUx1ysSkWcXr+wwgaFG60E1w17HiYMyPvzHPL+zVbeJOffNdNbd82Alanmh/uhf+Hqk5mexgLQQZm1/N8oa4+kW1QpBxk6eY88kJ2thnAEHLk/zkcIL8garOcfP8Im/AmqDiYZeySApB3h6may6sEKRLq9+541PUL6rVCzKnbS5ofZ8BBNn5olmQbY09G2oEeXaNoEkuyNvDHnvVDzdf2Rg1oczz692i0kFbrVaQd4pt7COEdxUrhlCDoEtzW2zvj5bvrwkqH3YhbuJVvfD30HUfOA2loGqv8vpltVpB+plyDlrfZwhBylBi7330C9gOeoLsJDlXlfTlzBdUPlyMF3dLMLr29nDH3pwUrtPPZrmVck9Vv1rt2WxTUKKnt9FP39qn1/YZRJB7q6E7Zqfoss1m+2xeueNIzfsQ/f2DaeXhefn2RBd/bfpd7mHq/vsfaf6Amnqm9mW+mnnN0KPCVdNz8Ti1t0vJh6oh+oKv74wS/bD2Xd6dFfsMJGh3FFN0XMQjaI7ekuyGSAQtRE8LSaIRFKmfWATFCwUBKAhAQQAKAlAQgIIASUNZJjEk5UIkJxgKAlAQIGJBcRiiIAAFAdYE3ZFIlOhatILCDVEQTKQgkEhBIJGCQCIFgUQKAokUBBIpCCRSEEgUEXRxRUGtKRQEUuIUdOeuhCCJru23IIG+URBKkQiRgIIA64LCDVEQTKQgkLjHgu5S0DoRC4rDEAUBhhEU3jcKQikUBFIoCKRQEEihIJBCQSAlXkGhhvZdUPAQoiCYSEEgkYJAopSgKAzVCAo0tPeCQocQBcFECgKJEn2zgiIwFLWgGIYQBaGGeGUK2myIVxYUFNi3mAUFGrKCQg3tv6DAzjlBu7+ODSgoqG9WUARjaDhBYYc/bkFBb8cKQUG9KwTt2lCDoABDsoJ2bqhOUJijiqAAQ0mZsduZukGQMdTPki+o6N2W3UyuPEOW7RsTjieoK+2J/9cUAQXtcGkKAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQYB4F9yOBAoCUBCAggAUBKAgwCCCRBa7jQQKAgwhSGa55EigIMCaIIG+URBMpCCQSEEgkYJAIgWBRAoCiRKLiVMQTgkLuFNLn4Z45ZgEhYXcuVsDBZVQEGAoQQIr/1AQSozi72pQEKBdUJoczbJsPrrGDfHKFxKLa8Wxpj0YQavpJMsWx5e4IV75cATdno+VpQcdGuKVD0dQlipBP+ABdMCCRtfL97s0xCsfkKD56D9/xVN01ILCUqCg47/POjXEK4ssEflqCFokk24N8cqHJOisY0O88uEIWr7RtSFeWUpQBOtJtwlajH58vcsEbRrilQ9FUNLhPUbeEK98IIK2aohXFllklIJQopigkJRDELT7RRQzCoLUCApdx1dwRfKAgItaejTEK0usDhqLoKsaKKiEggBDCgpcCXrvBYUulR3Hmvbtgvp+qiEnKPhEHVZQ3081DkdQz081rgQmoVdDUM9PNfrPZRspIn8VIaAlUFCvTzUEBcks+t8/BAnKP9VY3f/b0SxNRter+98kNb+nHk5QYEoR0nOhbSjIfqpxe66kLCZZ+uZ5Ms6WJxu/qa4XFLL695qgnkHlov8X/YYREpR/qrG6f5nNkyQZ60I23xhCtYKuQv5pRUVztvVK7WVK2ZR+YxEKcmPFCDpzhc6CgpbrLzVf9P/3NInXrx4ZQFDxqYb2shirK/7qnVmmvza6Uy17bep58Kt/NqL3CeILuqr8qsL+vIDnb5ug6qcaen5W344vV9PE3F5vdKdS3qdF/1sF1X2qYU6xmoa0NvMVZus3qxTULkhd72vfulIQgIIA+ytogF/akxooCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQE4HrSAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFAQYRJDAkhIUBFNiWLgj2xAU0aL/EikCUBBgEEExLLgtBQUBKAgQs6AoDEUrSGLdXQkoCEBBAF+QzHrSff+ns5ey34IiWIlTCgoCUBBgCEESfYtUkEjXKAglSgmKwhAFASgIQEEACgJsLrAUvMioEbTztVylGEjQ7he7lYKCABQEiFtQBIaiFhTDEKIg1BCvTEGbDfHKgoICY2IWFNq1OBbclmJTkMyfjaCglsQrgYG4/4JC/3QABYEUiWEoQZ2gwK6Jrmkf1BQJagTpdeSDEq8EOhe3IMk17fumFMdqx47qBIX1TlbQzv+VUKOg3u3yF/3vnSJwqERoEtT/2PmL/vdul8ChEqFFUE9H3qL//dslcKhE8ASV3EvaNtoTO4TIpMAQCRpe4V63jXZa9hNJ2SKkPxQEoCBANP/tKFYoCEBBAAoCUBCAggA1gm7eVt9efPTWoyz7+Z+n+ofdyG6qG4DGEJmUbULC2BR0c6pa9fLTRy8+fpL991H2+LdP3caLP+sGuw1AY4hMyjYhgTSMoOdvq0P2md5STSg3nj+sPNNKS4hMSveQMBoE6a/HD02rPnlabPz8r+ozrTSHyKRsERJGk6CH+WurI5VvvPzD6cPKM600hsikbBMSBhL08k9PKw25+c2TPl3zQ2RSuoeEgeag759UZ4GXf3zSZ/bwQ2RSuoeE0SBIXyA+earKn6krRr5h2ldutNISIpPSPSSMTUHPT/XF1d5iPD491TccduPGPNHt5qMxRCZlm5BAeCcNoCAABQEoCEBBAAoCUBCAggAUBKAgwP8AaNNT6hMmkI8AAAAASUVORK5CYII=" width="45%" /><img src="data:image/png;base64,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" width="45%" /></p>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAABDlBMVEUAAAAAADoAAGYAOmYAOpAAZmYAZrYBH0sDOWwzMzM6AAA6AGY6OgA6OpA6ZrY6kJA6kLw6kNtNTU1NTW5NTY5NbqtNjshmAABmADpmAGZmOjpmOpBmZgBmZjpmZrZmkNtmtrZmtttmtv9uTU1uTY5ubqtuq+SOTU2OTW6OTY6ObquOq+SOyP+QOgCQOjqQZpCQkDqQkGaQkLaQkNuQtpCQ29uQ2/+rbk2rq8ir5P+zzeC2ZgC2Zjq2Zma2tma22/+2/7a2/9u2///Ijk3Ijo7I///R4ezbkDrbkJDb25Db27bb/9vb///kq27kq47k////tmb/tpD/yI7/25D/5Kv//7b//8j//9v//+T///8q77GGAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAKB0lEQVR4nO2djX/bxB3Glcxz2wwYDhumbBQI0LGN7IWBt0a8jJTGwJLVresG/f//yO5NL2dLemTdT/PVfr6fT5KTfXp899XpJMftJclIK8muGxA7FASgIAAFASgIQEEACgJsISg9vuxW72hW2VqeTFrqzr267WxTV451QfNEMbn9PLs9Tyxn9gm13UmQqlftyEKltdQ2nf4a5+oqLYI6JPTFF7SamkbMk9G13hircpqM3ZPzjiPI78hq2ibI1LgPc0GVDgm98QStps7BQgu6Pddq1IhwY2goQR1yQZWuLeuDJyjNXZgxawWp4TQpm5EmekCp81A3KT3+7vxopqam1J597uFS0GqaJL80goo9XF39zAcPzHylIpOj1xI9aFMzcrOyvqumq6g9Va4JOJq5810/bRulf/j7DCGoGEAWJyitjqDlr7SBsa76nWrke1+cqFb9/sycjfbhy1KQnp9VVybVPWzd27+oKunYzlc6dzU1J3V+qrgoV828tK77pQv4xbsznaK/lidjN4LW9xlA0PLEHsCFmaidoMpRPb5cvp53Y660zY06/f32fHRdPuwE2f21JW8PU3eq9lw9sKPNdG+hd1q+4Y6Uq19Wy0emeUlzmUx1ysSkWcXr+wwgaFG60E1w17HiYMyPvzHPL+zVbeJOffNdNbd82Alanmh/uhf+Hqk5mexgLQQZm1/N8oa4+kW1QpBxk6eY88kJ2thnAEHLk/zkcIL8garOcfP8Im/AmqDiYZeySApB3h6may6sEKRLq9+541PUL6rVCzKnbS5ofZ8BBNn5olmQbY09G2oEeXaNoEkuyNvDHnvVDzdf2Rg1oczz692i0kFbrVaQd4pt7COEdxUrhlCDoEtzW2zvj5bvrwkqH3YhbuJVvfD30HUfOA2loGqv8vpltVpB+plyDlrfZwhBylBi7330C9gOeoLsJDlXlfTlzBdUPlyMF3dLMLr29nDH3pwUrtPPZrmVck9Vv1rt2WxTUKKnt9FP39qn1/YZRJB7q6E7Zqfoss1m+2xeueNIzfsQ/f2DaeXhefn2RBd/bfpd7mHq/vsfaf6Amnqm9mW+mnnN0KPCVdNz8Ti1t0vJh6oh+oKv74wS/bD2Xd6dFfsMJGh3FFN0XMQjaI7ekuyGSAQtRE8LSaIRFKmfWATFCwUBKAhAQQAKAlAQgIIASUNZJjEk5UIkJxgKAlAQIGJBcRiiIAAFAdYE3ZFIlOhatILCDVEQTKQgkEhBIJGCQCIFgUQKAokUBBIpCCRSEEgUEXRxRUGtKRQEUuIUdOeuhCCJru23IIG+URBKkQiRgIIA64LCDVEQTKQgkLjHgu5S0DoRC4rDEAUBhhEU3jcKQikUBFIoCKRQEEihIJBCQSAlXkGhhvZdUPAQoiCYSEEgkYJAopSgKAzVCAo0tPeCQocQBcFECgKJEn2zgiIwFLWgGIYQBaGGeGUK2myIVxYUFNi3mAUFGrKCQg3tv6DAzjlBu7+ODSgoqG9WUARjaDhBYYc/bkFBb8cKQUG9KwTt2lCDoABDsoJ2bqhOUJijiqAAQ0mZsduZukGQMdTPki+o6N2W3UyuPEOW7RsTjieoK+2J/9cUAQXtcGkKAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQYB4F9yOBAoCUBCAggAUBKAgwCCCRBa7jQQKAgwhSGa55EigIMCaIIG+URBMpCCQSEEgkYJAIgWBRAoCiRKLiVMQTgkLuFNLn4Z45ZgEhYXcuVsDBZVQEGAoQQIr/1AQSozi72pQEKBdUJoczbJsPrrGDfHKFxKLa8Wxpj0YQavpJMsWx5e4IV75cATdno+VpQcdGuKVD0dQlipBP+ABdMCCRtfL97s0xCsfkKD56D9/xVN01ILCUqCg47/POjXEK4ssEflqCFokk24N8cqHJOisY0O88uEIWr7RtSFeWUpQBOtJtwlajH58vcsEbRrilQ9FUNLhPUbeEK98IIK2aohXFllklIJQopigkJRDELT7RRQzCoLUCApdx1dwRfKAgItaejTEK0usDhqLoKsaKKiEggBDCgpcCXrvBYUulR3Hmvbtgvp+qiEnKPhEHVZQ3081DkdQz081rgQmoVdDUM9PNfrPZRspIn8VIaAlUFCvTzUEBcks+t8/BAnKP9VY3f/b0SxNRter+98kNb+nHk5QYEoR0nOhbSjIfqpxe66kLCZZ+uZ5Ms6WJxu/qa4XFLL695qgnkHlov8X/YYREpR/qrG6f5nNkyQZ60I23xhCtYKuQv5pRUVztvVK7WVK2ZR+YxEKcmPFCDpzhc6CgpbrLzVf9P/3NInXrx4ZQFDxqYb2shirK/7qnVmmvza6Uy17bep58Kt/NqL3CeILuqr8qsL+vIDnb5ug6qcaen5W344vV9PE3F5vdKdS3qdF/1sF1X2qYU6xmoa0NvMVZus3qxTULkhd72vfulIQgIIA+ytogF/akxooCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQE4HrSAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFAQYRJDAkhIUBFNiWLgj2xAU0aL/EikCUBBgEEExLLgtBQUBKAgQs6AoDEUrSGLdXQkoCEBBAF+QzHrSff+ns5ey34IiWIlTCgoCUBBgCEESfYtUkEjXKAglSgmKwhAFASgIQEEACgJsLrAUvMioEbTztVylGEjQ7he7lYKCABQEiFtQBIaiFhTDEKIg1BCvTEGbDfHKgoICY2IWFNq1OBbclmJTkMyfjaCglsQrgYG4/4JC/3QABYEUiWEoQZ2gwK6Jrmkf1BQJagTpdeSDEq8EOhe3IMk17fumFMdqx47qBIX1TlbQzv+VUKOg3u3yF/3vnSJwqERoEtT/2PmL/vdul8ChEqFFUE9H3qL//dslcKhE8ASV3EvaNtoTO4TIpMAQCRpe4V63jXZa9hNJ2SKkPxQEoCBANP/tKFYoCEBBAAoCUBCAggA1gm7eVt9efPTWoyz7+Z+n+ofdyG6qG4DGEJmUbULC2BR0c6pa9fLTRy8+fpL991H2+LdP3caLP+sGuw1AY4hMyjYhgTSMoOdvq0P2md5STSg3nj+sPNNKS4hMSveQMBoE6a/HD02rPnlabPz8r+ozrTSHyKRsERJGk6CH+WurI5VvvPzD6cPKM600hsikbBMSBhL08k9PKw25+c2TPl3zQ2RSuoeEgeag759UZ4GXf3zSZ/bwQ2RSuoeE0SBIXyA+earKn6krRr5h2ldutNISIpPSPSSMTUHPT/XF1d5iPD491TccduPGPNHt5qMxRCZlm5BAeCcNoCAABQEoCEBBAAoCUBCAggAUBKAgwP8AaNNT6hMmkI8AAAAASUVORK5CYII=" width="45%" /><img src="data:image/png;base64,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" width="45%" /></p>
 </div>
 <div id="posterior-predictive-test-statistics" class="section level3">
 <h3>Posterior predictive test statistics</h3>
-<p>The default setting for <code>pp_check</code> is to produce a plot that compares the values of test statistics for the observed and replicated data. The argument <code>stat</code> defines the test statistic (or a pair of test statistics) to use, using either the name of a standard function or a user-defined function. For a model that fits well the value of the statistic calculated from the observed data should not be unusual compared to the values calculated from the replicated data. In this example, the plots do not suggest clear lack-of-fit.</p>
+<p>The default setting for <code>pp_check</code> is to produce a plot
+that compares the values of test statistics for the observed and
+replicated data. The argument <code>stat</code> defines the test
+statistic (or a pair of test statistics) to use, using either the name
+of a standard function or a user-defined function. For a model that fits
+well the value of the statistic calculated from the observed data should
+not be unusual compared to the values calculated from the replicated
+data. In this example, the plots do not suggest clear lack-of-fit.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pp_check</span>(gpg)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">pp_check</span>(gpg, <span class="at">stat =</span> <span class="st">&quot;max&quot;</span>)</span>
@@ -244,23 +501,70 @@ div.csl-indent {
 </div>
 <div id="posterior-predictive-extreme-value-inference" class="section level2">
 <h2>Posterior predictive extreme value inference</h2>
-<p>Posterior predictive inferences for the largest value <span class="math inline">\(M_N\)</span> to be observed over a future time period of length <span class="math inline">\(N\)</span> years is performed by the <code>predict</code> method for the objects of class <code>evpost</code> returned from <code>rpost</code>. Objects returned from <code>predict.evpost</code> have class <code>evpred</code>. The <code>plot</code> method for these objects produces graphical summaries of the output from <code>predict</code>.</p>
-<p>To perform predictive inference about <span class="math inline">\(M_N\)</span> we need to provide, or assume, information about the timescale covered by the data. To do this we need to supply the mean number <code>npy</code> of non-missing observations per year, either in the call to <code>rpost</code> or the call to <code>predict</code>. For the GEV and OS models it is often the case that the input data are annual maxima, so <code>npy = 1</code> is the default value if <code>npy</code> is not supplied. For the PP model a similar assumption is made: see the documentation for <code>predict.evpost</code> for details. For the binomial-GP model (note that we need the binomial part in order to account for the rate at which the threshold is exceedance) <code>npy</code> must be provided by the user.</p>
-<p>Let <span class="math inline">\(F_{M_N}(z; \theta)\)</span> denote the distribution function of <span class="math inline">\(M_N\)</span> conditional on the parameters <span class="math inline">\(\theta\)</span> of an extreme value model and let <span class="math inline">\(\pi(\theta \mid x)\)</span> be the posterior distribution of <span class="math inline">\(\theta\)</span> given the observed data. Then, if we assume that given <span class="math inline">\(\theta\)</span> future observations are independent of the data <span class="math inline">\(x\)</span> then posterior predictive distribution function of <span class="math inline">\(M_N\)</span> given only the data <span class="math inline">\(x\)</span> is given by <span class="math display">\[ P(M_N \leqslant z \mid x) = \int F_{M_N}(z; \theta) \, \pi(\theta \mid x) {\rm ~d}\theta. \]</span> We estimate <span class="math inline">\(P(M_N \leqslant z)\)</span> using <span class="math display">\[ \hat{P}(M_N \leqslant z \mid x) = \frac1m \sum_{j=1}^m F_{M_N}(z; \theta_j), \]</span> where <span class="math inline">\(\theta_j, j=1, \ldots, m\)</span> is a sample from the posterior distribution <span class="math inline">\(\pi(\theta \mid x)\)</span>.</p>
-<p>The form of <span class="math inline">\(F_{M_N}(z; \theta)\)</span> depends on the extreme value model. The GEV, OS and PP models are each parameterised by the location, scale and shape parameters of a GEV distribution. Let <span class="math inline">\(G(z; \theta)\)</span> be the GEV distribution function for an annual maximum under a given such model, after appropriate adjustment for the value of <code>npy</code>. Then, <span class="math inline">\(F_{M_N}(z; \theta) = G(z; \theta)^{N}\)</span>. For the binomial-GP model, provided that <span class="math inline">\(z\)</span> is the greater than the threshold <span class="math inline">\(u\)</span>, <span class="math inline">\(F_{M_N}(z; \theta) = F(z; \theta)^{n_{py} N}\)</span>, where <span class="math inline">\(n_{py}\)</span> is the value of <code>npy</code> and <span class="math display">\[ F(z; \theta) = 1-p_u \left\{1+\xi\left(\frac{z-u}{\sigma_u}\right)\right\}^{-1/\xi}. \]</span> See <span class="citation">Northrop, Attalides, and Jonathan (2017)</span> for greater detail.</p>
-<p>We repeat the posterior simulation for the Gulf-of-Mexico example, changing <code>model = gp</code> to <code>model = bingp</code> in the call to <code>rpost</code> to add inferences about the probability of threshold exceedance based on a binomial distribution.</p>
+<p>Posterior predictive inferences for the largest value <span class="math inline">\(M_N\)</span> to be observed over a future time
+period of length <span class="math inline">\(N\)</span> years is
+performed by the <code>predict</code> method for the objects of class
+<code>evpost</code> returned from <code>rpost</code>. Objects returned
+from <code>predict.evpost</code> have class <code>evpred</code>. The
+<code>plot</code> method for these objects produces graphical summaries
+of the output from <code>predict</code>.</p>
+<p>To perform predictive inference about <span class="math inline">\(M_N\)</span> we need to provide, or assume,
+information about the timescale covered by the data. To do this we need
+to supply the mean number <code>npy</code> of non-missing observations
+per year, either in the call to <code>rpost</code> or the call to
+<code>predict</code>. For the GEV and OS models it is often the case
+that the input data are annual maxima, so <code>npy = 1</code> is the
+default value if <code>npy</code> is not supplied. For the PP model a
+similar assumption is made: see the documentation for
+<code>predict.evpost</code> for details. For the binomial-GP model (note
+that we need the binomial part in order to account for the rate at which
+the threshold is exceedance) <code>npy</code> must be provided by the
+user.</p>
+<p>Let <span class="math inline">\(F_{M_N}(z; \theta)\)</span> denote
+the distribution function of <span class="math inline">\(M_N\)</span>
+conditional on the parameters <span class="math inline">\(\theta\)</span> of an extreme value model and let
+<span class="math inline">\(\pi(\theta \mid x)\)</span> be the posterior
+distribution of <span class="math inline">\(\theta\)</span> given the
+observed data. Then, if we assume that given <span class="math inline">\(\theta\)</span> future observations are
+independent of the data <span class="math inline">\(x\)</span> then
+posterior predictive distribution function of <span class="math inline">\(M_N\)</span> given only the data <span class="math inline">\(x\)</span> is given by <span class="math display">\[ P(M_N \leqslant z \mid x) = \int F_{M_N}(z;
+\theta) \, \pi(\theta \mid x) {\rm ~d}\theta. \]</span> We estimate
+<span class="math inline">\(P(M_N \leqslant z)\)</span> using <span class="math display">\[ \hat{P}(M_N \leqslant z \mid x) = \frac1m
+\sum_{j=1}^m F_{M_N}(z; \theta_j), \]</span> where <span class="math inline">\(\theta_j, j=1, \ldots, m\)</span> is a sample from
+the posterior distribution <span class="math inline">\(\pi(\theta \mid
+x)\)</span>.</p>
+<p>The form of <span class="math inline">\(F_{M_N}(z; \theta)\)</span>
+depends on the extreme value model. The GEV, OS and PP models are each
+parameterised by the location, scale and shape parameters of a GEV
+distribution. Let <span class="math inline">\(G(z; \theta)\)</span> be
+the GEV distribution function for an annual maximum under a given such
+model, after appropriate adjustment for the value of <code>npy</code>.
+Then, <span class="math inline">\(F_{M_N}(z; \theta) = G(z;
+\theta)^{N}\)</span>. For the binomial-GP model, provided that <span class="math inline">\(z\)</span> is the greater than the threshold <span class="math inline">\(u\)</span>, <span class="math inline">\(F_{M_N}(z;
+\theta) = F(z; \theta)^{n_{py} N}\)</span>, where <span class="math inline">\(n_{py}\)</span> is the value of <code>npy</code>
+and <span class="math display">\[ F(z; \theta) = 1-p_u
+\left\{1+\xi\left(\frac{z-u}{\sigma_u}\right)\right\}^{-1/\xi}.
+\]</span> See <span class="citation">Northrop, Attalides, and Jonathan
+(2017)</span> for greater detail.</p>
+<p>We repeat the posterior simulation for the Gulf-of-Mexico example,
+changing <code>model = gp</code> to <code>model = bingp</code> in the
+call to <code>rpost</code> to add inferences about the probability of
+threshold exceedance based on a binomial distribution.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Binomial-GP model for Gulf-of-Mexico significant wave heights</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(gom)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="fu">quantile</span>(gom, <span class="at">probs =</span> <span class="fl">0.65</span>)</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>fp <span class="ot">&lt;-</span> <span class="fu">set_prior</span>(<span class="at">prior =</span> <span class="st">&quot;flat&quot;</span>, <span class="at">model =</span> <span class="st">&quot;gp&quot;</span>, <span class="at">min_xi =</span> <span class="sc">-</span><span class="dv">1</span>)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>bp <span class="ot">&lt;-</span> <span class="fu">set_bin_prior</span>(<span class="at">prior =</span> <span class="st">&quot;jeffreys&quot;</span>)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co"># We need to provide the mean number of observations per year (the data cover a period of 105 years)</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>npy_gom <span class="ot">&lt;-</span> <span class="fu">length</span>(gom)<span class="sc">/</span><span class="dv">105</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>bgpg <span class="ot">&lt;-</span> <span class="fu">rpost</span>(<span class="at">n =</span> <span class="dv">1000</span>, <span class="at">model =</span> <span class="st">&quot;bingp&quot;</span>, <span class="at">prior =</span> fp, <span class="at">thresh =</span> u, <span class="at">data =</span> gom,</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">bin_prior =</span> bp, <span class="at">npy =</span> npy_gom, <span class="at">nrep =</span> <span class="dv">50</span>)</span></code></pre></div>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="fu">quantile</span>(gom, <span class="at">probs =</span> <span class="fl">0.65</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>fp <span class="ot">&lt;-</span> <span class="fu">set_prior</span>(<span class="at">prior =</span> <span class="st">&quot;flat&quot;</span>, <span class="at">model =</span> <span class="st">&quot;gp&quot;</span>, <span class="at">min_xi =</span> <span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>bp <span class="ot">&lt;-</span> <span class="fu">set_bin_prior</span>(<span class="at">prior =</span> <span class="st">&quot;jeffreys&quot;</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># We need to provide the mean number of observations per year (the data cover a period of 105 years)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>npy_gom <span class="ot">&lt;-</span> <span class="fu">length</span>(gom)<span class="sc">/</span><span class="dv">105</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>bgpg <span class="ot">&lt;-</span> <span class="fu">rpost</span>(<span class="at">n =</span> <span class="dv">1000</span>, <span class="at">model =</span> <span class="st">&quot;bingp&quot;</span>, <span class="at">prior =</span> fp, <span class="at">thresh =</span> u, <span class="at">data =</span> gom,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">bin_prior =</span> bp, <span class="at">npy =</span> npy_gom, <span class="at">nrep =</span> <span class="dv">50</span>)</span></code></pre></div>
 <div id="posterior-predictive-density-and-distribution-functions" class="section level3">
 <h3>Posterior predictive density and distribution functions</h3>
-<p>We plot, for the analyses of the <code>portpirie</code> (GEV) and <code>gom</code> (binomial-GP) datasets, the estimated posterior predictive density functions and distributions functions of <span class="math inline">\(M_N\)</span> for <span class="math inline">\(N = 100\)</span> and <span class="math inline">\(N = 1000\)</span>. The argument <code>n_years</code> gives the value(s) of <span class="math inline">\(N\)</span>.</p>
+<p>We plot, for the analyses of the <code>portpirie</code> (GEV) and
+<code>gom</code> (binomial-GP) datasets, the estimated posterior
+predictive density functions and distributions functions of <span class="math inline">\(M_N\)</span> for <span class="math inline">\(N =
+100\)</span> and <span class="math inline">\(N = 1000\)</span>. The
+argument <code>n_years</code> gives the value(s) of <span class="math inline">\(N\)</span>.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># GEV (Portpirie)</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">predict</span>(gevp, <span class="at">type =</span> <span class="st">&quot;d&quot;</span>, <span class="at">n_years =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">1000</span>)), <span class="at">cex =</span> <span class="fl">0.7</span>)</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">predict</span>(gevp, <span class="at">type =</span> <span class="st">&quot;p&quot;</span>, <span class="at">n_years =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">1000</span>)), <span class="at">cex =</span> <span class="fl">0.7</span>)</span></code></pre></div>
@@ -269,17 +573,45 @@ div.csl-indent {
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">predict</span>(bgpg, <span class="at">type =</span> <span class="st">&quot;d&quot;</span>, <span class="at">n_years =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">1000</span>)), <span class="at">cex =</span> <span class="fl">0.7</span>)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">predict</span>(bgpg, <span class="at">type =</span> <span class="st">&quot;p&quot;</span>, <span class="at">n_years =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">1000</span>)), <span class="at">cex =</span> <span class="fl">0.7</span>)</span></code></pre></div>
 <p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAAAeFBMVEUAAAAAADoAAGYAOpAAZrY6AAA6ADo6AGY6OpA6ZpA6ZrY6kNtmAABmADpmAGZmkJBmtrZmtv+QOgCQOjqQOmaQZgCQZjqQtpCQ29uQ2/+2ZgC2Zjq225C2/7a2///bkDrb25Db/7bb////tmb/25D//7b//9v////Cg1vdAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAIlUlEQVR4nO2di3ajNhRFcZxM08bTTtKnaSe0xjb//4dFEmCb17k8BNfy2WtN4rElAXv0urIGooz0Eq19AtqhIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEGAmQVFd8NaguYtzl8Np6C5yqWgZU8g6vzLHAXOiAZB8o5QWOCcUNBc5foTFLGJ9RdHQaC4aJbCAxHUNkGlIFDcsoKOX/bZ+df97Zunnz+zLI2i9/Ln8HLDEfTy3BB02j19Zqev++MPn+7niHLDEfT6x74m6Pzb97wGHV8P+fvu54hy70hQf0x+fP33J6cgNe+75mSaWPqcZfG7+9l+otITmIUVa9Dh77/a+iAKcuSCjj+21aDHaWL95AayeNNSg9hJO4wgM9TfwGF+gXK9CpqhdAqSFzgrFDRXuRS07AlEt68oqLu4hQXJovnLYK9E0PTiZ43mr6aLAQoqg9P6b4comr8KOAIU1I8omr8KWddfcl1ckCCaX09QS3HLC8LR/GM3MUE0P6mTPu2iZ2kmQXFrCMLR/LRhPsmr5ps0HyxuYUHeyr1NONlR6IKcoqfP1qQ5cf7R8SWK6o29pbggBaW2/z9/bA/tia0f09BPu/f2FCELynvpyJlJO6rQaZc3v9h25UmHw4AFnXad7eaSxFQv20d1OQxZ0Ffnp+vSDab2JINq0OQL1Cco6RFkwmNbhdKu2hasoPgSTfUO86lL0zmlnF+QL8QnUL4oa9DE66m/8lUDpqIlFns0QecPVz87+6lQBeUzHDMN6r94M80uOqi0q6dqCNJqyEsNKuZABvEw/1CCrgIM6UQxJEEmkEjKaKOVB69B8fZgvjuJe5bNknK5qd4Hda5JByTItJ80F9AXamRlT95ZzdoEqVQ0TpBZzugLNYYc96oGaTQ0pok9n3bbw2k3aWU6ZEF589nszx8yP131rL0PUmho9VDj5gUFNYtrvtDFCEEwzhpUnPJBbFQnLTAjD1bDE2RX5AEDgtVab63O0rh5EGBIqBGeIMEAPyRYDU+QjTP6GVGDqmmiNkNjmphkwawjWG0WF54gEfJgtS5IG1omikEJyqvH9hBP2yHUIkinoTGd9GafmGh+nv1BUf09ZZrGDPNvdmyaaT0oPEFmkmME9a4odpbSWHJtCFJmaHwNintW7QcUd21FYxUa3QclcLooKu7mty41jpGjWM/uw2HF3TSrUATNeVwKAsW1CtIkaqCgKhCba0Uxgm+uzKho3kwROzfXDSsuQEHlelDXQsaw4iLBu6syfkVx1ESxUVzU9uu+BZWrYfNMFNsFKWL0imIyax8UlCA3lE2qP4ELmvO4XYLUqFIiqHEUCmovVl8VUiZIXxXSIUhfxamgIIBiQTpcLSyosSbdWAjSVpm01SB1VUiHoI4DaTCkWpAGQxQEUCGofdVMB54EiTdxQkFr6/IjSL6Js0VQ+zr1WngRJN+C1xjlm39f2ZAXQfJNnAJB8zzZZjQqatCkg3nGVx8k3MTZVWp/nVoST6OYdBNnZ6lqDK08D2obxIpP6kPbSorUCmozMuBWI7Ox7kSxfRCr0rR8EA0+lYmsO1HsF9RZZYbctWYq6w7zSFCW1e7lK/tkTlaeKAqP3Xezo/IDT75WnigOQ3RvqLqw8b+Hneg8E0V0dfpYeaKon7UXzNRDQQDfgjpvTXE3eBY0BHHkOv6DGQ8xOuF4KGjsIQIUNOr+Hg8kCAergw4RnCBBqDHoEMEJEgSrgw4RnCDWIAT+VmPQIcIThIPV8Lib4GktKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJ4FGTXZ93j2qT3JTLPT3wW5yiemVqlxZnKp6yW908QHMafoPNHfuzEXK+5YYropilpftb2pvqiHPZh4FdpcaYih8lkFyQkh/En6Phi7+RQPLKt93kdBS6hNEfqvjuo0uJMafVtg71lpCBH5r8Pyv+BKlMobfWkXUmONHqz675VWpipzGFSbX/PBYlOzLegOD9ze92CVez06fvO9lrCHE5QmVaSqfg0T2r6INFhPAsya7OulQs6ocS0AHMfI2EOe2lVWkkmJ8M0LSNIdBi/gtKyj5YJ2hT/op4FlbeLXF+QW9sXNzHXG+Q9g98mZhOqaGLFF7HiTtqdan7awhwDO+kyR1JsgHlfu5MuvyQSD/Pui8lUPDFIBw7z17UlXn+YP76U352JJ4pJedayHOnQiWJN0MoTxaImm+Mn0lAjLYMTUY7icqu0OFNNkOQwDFYBFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIMA9CUrf7QaQq/+dvgB3JKgUQ0EdPLwgsxflzy97e/32R2y2gZnX33Z2P1gUbf8rm1hSbpTxjR5B8dNnlkabiyCz9cvs6zztzJZ990H5x7x/2aHlEzWCig2DF0Gnr3v37mn3Zl9cCbJvTXygpxA1gqodnJcmZnecFU3KWqkEuX1zzqln1AhKGoLybubpn5d2QeVGVf/npUZQUSkugmz9OHYImvjU9wGoEeQale2DXJfj9tG3N7EFR3o1goqBabM/f2wP5w+3zfu0y8fyi6C3m1Esi5eoR3oE2T3Av3zZ23vwfHN90GYfX4/7tXnQEoOYJkGG6r+MqYGCABQEUCZIHxQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgI8D94BAgBayTYhwAAAABJRU5ErkJggg==" width="45%" /><img src="data:image/png;base64,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" width="45%" /></p>
-<p>As one would expect there is greater uncertainty for <span class="math inline">\(N=1000\)</span> than for <span class="math inline">\(N=100\)</span>. In making inferences over a period of length 1000 years a large degree of uncertainty is to be expected. For the Gulf-of-Mexico data in particular, this results in appreciable probability on values of significant wave height thought by experts to be physically unrealistic.</p>
+<p>As one would expect there is greater uncertainty for <span class="math inline">\(N=1000\)</span> than for <span class="math inline">\(N=100\)</span>. In making inferences over a period
+of length 1000 years a large degree of uncertainty is to be expected.
+For the Gulf-of-Mexico data in particular, this results in appreciable
+probability on values of significant wave height thought by experts to
+be physically unrealistic.</p>
 </div>
 <div id="posterior-predictive-intervals" class="section level3">
 <h3>Posterior predictive intervals</h3>
-<p>The default setting for <code>predict.evpost</code> is to estimate posterior predictive intervals for <span class="math inline">\(M_N\)</span>. In addition to <code>n_years</code> we can specify the probability level <code>level</code> of the interval(s), that is, the estimated probability that <span class="math inline">\(M_N\)</span> lies within the interval. Two types of interval can be calculated. One is an equi-tailed interval in which the estimated probability that <span class="math inline">\(M_N\)</span> lies below the lower limit of the interval is equal to the estimated probability that <span class="math inline">\(M_N\)</span> lies above the upper limit of the interval. Typically, there will exist intervals of the required probability level that is shorter than the equi-tailed interval. <code>predict.evpost</code> can search for the shortest such interval. If the estimated posterior predictive distribution is unimodal then this interval is the <em>highest predictive density</em> (HPD) interval, with the property that at all values inside the interval the estimated posterior predictive density is greater than at all values outside the interval. If <code>hpd = FALSE</code> then only equi-tailed intervals are returned. If <code>hpd = TRUE</code> then both types of interval are returned.</p>
-<p>The <code>plot.evpred</code> method plots the estimated posterior predictive intervals for each value in <code>n_years</code> and each level in <code>level</code>. The argument <code>which_int</code> controls which of the two types of interval are included. The dashed lines give the HPD intervals and the solid lines the equi-tailed intervals. Each line is labelled by the level of the interval.</p>
+<p>The default setting for <code>predict.evpost</code> is to estimate
+posterior predictive intervals for <span class="math inline">\(M_N\)</span>. In addition to <code>n_years</code>
+we can specify the probability level <code>level</code> of the
+interval(s), that is, the estimated probability that <span class="math inline">\(M_N\)</span> lies within the interval. Two types
+of interval can be calculated. One is an equi-tailed interval in which
+the estimated probability that <span class="math inline">\(M_N\)</span>
+lies below the lower limit of the interval is equal to the estimated
+probability that <span class="math inline">\(M_N\)</span> lies above the
+upper limit of the interval. Typically, there will exist intervals of
+the required probability level that is shorter than the equi-tailed
+interval. <code>predict.evpost</code> can search for the shortest such
+interval. If the estimated posterior predictive distribution is unimodal
+then this interval is the <em>highest predictive density</em> (HPD)
+interval, with the property that at all values inside the interval the
+estimated posterior predictive density is greater than at all values
+outside the interval. If <code>hpd = FALSE</code> then only equi-tailed
+intervals are returned. If <code>hpd = TRUE</code> then both types of
+interval are returned.</p>
+<p>The <code>plot.evpred</code> method plots the estimated posterior
+predictive intervals for each value in <code>n_years</code> and each
+level in <code>level</code>. The argument <code>which_int</code>
+controls which of the two types of interval are included. The dashed
+lines give the HPD intervals and the solid lines the equi-tailed
+intervals. Each line is labelled by the level of the interval.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>i_gevp <span class="ot">&lt;-</span> <span class="fu">predict</span>(gevp, <span class="at">n_years =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">1000</span>), <span class="at">level =</span> <span class="fu">c</span>(<span class="dv">50</span>, <span class="dv">95</span>, <span class="dv">99</span>), <span class="at">hpd =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(i_gevp, <span class="at">which_int =</span> <span class="st">&quot;both&quot;</span>)</span></code></pre></div>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(i_gevp, <span class="at">which_int =</span> <span class="st">&quot;both&quot;</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in graphics::par(u): argument 1 does not name a graphical parameter</span></span></code></pre></div>
 <p><img src="data:image/png;base64,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" /><!-- --></p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>i_bgpp <span class="ot">&lt;-</span> <span class="fu">predict</span>(bgpg, <span class="at">n_years =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">1000</span>), <span class="at">level =</span> <span class="fu">c</span>(<span class="dv">50</span>, <span class="dv">95</span>, <span class="dv">99</span>), <span class="at">hpd =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(i_bgpp, <span class="at">which_int =</span> <span class="st">&quot;both&quot;</span>)</span></code></pre></div>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(i_bgpp, <span class="at">which_int =</span> <span class="st">&quot;both&quot;</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in graphics::par(u): argument 1 does not name a graphical parameter</span></span></code></pre></div>
 <p><img src="data:image/png;base64,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" /><!-- --></p>
 </div>
 </div>
@@ -290,16 +622,24 @@ div.csl-indent {
 </script>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-bayesplot" class="csl-entry">
-Gabry, Jonah, and Tristan Mahr. 2017. <em>Bayesplot: Plotting for Bayesian Models</em>. <a href="https://CRAN.R-project.org/package=bayesplot">https://CRAN.R-project.org/package=bayesplot</a>.
+Gabry, Jonah, and Tristan Mahr. 2017. <em>Bayesplot: Plotting for
+Bayesian Models</em>. <a href="https://CRAN.R-project.org/package=bayesplot">https://CRAN.R-project.org/package=bayesplot</a>.
 </div>
 <div id="ref-BDA2014" class="csl-entry">
-Gelman, A., J. B. Carlin, Dunson Stern H. S., and D. B. Rubin. 2014. <em>Bayesian Data Analysis</em>. Third edition. London: Chapman &amp; Hall / CRC Press.
+Gelman, A., J. B. Carlin, Dunson Stern H. S., and D. B. Rubin. 2014.
+<em>Bayesian Data Analysis</em>. Third edition. London: Chapman &amp;
+Hall / CRC Press.
 </div>
 <div id="ref-NAJ2016" class="csl-entry">
-Northrop, P. J., N. Attalides, and P. Jonathan. 2017. <span>“Cross-Validatory Extreme Value Threshold Selection and Uncertainty with Application to Ocean Storm Severity.”</span> <em>Journal of the Royal Statistical Society: Series C (Applied Statistics)</em> 66 (1): 93–120. doi:<a href="https://doi.org/10.1111/rssc.12159">10.1111/rssc.12159</a>.
+Northrop, P. J., N. Attalides, and P. Jonathan. 2017.
+<span>“Cross-Validatory Extreme Value Threshold Selection and
+Uncertainty with Application to Ocean Storm Severity.”</span>
+<em>Journal of the Royal Statistical Society: Series C (Applied
+Statistics)</em> 66 (1): 93–120. doi:<a href="https://doi.org/10.1111/rssc.12159">10.1111/rssc.12159</a>.
 </div>
 <div id="ref-ggplot2" class="csl-entry">
-Wickham, Hadley. 2009. <em><span class="nocase">ggplot2</span>: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="https://ggplot2.tidyverse.org/">https://ggplot2.tidyverse.org/</a>.
+Wickham, Hadley. 2009. <em><span class="nocase">ggplot2</span>: Elegant
+Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="https://ggplot2.tidyverse.org/">https://ggplot2.tidyverse.org/</a>.
 </div>
 </div>
 </div>

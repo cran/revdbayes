@@ -1,3 +1,14 @@
+# revdbayes 1.5.0
+
+## New features
+
+* When calling `predict.evpost(object, ...)`, if `object$model = "bingp"` and `object$sim_vals` has a third column named `"theta"` containing a posterior sample for the extremal index, then predictive inferences incorporate this posterior sample.  This feature is introduced to facilitate the `predict.blite()` function in the upcoming version 1.1.0 of the `lite` package.
+
+## Bug fixes and minor improvements
+
+* Dependence on the previously suggested package evdbayes has been removed because evdbayes has been archived on CRAN.
+* WARNINGs in the CRAN package check results, like "init.c:120:52: warning: a function declaration without a prototype is deprecated in all versions of C [-Wstrict-prototypes] extern SEXP _revdbayes_RcppExport_registerCCallable();" have been avoided.
+
 # revdbayes 1.4.9
 
 ## New features
@@ -184,7 +195,7 @@
 
 ## Bug fixes and minor improvements
 
-* The spurious warning messages relating to checking that the model argument to `rpost()` is consistent with the prior set using `set-prior()` have been corrected.  These occurred when `model = "pp"` or `model = "os"`.
+* The spurious warning messages relating to checking that the model argument to `rpost()` is consistent with the prior set using `set_prior()` have been corrected.  These occurred when `model = "pp"` or `model = "os"`.
   
 * The hyperparameter in the MDI prior was `a` in the documentation and `a_mdi` in the code.  Now it is `a` everywhere.
   

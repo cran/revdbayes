@@ -1,14 +1,14 @@
 # =========================== predict.evpost ===========================
 
-#' Predictive inference for the largest value observed in N years.
+#' Predictive inference for the largest value observed in \eqn{N} years.
 #'
 #' \code{predict} method for class "evpost".  Performs predictive inference
 #' about the largest value to be observed over a future time period of
-#' N years.  Predictive inferences accounts for uncertainty in model
+#' \eqn{N} years.  Predictive inferences accounts for uncertainty in model
 #' parameters and for uncertainty owing to the variability of future
 #' observations.
 #'
-#' @param object An object of class "evpost", a result of a call to
+#' @param object An object of class \code{"evpost"}, a result of a call to
 #'   \code{\link{rpost}} or \code{\link{rpost_rcpp}} with \code{model = "gev"},
 #'   \code{model = "os"}, \code{model = "pp"} or \code{model == "bingp"}.
 #'   Calling these functions after a call to \code{rpost} or \code{rpost_rcpp}
@@ -16,6 +16,11 @@
 #'   the probability of threshold exceedance are required, in addition to the
 #'   distribution of threshold excesses. The model is stored in
 #'   \code{object$model}.
+#'
+#'   \code{object} may also be an object created within the function
+#'   \code{predict.blite} in the \code{lite} package. In this case
+#'   \code{object$sim_vals} has a column named \code{"theta"} containing
+#'   a posterior sample of values of the extremal index.
 #' @param type A character vector.  Indicates which type of inference is
 #'   required:
 #' \itemize{
@@ -55,7 +60,7 @@
 #' @param x_num A numeric scalar.  If \code{type = "p"} or \code{type = "d"}
 #'   and \code{x} is not supplied then \code{x_num} gives the number of values
 #'   in \code{x} for each value in \code{n_years}.
-#' @param n_years A numeric vector. Values of N.
+#' @param n_years A numeric vector. Values of \eqn{N}.
 #' @param npy A numeric scalar. The mean number of observations per year
 #'   of data, after excluding any missing values, i.e. the number of
 #'   non-missing observations divided by total number of years' worth of
@@ -83,12 +88,12 @@
 #' @param level A numeric vector of values in (0, 100).
 #'   Only relevant when \code{type = "i"}.
 #'   Levels of predictive intervals for the largest value observed in
-#'   N years, i.e. level\% predictive intervals are returned.
+#'   \eqn{N} years, i.e. level\% predictive intervals are returned.
 #' @param hpd A logical scalar.
 #'   Only relevant when \code{type = "i"}.
 #'
 #'   If \code{hpd = FALSE} then the interval is
-#'   equi-tailed, with its limits produced by
+#'   equi-tailed, with its limits produced by \cr
 #'   \code{predict.evpost(}\code{object, type ="q", x = p)},
 #'   where \code{p = c((1-level/100)/2,} \code{(1+level/100)/2)}.
 #'
@@ -270,7 +275,6 @@
 #' plot(predict(gevp, type = "r"))
 #'
 #' ### Binomial-GP
-#' data(gom)
 #' u <- quantile(gom, probs = 0.65)
 #' fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
 #' bp <- set_bin_prior(prior = "jeffreys")
@@ -897,6 +901,21 @@ pred_dbingp <- function(ev_obj, x, n_years = 100, npy = NULL,
   # For each value in n_years calculate the distribution function of the
   # n_years maximum.
   mult <- npy * n_years
+  # If ev_obj$sim_vals contains a posterior sample for the extremal index
+  # theta then multiply mult by these values
+  if ("theta" %in% colnames(ev_obj$sim_vals)) {
+    theta <- ev_obj$sim_vals[, "theta"]
+    # Check that all the values of theta are non-negative
+    if (any(theta < 0)) {
+      stop("The posterior sample for the extremal index has negative values")
+    }
+    # Set to 1 any values of theta that are > 1
+    if (any(theta > 1)) {
+      theta <- pmin(theta, 1)
+      warning("Some values of the extremal index have been decreased to 1")
+    }
+    mult <- mult * theta
+  }
   for (i in 1:n_y) {
     d[, i] <- sapply(x[, i], temp, p_u = p_u, scale = scale, shape = shape,
                      thresh = thresh, mult = mult[i])
@@ -940,6 +959,21 @@ pred_pbingp <- function(ev_obj, q, n_years = 100, npy = NULL,
   # For each value in n_years calculate the distribution function of the
   # n_years maximum.
   mult <- npy * n_years
+  # If ev_obj$sim_vals contains a posterior sample for the extremal index
+  # theta then multiply mult by these values
+  if ("theta" %in% colnames(ev_obj$sim_vals)) {
+    theta <- ev_obj$sim_vals[, "theta"]
+    # Check that all the values of theta are non-negative
+    if (any(theta < 0)) {
+      stop("The posterior sample for the extremal index has negative values")
+    }
+    # Set to 1 any values of theta that are > 1
+    if (any(theta > 1)) {
+      theta <- pmin(theta, 1)
+      warning("Some values of the extremal index have been decreased to 1")
+    }
+    mult <- mult * theta
+  }
   for (i in 1:n_y) {
     p[, i] <- sapply(q[, i], temp, p_u = p_u, scale = scale, shape = shape,
                      thresh = thresh, mult = mult[i])
@@ -1003,6 +1037,21 @@ pred_qbingp <- function(ev_obj, p, n_years = 100, npy = NULL,
     }
   }
   mult <- npy * n_years
+  # If ev_obj$sim_vals contains a posterior sample for the extremal index
+  # theta then multiply mult by these values
+  if ("theta" %in% colnames(ev_obj$sim_vals)) {
+    theta <- ev_obj$sim_vals[, "theta"]
+    # Check that all the values of theta are non-negative
+    if (any(theta < 0)) {
+      stop("The posterior sample for the extremal index has negative values")
+    }
+    # Set to 1 any values of theta that are > 1
+    if (any(theta > 1)) {
+      theta <- pmin(theta, 1)
+      warning("Some values of the extremal index have been decreased to 1")
+    }
+    mult <- mult * theta
+  }
   lower <- ev_obj$thresh
   upper <- big_q
   u_minus_l <- upper - lower
@@ -1073,6 +1122,21 @@ pred_rbingp <- function(ev_obj = ev_obj, n_years = n_years, npy = npy) {
   r_mat <- matrix(NA, nrow = n_sim, ncol = n_y)
   #
   mult <- npy * n_years
+  # If ev_obj$sim_vals contains a posterior sample for the extremal index
+  # theta then multiply mult by these values
+  if ("theta" %in% colnames(ev_obj$sim_vals)) {
+    theta <- ev_obj$sim_vals[, "theta"]
+    # Check that all the values of theta are non-negative
+    if (any(theta < 0)) {
+      stop("The posterior sample for the extremal index has negative values")
+    }
+    # Set to 1 any values of theta that are > 1
+    if (any(theta > 1)) {
+      theta <- pmin(theta, 1)
+      warning("Some values of the extremal index have been decreased to 1")
+    }
+    mult <- mult * theta
+  }
   # We use the sample underlying simulated uniforms for each value in n_years.
   u <- stats::runif(n_sim)
   for (i in 1:n_y) {

@@ -20,7 +20,6 @@ pn <- set_prior(prior = "norm", model = "gev", mean = c(0,0,0), cov = mat)
 gevp  <- rpost(n = n, model = "gev", prior = pn, data = portpirie, nrep = 50)
 
 ### GP model for Gulf-of-Mexico significant wave heights
-data(gom)
 u <- quantile(gom, probs = 0.65)
 fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
 gpg <- rpost(n = 1000, model = "gp", prior = fp, thresh = u, data = gom, nrep = 50)
@@ -47,7 +46,6 @@ pp_check(gpg, stat = "iqr")
 
 ## -----------------------------------------------------------------------------
 ### Binomial-GP model for Gulf-of-Mexico significant wave heights
-data(gom)
 u <- quantile(gom, probs = 0.65)
 fp <- set_prior(prior = "flat", model = "gp", min_xi = -1)
 bp <- set_bin_prior(prior = "jeffreys")

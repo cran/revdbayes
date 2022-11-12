@@ -12,29 +12,42 @@
 
 <meta name="author" content="Paul J. Northrop" />
 
-<meta name="date" content="2022-05-07" />
+<meta name="date" content="2022-11-11" />
 
 <title>Faster simulation using revdbayes</title>
 
-<script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
 
 <style type="text/css">
-  code{white-space: pre-wrap;}
-  span.smallcaps{font-variant: small-caps;}
-  span.underline{text-decoration: underline;}
-  div.column{display: inline-block; vertical-align: top; width: 50%;}
-  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-  ul.task-list{list-style: none;}
-    </style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
 
 
 <style type="text/css">
-  code {
-    white-space: pre;
-  }
-  .sourceCode {
-    overflow: visible;
-  }
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
@@ -52,55 +65,54 @@ pre > code.sourceCode { white-space: pre-wrap; }
 pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
-  { counter-reset: source-line 0; }
+{ counter-reset: source-line 0; }
 pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
+{ position: relative; left: -4em; counter-increment: source-line; }
 pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
 div.sourceCode
-  {   }
+{ }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
 </style>
 <script>
 // apply pandoc div.sourceCode style to pre.sourceCode instead
@@ -109,13 +121,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
+    var j = 0;
+    while (j < rules.length) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -127,29 +146,209 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 <style type="text/css">
-/* for pandoc --citeproc since 2.11 */
+
 div.csl-bib-body { }
 div.csl-entry {
-  clear: both;
+clear: both;
 }
 .hanging div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
+margin-left:2em;
+text-indent:-2em;
 }
 div.csl-left-margin {
-  min-width:2em;
-  float:left;
+min-width:2em;
+float:left;
 }
 div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
+margin-left:2em;
+padding-left:1em;
 }
 div.csl-indent {
-  margin-left: 2em;
+margin-left: 2em;
 }
 </style>
 
-<link rel="stylesheet" href="data:text/css,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" type="text/css" />
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
 
 
 
@@ -163,42 +362,62 @@ div.csl-indent {
 
 <h1 class="title toc-ignore">Faster simulation using revdbayes</h1>
 <h4 class="author">Paul J. Northrop</h4>
-<h4 class="date">2022-05-07</h4>
+<h4 class="date">2022-11-11</h4>
 
 
 <div id="TOC">
 <ul>
-<li><a href="#performance-comparisons">Performance comparisons</a>
+<li><a href="#performance-comparisons" id="toc-performance-comparisons">Performance comparisons</a>
 <ul>
-<li><a href="#gp_example">Generalised Pareto (GP) model</a></li>
-<li><a href="#generalised-extreme-value-gev-model">Generalised Extreme Value (GEV) model</a></li>
-<li><a href="#point-process-pp-model">Point Process (PP) model</a></li>
+<li><a href="#gp_example" id="toc-gp_example">Generalised Pareto (GP)
+model</a></li>
+<li><a href="#generalised-extreme-value-gev-model" id="toc-generalised-extreme-value-gev-model">Generalised Extreme Value
+(GEV) model</a></li>
+<li><a href="#point-process-pp-model" id="toc-point-process-pp-model">Point Process (PP) model</a></li>
 </ul></li>
-<li><a href="#cpp_fun">Providing a user-defined prior</a></li>
-<li><a href="#references">References</a></li>
+<li><a href="#cpp_fun" id="toc-cpp_fun">Providing a user-defined
+prior</a></li>
+<li><a href="#references" id="toc-references">References</a></li>
 </ul>
 </div>
 
-<p>This vignette introduces a new feature of <em>revdbayes</em>: reducing posterior simulation time by performing the most time-consuming tasks using C++ functions. This achieved using a new facility in the <em>rust</em> package <span class="citation">(Northrop 2017)</span>, which in turn uses the <strong>Rcpp</strong> package <span class="citation">(Eddelbuettel and Francois 2011)</span>. The result is a new function <code>rpost_rcpp</code>, which has the same structure as the existing function <code>rpost</code>. From a user’s perspective the only difference between these two functions occurs if they wish to supply their own prior distribution: <code>rpost_rcpp</code> requires an external pointer to a C++ function (see <a href="#cpp_fun">Providing a user-defined prior</a>), whereas <code>rpost</code> requires an input R function (see the vignette <a href="revdbayes-a-vignette.html">Introducing revdbayes</a>.</p>
-<p>Before we deal with user-supplied priors we compare posterior simulation times using <code>rpost</code> and <code>rpost_rcpp</code> for examples based on in-built prior distributions. We use the default settings of <code>rpost</code> and <code>rpost_rcpp</code> throughout. We also compare the speed of these functions with the function <code>posterior</code> in the <strong>evdbayes</strong> package <span class="citation">(Stephenson and Ribatet 2014)</span>, using the <strong>microbenchmark</strong> package <span class="citation">(Mersmann 2015)</span>.</p>
+<p>This vignette introduces a new feature of <em>revdbayes</em>:
+reducing posterior simulation time by performing the most time-consuming
+tasks using C++ functions. This achieved using a new facility in the
+<em>rust</em> package <span class="citation">(Northrop 2017)</span>,
+which in turn uses the <strong>Rcpp</strong> package <span class="citation">(Eddelbuettel and Francois 2011)</span>. The result is
+a new function <code>rpost_rcpp</code>, which has the same structure as
+the existing function <code>rpost</code>. From a user’s perspective the
+only difference between these two functions occurs if they wish to
+supply their own prior distribution: <code>rpost_rcpp</code> requires an
+external pointer to a C++ function (see <a href="#cpp_fun">Providing a
+user-defined prior</a>), whereas <code>rpost</code> requires an input R
+function (see the vignette <a href="revdbayes-a-vignette.html">Introducing revdbayes</a>.</p>
+<p>Before we deal with user-supplied priors we compare posterior
+simulation times using <code>rpost</code> and <code>rpost_rcpp</code>
+for examples based on in-built prior distributions. We use the default
+settings of <code>rpost</code> and <code>rpost_rcpp</code> throughout.
+We also compare the speed of these functions with the function
+<code>posterior</code> in the <strong>evdbayes</strong> package <span class="citation">(Stephenson and Ribatet 2014)</span>, using the
+<strong>microbenchmark</strong> package <span class="citation">(Mersmann
+2015)</span>.</p>
 <div id="performance-comparisons" class="section level2">
 <h2>Performance comparisons</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(revdbayes)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Are microbenchmark and evdbayes available?</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Is the microbenchmark package available?</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>got_microbenchmark <span class="ot">&lt;-</span> <span class="fu">requireNamespace</span>(<span class="st">&quot;microbenchmark&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>got_evdbayes <span class="ot">&lt;-</span> <span class="fu">requireNamespace</span>(<span class="st">&quot;evdbayes&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (got_microbenchmark) {</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(microbenchmark)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (got_evdbayes) {</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(evdbayes)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the number of posterior samples required.</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">46</span>)</span></code></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (got_microbenchmark) {</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(microbenchmark)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the number of posterior samples required.</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">46</span>)</span></code></pre></div>
 <div id="gp_example" class="section level3">
 <h3>Generalised Pareto (GP) model</h3>
-<p>We repeat the analysis of the Gulf of Mexico Wave Height Data from the <a href="revdbayes-a-vignette.html">Introducing revdbayes</a> vignette to check that using Rcpp does indeed reduce computation time.</p>
+<p>We repeat the analysis of the Gulf of Mexico Wave Height Data from
+the <a href="revdbayes-a-vignette.html">Introducing revdbayes</a>
+vignette to check that using Rcpp does indeed reduce computation
+time.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="fu">quantile</span>(gom, <span class="at">probs =</span> <span class="fl">0.65</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>fp <span class="ot">&lt;-</span> <span class="fu">set_prior</span>(<span class="at">prior =</span> <span class="st">&quot;flat&quot;</span>, <span class="at">model =</span> <span class="st">&quot;gp&quot;</span>, <span class="at">min_xi =</span> <span class="sc">-</span><span class="dv">1</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (got_microbenchmark) {</span>
@@ -212,113 +431,146 @@ div.csl-indent {
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(res, <span class="at">signif =</span> <span class="dv">2</span>)</span>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>}  </span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Unit: milliseconds</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        expr min    lq  mean median    uq   max neval</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       rpost 101 107.0 109.0  109.0 111.0 121.0   100</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp  19  19.7  21.4   20.2  21.2  92.2   100</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        expr  min    lq  mean median    uq   max neval</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       rpost 97.1 107.0 110.0  108.0 112.0 174.0   100</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp 19.1  19.8  20.8   20.2  21.1  28.6   100</span></span>
 <span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Unit: relative</span></span>
 <span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        expr min  lq mean median  uq max neval</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       rpost 5.3 5.4  5.1    5.4 5.3 1.3   100</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       rpost 5.1 5.4  5.3    5.4 5.3 6.1   100</span></span>
 <span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp 1.0 1.0  1.0    1.0 1.0 1.0   100</span></span></code></pre></div>
-<p>In this example <code>rpost_rcpp</code> is indeed much faster than <code>rpost</code>.</p>
+<p>In this example <code>rpost_rcpp</code> is indeed much faster than
+<code>rpost</code>.</p>
 </div>
 <div id="generalised-extreme-value-gev-model" class="section level3">
 <h3>Generalised Extreme Value (GEV) model</h3>
-<p>We repeat the analysis of the Port Pirie annual maximum sea level data from the <a href="revdbayes-a-vignette.html">Introducing revdbayes</a>. We add to the comparison the example calculations that feature in the <strong>evdbayes</strong> user guide, based on the <code>posterior</code> function.</p>
+<p>We repeat the analysis of the Port Pirie annual maximum sea level
+data from the <a href="revdbayes-a-vignette.html">Introducing
+revdbayes</a>.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mat <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="fu">c</span>(<span class="dv">10000</span>, <span class="dv">10000</span>, <span class="dv">100</span>))</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>pn <span class="ot">&lt;-</span> <span class="fu">set_prior</span>(<span class="at">prior =</span> <span class="st">&quot;norm&quot;</span>, <span class="at">model =</span> <span class="st">&quot;gev&quot;</span>, <span class="at">mean =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">cov =</span> mat)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Tuning parameters from the evdbayes user guide.</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>t0 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">3.87</span>, <span class="fl">0.2</span>, <span class="sc">-</span><span class="fl">0.05</span>) </span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">c</span>(.<span class="dv">06</span>, .<span class="dv">25</span>, .<span class="dv">25</span>)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (got_microbenchmark) {</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (got_evdbayes) {</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    res <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">rpost =</span> <span class="fu">rpost</span>(<span class="at">n =</span> n, <span class="at">model =</span> <span class="st">&quot;gev&quot;</span>, <span class="at">prior =</span> pn, <span class="at">data =</span> portpirie),</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">rpost_rcpp =</span> <span class="fu">rpost_rcpp</span>(<span class="at">n =</span> n, <span class="at">model =</span> <span class="st">&quot;gev&quot;</span>, <span class="at">prior =</span> pn, </span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>                            <span class="at">data =</span> portpirie),</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">evdbayes =</span> <span class="fu">posterior</span>(<span class="at">n =</span> n, <span class="at">init =</span> t0, <span class="at">prior =</span> pn, <span class="at">lh =</span> <span class="st">&quot;gev&quot;</span>, </span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>                         <span class="at">data =</span> portpirie, <span class="at">psd =</span> s, <span class="at">burn =</span> <span class="dv">0</span>)</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    res <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">rpost =</span> <span class="fu">rpost</span>(<span class="at">n =</span> n, <span class="at">model =</span> <span class="st">&quot;gev&quot;</span>, <span class="at">prior =</span> pn, <span class="at">data =</span> portpirie),</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">rpost_rcpp =</span> <span class="fu">rpost_rcpp</span>(<span class="at">n =</span> n, <span class="at">model =</span> <span class="st">&quot;gev&quot;</span>, <span class="at">prior =</span> pn, </span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>                              <span class="at">data =</span> portpirie)</span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">options</span>(<span class="at">microbenchmark.unit =</span> <span class="cn">NULL</span>)</span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(res, <span class="at">signif =</span> <span class="dv">3</span>)</span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">options</span>(<span class="at">microbenchmark.unit =</span> <span class="st">&quot;relative&quot;</span>)</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(res, <span class="at">signif =</span> <span class="dv">2</span>)</span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>}  </span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Unit: milliseconds</span></span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        expr   min    lq  mean median    uq   max neval</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       rpost 256.0 268.0 274.0  272.0 277.0 352.0   100</span></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp  66.9  70.1  72.3   71.9  74.2  80.2   100</span></span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    evdbayes 195.0 204.0 208.0  207.0 209.0 290.0   100</span></span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Unit: relative</span></span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        expr min  lq mean median  uq max neval</span></span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       rpost 3.8 3.8  3.8    3.8 3.7 4.4   100</span></span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp 1.0 1.0  1.0    1.0 1.0 1.0   100</span></span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    evdbayes 2.9 2.9  2.9    2.9 2.8 3.6   100</span></span></code></pre></div>
-<p>This comparison is generous to <code>posterior</code> because the burn-in has been set to zero and <code>posterior</code> produces a dependent sample rather than a random sample. The <em>effective sample size</em> of an MCMC sample from <code>posterior</code> varies between simulations and across parameters. The <code>effectiveSize</code> function in the <strong>coda</strong> package <span class="citation">(Plummer et al. 2006)</span> suggests that the effective sample size in this example is of the order of 100 to 200, whereas the <strong>revdbayes</strong> functions <code>rpost</code> and <code>rpost_rcpp</code> produce random samples of size 1000. <code>rpost</code> is a little slower than <code>posterior</code> while <code>rpost_rcpp</code> is much faster than <code>posterior</code>.</p>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (got_microbenchmark) {</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  res <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">rpost =</span> <span class="fu">rpost</span>(<span class="at">n =</span> n, <span class="at">model =</span> <span class="st">&quot;gev&quot;</span>, <span class="at">prior =</span> pn, <span class="at">data =</span> portpirie),</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">rpost_rcpp =</span> <span class="fu">rpost_rcpp</span>(<span class="at">n =</span> n, <span class="at">model =</span> <span class="st">&quot;gev&quot;</span>, <span class="at">prior =</span> pn, </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                            <span class="at">data =</span> portpirie)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>}    </span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">microbenchmark.unit =</span> <span class="cn">NULL</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res, <span class="at">signif =</span> <span class="dv">3</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Unit: milliseconds</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        expr   min    lq  mean median    uq max neval</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       rpost 262.0 278.0 318.0  295.0 328.0 650   100</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp  65.1  71.7  81.7   75.8  82.6 213   100</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">microbenchmark.unit =</span> <span class="st">&quot;relative&quot;</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res, <span class="at">signif =</span> <span class="dv">2</span>)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Unit: relative</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        expr min  lq mean median uq max neval</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       rpost   4 3.9  3.9    3.9  4 3.1   100</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp   1 1.0  1.0    1.0  1 1.0   100</span></span></code></pre></div>
+<p>Comparison to the example calculations that feature in the
+<strong>evdbayes</strong> user guide, based on the
+<code>posterior</code> function, are not shown because
+<strong>evdbayes</strong> is archived on CRAN. This comparison shows
+that <code>rpost_rcpp</code> is approximately a factor 3 faster than
+<code>posterior</code>. This comparison is generous to
+<code>posterior</code> because the burn-in was set to zero and
+<code>posterior</code> produces a dependent sample rather than a random
+sample. The <em>effective sample size</em> of an MCMC sample from
+<code>posterior</code> varies between simulations and across parameters.
+The <code>effectiveSize</code> function in the <strong>coda</strong>
+package <span class="citation">(Plummer et al. 2006)</span> suggests
+that the effective sample size in this example is of the order of 100 to
+200, whereas the <strong>revdbayes</strong> functions <code>rpost</code>
+and <code>rpost_rcpp</code> produce random samples of size 1000.
+<code>rpost</code> is a little slower than <code>posterior</code>.</p>
 </div>
 <div id="point-process-pp-model" class="section level3">
 <h3>Point Process (PP) model</h3>
-<p>We compare the computational efficiencies of <code>rpost</code>, <code>rpost_rcpp</code> and the evdbayes function <code>posterior</code> when performing the analysis of daily rainfall totals from the <a href="revdbayes-a-vignette.html">Introducing revdbayes</a>.</p>
+<p>We compare the computational efficiencies of <code>rpost</code> and
+<code>rpost_rcpp</code> when performing the analysis of daily rainfall
+totals from the <a href="revdbayes-a-vignette.html">Introducing
+revdbayes</a>.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Informative prior set using revdbayes</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>pr2 <span class="ot">&lt;-</span> <span class="fu">set_prior</span>(<span class="at">prob =</span> <span class="dv">10</span><span class="sc">^-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>), <span class="at">shape =</span> <span class="fu">c</span>(<span class="fl">38.9</span>, <span class="fl">7.1</span>, <span class="dv">47</span>),</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">scale =</span> <span class="fu">c</span>(<span class="fl">1.5</span>, <span class="fl">6.3</span>, <span class="fl">2.6</span>), <span class="at">model =</span> <span class="st">&quot;gev&quot;</span>, <span class="at">prior =</span> <span class="st">&quot;quant&quot;</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Tuning parameters from the evdbayes user guide.</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>t0 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">43.2</span>, <span class="fl">7.64</span>, <span class="fl">0.32</span>) </span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, .<span class="dv">2</span>, .<span class="dv">07</span>)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (got_microbenchmark) {</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (got_evdbayes) {</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Informative prior set using evdbayes</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    pr <span class="ot">&lt;-</span> <span class="fu">prior.quant</span>(<span class="at">prob =</span> <span class="dv">10</span><span class="sc">^-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>), <span class="at">shape =</span> <span class="fu">c</span>(<span class="fl">38.9</span>, <span class="fl">7.1</span>, <span class="dv">47</span>), </span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>                      <span class="at">scale =</span> <span class="fu">c</span>(<span class="fl">1.5</span>, <span class="fl">6.3</span>, <span class="fl">2.6</span>))</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    res <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">rpost =</span> <span class="fu">rpost</span>(<span class="at">n =</span> n, <span class="at">model =</span> <span class="st">&quot;pp&quot;</span>, <span class="at">prior =</span> pr2, <span class="at">data =</span> rainfall,</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>                <span class="at">thresh =</span> <span class="dv">40</span>, <span class="at">noy =</span> <span class="dv">54</span>),</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">rpost_rcpp =</span> <span class="fu">rpost_rcpp</span>(<span class="at">n =</span> n, <span class="at">model =</span> <span class="st">&quot;pp&quot;</span>, <span class="at">prior =</span> pr2, <span class="at">data =</span> rainfall,</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>                          <span class="at">thresh =</span> <span class="dv">40</span>, <span class="at">noy =</span> <span class="dv">54</span>),</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">evdbayes =</span> <span class="fu">posterior</span>(<span class="at">n =</span> n, <span class="at">init =</span> t0, <span class="at">prior =</span> pr, <span class="st">&quot;pp&quot;</span>, <span class="at">data =</span> rainfall,</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>                       <span class="at">thresh =</span> <span class="dv">40</span>, <span class="at">noy =</span> <span class="dv">54</span>, <span class="at">psd =</span> s, <span class="at">burn =</span> <span class="dv">0</span>)</span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    res <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>      <span class="at">rpost =</span> <span class="fu">rpost</span>(<span class="at">n =</span> n, <span class="at">model =</span> <span class="st">&quot;pp&quot;</span>, <span class="at">prior =</span> pr2, <span class="at">data =</span> rainfall,</span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>                <span class="at">thresh =</span> <span class="dv">40</span>, <span class="at">noy =</span> <span class="dv">54</span>),</span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>      <span class="at">rpost_rcpp =</span> <span class="fu">rpost_rcpp</span>(<span class="at">n =</span> n, <span class="at">model =</span> <span class="st">&quot;pp&quot;</span>, <span class="at">prior =</span> pr2, <span class="at">data =</span> rainfall,</span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>                          <span class="at">thresh =</span> <span class="dv">40</span>, <span class="at">noy =</span> <span class="dv">54</span>)</span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  }  </span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">options</span>(<span class="at">microbenchmark.unit =</span> <span class="cn">NULL</span>)</span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(res, <span class="at">signif =</span> <span class="dv">3</span>)</span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">options</span>(<span class="at">microbenchmark.unit =</span> <span class="st">&quot;relative&quot;</span>)</span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(res, <span class="at">signif =</span> <span class="dv">2</span>)</span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>}  </span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Unit: milliseconds</span></span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        expr   min    lq mean median    uq   max neval</span></span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       rpost 465.0 484.0  492  489.0 499.0 568.0   100</span></span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp  40.2  42.1   44   43.7  45.6  50.2   100</span></span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    evdbayes 260.0 265.0  271  269.0 271.0 338.0   100</span></span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Unit: relative</span></span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        expr  min   lq mean median uq  max neval</span></span>
-<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       rpost 12.0 11.0 11.0   11.0 11 11.0   100</span></span>
-<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp  1.0  1.0  1.0    1.0  1  1.0   100</span></span>
-<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    evdbayes  6.5  6.3  6.2    6.1  6  6.7   100</span></span></code></pre></div>
-<p>In this example <code>rpost</code> is slower than <code>posterior</code> but <code>rpost_rcpp</code> is substantially faster than <code>posterior</code>.</p>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (got_microbenchmark) {</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  res <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">rpost =</span> <span class="fu">rpost</span>(<span class="at">n =</span> n, <span class="at">model =</span> <span class="st">&quot;pp&quot;</span>, <span class="at">prior =</span> pr2, <span class="at">data =</span> rainfall,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>                  <span class="at">thresh =</span> <span class="dv">40</span>, <span class="at">noy =</span> <span class="dv">54</span>),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">rpost_rcpp =</span> <span class="fu">rpost_rcpp</span>(<span class="at">n =</span> n, <span class="at">model =</span> <span class="st">&quot;pp&quot;</span>, <span class="at">prior =</span> pr2, </span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>                            <span class="at">data =</span> rainfall, <span class="at">thresh =</span> <span class="dv">40</span>, <span class="at">noy =</span> <span class="dv">54</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">microbenchmark.unit =</span> <span class="cn">NULL</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res, <span class="at">signif =</span> <span class="dv">3</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Unit: milliseconds</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        expr   min    lq  mean median    uq   max neval</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       rpost 456.0 500.0 536.0  525.0 562.0 779.0   100</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp  40.2  43.3  46.6   45.6  48.8  59.6   100</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">microbenchmark.unit =</span> <span class="st">&quot;relative&quot;</span>)</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res, <span class="at">signif =</span> <span class="dv">2</span>)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Unit: relative</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        expr min lq mean median uq max neval</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       rpost  11 12   11     12 12  13   100</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp   1  1    1      1  1   1   100</span></span></code></pre></div>
+<p>Again, a comparison with the function <code>posterior</code> in
+<strong>evdbayes</strong> is not shown, but <code>rpost</code> is slower
+and <code>rpost_rcpp</code> substantially faster than
+<code>posterior</code>.</p>
 </div>
 </div>
 <div id="cpp_fun" class="section level2">
 <h2>Providing a user-defined prior</h2>
-<p>If the user wishes to supply their own prior to <code>rpost_rcpp</code> then they must first write a C++ function that evaluates the log of the prior density. The general way that <strong>rust</strong> (and hence <strong>revdbayes</strong>) enables users to provide their own C++ log-prior functions uses external pointers and is based on the <a href="https://gallery.rcpp.org/">Rcpp Gallery</a> article <a href="https://gallery.rcpp.org/articles/passing-cpp-function-pointers/">Passing user-supplied C++ functions</a> by Dirk Eddelbuettel.</p>
-<p>The implementation in <strong>rust</strong> requires this C++ function to have a particular structure: it must take a constant reference to an <code>Rcpp::NumericVector</code>, say <code>x</code>, a constant reference to an <code>Rcpp::List</code>, say <code>ppars</code>, and return a <code>double</code> precision scalar. Here <code>x</code> is the argument of the prior density, i.e. the parameter vector of the extreme value model, and <code>ppars</code> is a list containing the values of prior parameters whose values are not specified inside the function. Thus values of any parameters in the prior can be changed without editing the function. If there are no such parameters then the argument <code>ppars</code> must still be present in the C++ function, even though the list provided to the function will be empty.</p>
-<p>A simple way to provide C++ log-prior functions is to put them in a file, say <code>user_fns.cpp</code>, perhaps taking advantage of the R-like syntax made available by <a href="https://dirk.eddelbuettel.com/code/rcpp/Rcpp-sugar.pdf">Rcpp sugar</a>. Example content is provided below. This file is available on the <a href="https://github.com/paulnorthrop/revdbayes/blob/master/src/user_priors.cpp">revdbayes Github page</a>.The functions in this file are compiled and made available to R, either using the <code>Rcpp::sourceCpp</code> function (e.g. <code>Rcpp::sourceCpp(&quot;user_fns.cpp&quot;)</code>) or using RStudio’s Source button on the editor toolbar. The example content below also includes the function <code>create_prior_xptr</code>, which creates an external pointer to a C++ function. See . It is this external pointer that is passed to <code>set_prior</code> to set the prior. If the user has written a C++ function, say <code>new_name</code>, they need to add to <code>create_prior_xptr</code> two lines of code:</p>
+<p>If the user wishes to supply their own prior to
+<code>rpost_rcpp</code> then they must first write a C++ function that
+evaluates the log of the prior density. The general way that
+<strong>rust</strong> (and hence <strong>revdbayes</strong>) enables
+users to provide their own C++ log-prior functions uses external
+pointers and is based on the <a href="https://gallery.rcpp.org/">Rcpp
+Gallery</a> article <a href="https://gallery.rcpp.org/articles/passing-cpp-function-pointers/">Passing
+user-supplied C++ functions</a> by Dirk Eddelbuettel.</p>
+<p>The implementation in <strong>rust</strong> requires this C++
+function to have a particular structure: it must take a constant
+reference to an <code>Rcpp::NumericVector</code>, say <code>x</code>, a
+constant reference to an <code>Rcpp::List</code>, say
+<code>ppars</code>, and return a <code>double</code> precision scalar.
+Here <code>x</code> is the argument of the prior density, i.e. the
+parameter vector of the extreme value model, and <code>ppars</code> is a
+list containing the values of prior parameters whose values are not
+specified inside the function. Thus values of any parameters in the
+prior can be changed without editing the function. If there are no such
+parameters then the argument <code>ppars</code> must still be present in
+the C++ function, even though the list provided to the function will be
+empty.</p>
+<p>A simple way to provide C++ log-prior functions is to put them in a
+file, say <code>user_fns.cpp</code>, perhaps taking advantage of the
+R-like syntax made available by <a href="https://dirk.eddelbuettel.com/code/rcpp/Rcpp-sugar.pdf">Rcpp
+sugar</a>. Example content is provided below. This file is available on
+the <a href="https://github.com/paulnorthrop/revdbayes/blob/master/src/user_priors.cpp">revdbayes
+Github page</a>.The functions in this file are compiled and made
+available to R, either using the <code>Rcpp::sourceCpp</code> function
+(e.g. <code>Rcpp::sourceCpp(&quot;user_fns.cpp&quot;)</code>) or using RStudio’s
+Source button on the editor toolbar. The example content below also
+includes the function <code>create_prior_xptr</code>, which creates an
+external pointer to a C++ function. See . It is this external pointer
+that is passed to <code>set_prior</code> to set the prior. If the user
+has written a C++ function, say <code>new_name</code>, they need to add
+to <code>create_prior_xptr</code> two lines of code:</p>
 <pre><code>else if (fstr == &quot;new_name&quot;)  
   return(Rcpp::XPtr&lt;funcPtr&gt;(new funcPtr(&amp;new_name))) ;</code></pre>
-<p>in order that they can create an external pointer for <code>new_name</code> using <code>create_xptr</code>.</p>
-<p>The following excerpt from the example <code>user_fns.cpp</code> file contains a C++ function <code>user_gp_flat</code> to evaluate (the log of) a prior density <span class="math inline">\(\pi(\sigma, \xi) \propto \sigma^{-1}, \, \sigma &gt; 0\)</span>, with an extra parameter <code>min_xi</code> enabling a prior lower bound to be set for <span class="math inline">\(\xi\)</span>. The same prior can be set, using an in-built prior function, using <code>set_prior(prior = &quot;flat&quot;, model = &quot;gp&quot;, min_xi = -1)</code>, where we have set <code>min_xi = -1</code>. Note that . Hence in <code>user_gp_flat</code> <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(\xi\)</span> are <code>x[0]</code> and <code>x[1]</code> not <code>x[1]</code> and <code>x[2]</code>.</p>
+<p>in order that they can create an external pointer for
+<code>new_name</code> using <code>create_xptr</code>.</p>
+<p>The following excerpt from the example <code>user_fns.cpp</code> file
+contains a C++ function <code>user_gp_flat</code> to evaluate (the log
+of) a prior density <span class="math inline">\(\pi(\sigma, \xi) \propto
+\sigma^{-1}, \, \sigma &gt; 0\)</span>, with an extra parameter
+<code>min_xi</code> enabling a prior lower bound to be set for <span class="math inline">\(\xi\)</span>. The same prior can be set, using an
+in-built prior function, using
+<code>set_prior(prior = &quot;flat&quot;, model = &quot;gp&quot;, min_xi = -1)</code>, where
+we have set <code>min_xi = -1</code>. Note that . Hence in
+<code>user_gp_flat</code> <span class="math inline">\(\sigma\)</span>
+and <span class="math inline">\(\xi\)</span> are <code>x[0]</code> and
+<code>x[1]</code> not <code>x[1]</code> and <code>x[2]</code>.</p>
 <pre><code>// [[Rcpp::depends(Rcpp)]]
 
 #include &lt;Rcpp.h&gt;
@@ -354,7 +606,14 @@ SEXP create_prior_xptr(std::string fstr) {
 /*** R
   ptr_gp_flat &lt;- create_prior_xptr(&quot;gp_flat&quot;)
 */</code></pre>
-<p>Once the external pointer to the user-supplied prior C++ function has been created it is passed to <code>set_prior</code>, along with any required parameter values. The following example repeats the example in <a href="#gp_example">Generalised Pareto (GP) model</a>. The difference is that now we create the pointer <code>ptr_gp_flat</code> and pass it to <code>set_prior</code> using <code>prior = ptr_gp_flat</code> rather than using the arguments <code>prior = &quot;flat&quot;, model = &quot;gp&quot;</code> to specify the equivalent in-built prior.</p>
+<p>Once the external pointer to the user-supplied prior C++ function has
+been created it is passed to <code>set_prior</code>, along with any
+required parameter values. The following example repeats the example in
+<a href="#gp_example">Generalised Pareto (GP) model</a>. The difference
+is that now we create the pointer <code>ptr_gp_flat</code> and pass it
+to <code>set_prior</code> using <code>prior = ptr_gp_flat</code> rather
+than using the arguments <code>prior = &quot;flat&quot;, model = &quot;gp&quot;</code> to
+specify the equivalent in-built prior.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># GP model, user-defined prior</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ptr_gp_flat <span class="ot">&lt;-</span> <span class="fu">create_prior_xptr</span>(<span class="st">&quot;gp_flat&quot;</span>)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>p_user <span class="ot">&lt;-</span> <span class="fu">set_prior</span>(<span class="at">prior =</span> ptr_gp_flat, <span class="at">model =</span> <span class="st">&quot;gp&quot;</span>, <span class="at">min_xi =</span> <span class="sc">-</span><span class="dv">1</span>)</span>
@@ -368,19 +627,26 @@ SEXP create_prior_xptr(std::string fstr) {
 </script>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-Rcpp" class="csl-entry">
-Eddelbuettel, D., and R. Francois. 2011. <span>“Rcpp: Seamless <span>R</span> and <span>C++</span> Integration.”</span> <em>Journal of Statistical Software</em> 40 (8): 1–18. doi:<a href="https://doi.org/10.18637/jss.v040.i08">10.18637/jss.v040.i08</a>.
+Eddelbuettel, D., and R. Francois. 2011. <span>“Rcpp: Seamless
+<span>R</span> and <span>C++</span> Integration.”</span> <em>Journal of
+Statistical Software</em> 40 (8): 1–18. doi:<a href="https://doi.org/10.18637/jss.v040.i08">10.18637/jss.v040.i08</a>.
 </div>
 <div id="ref-microbenchmark" class="csl-entry">
-Mersmann, O. 2015. <em>Microbenchmark: Accurate Timing Functions</em>. <a href="https://CRAN.R-project.org/package=microbenchmark">https://CRAN.R-project.org/package=microbenchmark</a>.
+Mersmann, O. 2015. <em>Microbenchmark: Accurate Timing Functions</em>.
+<a href="https://CRAN.R-project.org/package=microbenchmark">https://CRAN.R-project.org/package=microbenchmark</a>.
 </div>
 <div id="ref-rust" class="csl-entry">
-Northrop, P. J. 2017. <em><span class="nocase">r</span>ust: Ratio-of-Uniforms Simulation with Transformation</em>. <a href="https://CRAN.R-project.org/package=rust">https://CRAN.R-project.org/package=rust</a>.
+Northrop, P. J. 2017. <em><span class="nocase">r</span>ust:
+Ratio-of-Uniforms Simulation with Transformation</em>. <a href="https://CRAN.R-project.org/package=rust">https://CRAN.R-project.org/package=rust</a>.
 </div>
 <div id="ref-coda" class="csl-entry">
-Plummer, M., N. Best, K. Cowles, and K. Vines. 2006. <span>“CODA: Convergence Diagnosis and Output Analysis for <span>MCMC</span>.”</span> <em>R News</em> 6 (1): 7–11. <a href="https://www.r-project.org/doc/Rnews/Rnews_2006-1.pdf">https://www.r-project.org/doc/Rnews/Rnews_2006-1.pdf</a>.
+Plummer, M., N. Best, K. Cowles, and K. Vines. 2006. <span>“CODA:
+Convergence Diagnosis and Output Analysis for <span>MCMC</span>.”</span>
+<em>R News</em> 6 (1): 7–11. <a href="https://www.r-project.org/doc/Rnews/Rnews_2006-1.pdf">https://www.r-project.org/doc/Rnews/Rnews_2006-1.pdf</a>.
 </div>
 <div id="ref-evdbayes" class="csl-entry">
-Stephenson, A., and M. Ribatet. 2014. <em><span class="nocase">e</span>vdbayes: Bayesian Analysis in Extreme Value Theory</em>. <a href="https://CRAN.R-project.org/package=evdbayes">https://CRAN.R-project.org/package=evdbayes</a>.
+Stephenson, A., and M. Ribatet. 2014. <em><span class="nocase">e</span>vdbayes: Bayesian Analysis in Extreme Value
+Theory</em>. <a href="https://CRAN.R-project.org/package=evdbayes">https://CRAN.R-project.org/package=evdbayes</a>.
 </div>
 </div>
 </div>
