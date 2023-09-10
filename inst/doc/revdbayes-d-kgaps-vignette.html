@@ -12,7 +12,7 @@
 
 <meta name="author" content="Paul J. Northrop" />
 
-<meta name="date" content="2022-12-27" />
+<meta name="date" content="2023-09-09" />
 
 <title>Inference for the extremal index using threshold interexceedance times</title>
 
@@ -31,23 +31,23 @@ document.addEventListener('DOMContentLoaded', function(e) {
 </script>
 
 <style type="text/css">
-code{white-space: pre-wrap;}
-span.smallcaps{font-variant: small-caps;}
-span.underline{text-decoration: underline;}
-div.column{display: inline-block; vertical-align: top; width: 50%;}
-div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-ul.task-list{list-style: none;}
-</style>
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 
 
 <style type="text/css">
-code {
-white-space: pre;
-}
-.sourceCode {
-overflow: visible;
-}
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
@@ -65,54 +65,55 @@ pre > code.sourceCode { white-space: pre-wrap; }
 pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
-{ counter-reset: source-line 0; }
+  { counter-reset: source-line 0; }
 pre.numberSource code > span
-{ position: relative; left: -4em; counter-increment: source-line; }
+  { position: relative; left: -4em; counter-increment: source-line; }
 pre.numberSource code > span > a:first-child::before
-{ content: counter(source-line);
-position: relative; left: -1em; text-align: right; vertical-align: baseline;
-border: none; display: inline-block;
--webkit-touch-callout: none; -webkit-user-select: none;
--khtml-user-select: none; -moz-user-select: none;
--ms-user-select: none; user-select: none;
-padding: 0 4px; width: 4em;
-color: #aaaaaa;
-}
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-{ }
+  {   }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } 
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
-code span.at { color: #7d9029; } 
-code span.bn { color: #40a070; } 
-code span.bu { color: #008000; } 
-code span.cf { color: #007020; font-weight: bold; } 
-code span.ch { color: #4070a0; } 
-code span.cn { color: #880000; } 
-code span.co { color: #60a0b0; font-style: italic; } 
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
-code span.do { color: #ba2121; font-style: italic; } 
-code span.dt { color: #902000; } 
-code span.dv { color: #40a070; } 
-code span.er { color: #ff0000; font-weight: bold; } 
-code span.ex { } 
-code span.fl { color: #40a070; } 
-code span.fu { color: #06287e; } 
-code span.im { color: #008000; font-weight: bold; } 
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
-code span.kw { color: #007020; font-weight: bold; } 
-code span.op { color: #666666; } 
-code span.ot { color: #007020; } 
-code span.pp { color: #bc7a00; } 
-code span.sc { color: #4070a0; } 
-code span.ss { color: #bb6688; } 
-code span.st { color: #4070a0; } 
-code span.va { color: #19177c; } 
-code span.vs { color: #4070a0; } 
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
 </style>
 <script>
 // apply pandoc div.sourceCode style to pre.sourceCode instead
@@ -146,25 +147,25 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
 
 
 <style type="text/css">
-
+/* for pandoc --citeproc since 2.11 */
 div.csl-bib-body { }
 div.csl-entry {
-clear: both;
+  clear: both;
 }
 .hanging div.csl-entry {
-margin-left:2em;
-text-indent:-2em;
+  margin-left:2em;
+  text-indent:-2em;
 }
 div.csl-left-margin {
-min-width:2em;
-float:left;
+  min-width:2em;
+  float:left;
 }
 div.csl-right-inline {
-margin-left:2em;
-padding-left:1em;
+  margin-left:2em;
+  padding-left:1em;
 }
 div.csl-indent {
-margin-left: 2em;
+  margin-left: 2em;
 }
 </style>
 
@@ -363,15 +364,14 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">Inference for the extremal index using
 threshold interexceedance times</h1>
 <h4 class="author">Paul J. Northrop</h4>
-<h4 class="date">2022-12-27</h4>
+<h4 class="date">2023-09-09</h4>
 
 
 <div id="TOC">
 <ul>
-<li><a href="#k-gaps-and-d-gaps-models" id="toc-k-gaps-and-d-gaps-models"><span class="math inline">\(K\)</span>-gaps and <span class="math inline">\(D\)</span>-gaps models</a></li>
-<li><a href="#bayesian-inference" id="toc-bayesian-inference">Bayesian
-Inference</a></li>
-<li><a href="#references" id="toc-references">References</a></li>
+<li><a href="#k-gaps-and-d-gaps-models"><span class="math inline">\(K\)</span>-gaps and <span class="math inline">\(D\)</span>-gaps models</a></li>
+<li><a href="#bayesian-inference">Bayesian Inference</a></li>
+<li><a href="#references">References</a></li>
 </ul>
 </div>
 
@@ -434,7 +434,7 @@ with the posterior density superimposed.</p>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>thresh <span class="ot">&lt;-</span> <span class="fu">quantile</span>(newlyn, <span class="at">probs =</span> <span class="fl">0.90</span>)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>postsim <span class="ot">&lt;-</span> <span class="fu">kgaps_post</span>(newlyn, thresh, <span class="at">k =</span> <span class="dv">1</span>)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(postsim, <span class="at">xlab =</span> <span class="fu">expression</span>(theta))</span></code></pre></div>
-<p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+<p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
 <p>The function <code>dgaps_post</code> has the same functionality as
 <code>kgaps-post</code>, except that the argument <code>k</code> is
 replaced by an argument <code>D</code>.</p>
