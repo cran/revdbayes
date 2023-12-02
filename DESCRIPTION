@@ -1,7 +1,7 @@
 Package: revdbayes
 Title: Ratio-of-Uniforms Sampling for Bayesian Extreme Value Analysis
-Version: 1.5.2
-Date: 2023-09-09
+Version: 1.5.3
+Date: 2023-12-01
 Authors@R: c(person(c("Paul", "J."), "Northrop", email = "p.northrop@ucl.ac.uk",
   role = c("aut", "cre", "cph")), person(c("Scott", "D."), "Grimshaw", 
   role = c("ctb")))
@@ -34,9 +34,9 @@ BugReports: https://github.com/paulnorthrop/revdbayes/issues
 LinkingTo: Rcpp (>= 0.12.10), RcppArmadillo
 Config/testthat/edition: 3
 NeedsCompilation: yes
-Packaged: 2023-09-09 21:30:21 UTC; paul
+Packaged: 2023-12-01 20:18:05 UTC; Paul
 Author: Paul J. Northrop [aut, cre, cph],
   Scott D. Grimshaw [ctb]
 Maintainer: Paul J. Northrop <p.northrop@ucl.ac.uk>
 Repository: CRAN
-Date/Publication: 2023-09-10 00:00:02 UTC
+Date/Publication: 2023-12-02 00:40:05 UTC

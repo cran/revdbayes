@@ -16,23 +16,22 @@ wbinpost(n, prior, ds_bin)
 \item{ds_bin}{A numeric list.  Sufficient statistics for inference
   about the binomial probability \eqn{p}.  Contains
 \itemize{
-  \item {\code{sf} : a logical vector of success (\code{TRUE}) and failure
-    (\code{FALSE}) indicators.}
-  \item {\code{w} : a numeric vector of length \code{length(sf)} containing
+  \item \code{sf} : a logical vector of success (\code{TRUE}) and failure
+    (\code{FALSE}) indicators.
+  \item \code{w} : a numeric vector of length \code{length(sf)} containing
     the values by which to multiply the observations when constructing the
-    log-likelihood.}
+    log-likelihood.
 }}
 }
 \value{
 An object (list) of class \code{"binpost"} with components
-  \itemize{
-    \item{\code{bin_sim_vals}:} {An \code{n} by 1 numeric matrix of values
+
+    \item{\code{bin_sim_vals}:}{An \code{n} by 1 numeric matrix of values
       simulated from the posterior for the binomial
       probability \eqn{p}}
-    \item{\code{bin_logf}:} {A function returning the log-posterior for
+    \item{\code{bin_logf}:}{A function returning the log-posterior for
       \eqn{p}.}
-    \item{\code{bin_logf_args}:} {A list of arguments to \code{bin_logf}.}
-  }
+    \item{\code{bin_logf_args}:}{A list of arguments to \code{bin_logf}.}
 }
 \description{
 Samples from the posterior distribution of the probability \eqn{p}
