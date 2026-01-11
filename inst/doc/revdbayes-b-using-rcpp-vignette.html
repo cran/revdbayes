@@ -12,7 +12,7 @@
 
 <meta name="author" content="Paul J. Northrop" />
 
-<meta name="date" content="2024-08-18" />
+<meta name="date" content="2026-01-11" />
 
 <title>Faster simulation using revdbayes</title>
 
@@ -50,8 +50,9 @@ overflow: visible;
 }
 </style>
 <style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -363,7 +364,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Faster simulation using revdbayes</h1>
 <h4 class="author">Paul J. Northrop</h4>
-<h4 class="date">2024-08-18</h4>
+<h4 class="date">2026-01-11</h4>
 
 
 <div id="TOC">
@@ -410,9 +411,10 @@ We also compare the speed of these functions with the function
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="cf">if</span> (got_microbenchmark) {</span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  <span class="fu">library</span>(microbenchmark)</span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>}</span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co"># Set the number of posterior samples required.</span></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">46</span>)</span></code></pre></div>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; Warning: package &#39;microbenchmark&#39; was built under R version 4.5.2</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co"># Set the number of posterior samples required.</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">46</span>)</span></code></pre></div>
 <div id="gp_example" class="section level3">
 <h3>Generalised Pareto (GP) model</h3>
 <p>We repeat the analysis of the Gulf of Mexico Wave Height Data from
@@ -432,13 +434,13 @@ time.</p>
 <span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>  <span class="fu">print</span>(res, <span class="at">signif =</span> <span class="dv">2</span>)</span>
 <span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>}  </span>
 <span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; Unit: milliseconds</span></span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt;        expr  min   lq mean median   uq   max neval</span></span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt;       rpost 81.1 85.6 96.3   88.5 94.7 285.0   100</span></span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp 16.2 17.4 20.3   18.8 20.4  57.3   100</span></span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; Unit: relative</span></span>
-<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt;        expr min  lq mean median  uq max neval</span></span>
-<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt;       rpost   5 4.9  4.7    4.7 4.7   5   100</span></span>
-<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp   1 1.0  1.0    1.0 1.0   1   100</span></span></code></pre></div>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt;        expr  min   lq  mean median    uq   max neval</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt;       rpost 84.0 92.9 110.0    102 116.0 216.0   100</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp 16.9 18.4  21.1     20  22.7  35.7   100</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; Unit: milliseconds</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt;        expr min lq mean median  uq max neval</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt;       rpost  84 93  110    100 120 220   100</span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp  17 18   21     20  23  36   100</span></span></code></pre></div>
 <p>In this example <code>rpost_rcpp</code> is indeed much faster than
 <code>rpost</code>.</p>
 </div>
@@ -458,16 +460,16 @@ revdbayes</a>.</p>
 <span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>}    </span>
 <span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="fu">options</span>(<span class="at">microbenchmark.unit =</span> <span class="cn">NULL</span>)</span>
 <span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="fu">print</span>(res, <span class="at">signif =</span> <span class="dv">3</span>)</span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; Unit: milliseconds</span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt;        expr   min    lq  mean median    uq max neval</span></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt;       rpost 216.0 226.0 240.0  232.0 243.0 391   100</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp  59.1  63.9  69.6   66.7  69.7 197   100</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; Unit: relative</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt;        expr  min  lq mean median   uq  max neval</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt;       rpost 3.65 3.6 3.74   3.68 3.73 3.88   100</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp 1.00 1.0 1.00   1.00 1.00 1.00   100</span></span>
 <span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="fu">options</span>(<span class="at">microbenchmark.unit =</span> <span class="st">&quot;relative&quot;</span>)</span>
 <span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="fu">print</span>(res, <span class="at">signif =</span> <span class="dv">2</span>)</span>
 <span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; Unit: relative</span></span>
 <span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt;        expr min  lq mean median  uq max neval</span></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt;       rpost 3.6 3.5  3.5    3.5 3.5   2   100</span></span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp 1.0 1.0  1.0    1.0 1.0   1   100</span></span></code></pre></div>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt;       rpost 3.6 3.6  3.7    3.7 3.7 3.9   100</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp 1.0 1.0  1.0    1.0 1.0 1.0   100</span></span></code></pre></div>
 <p>Comparison to the example calculations that feature in the
 <strong>evdbayes</strong> user guide, based on the
 <code>posterior</code> function, are not shown because
@@ -504,16 +506,16 @@ revdbayes</a>.</p>
 <span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>}</span>
 <span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="fu">options</span>(<span class="at">microbenchmark.unit =</span> <span class="cn">NULL</span>)</span>
 <span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="fu">print</span>(res, <span class="at">signif =</span> <span class="dv">3</span>)</span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; Unit: milliseconds</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt;        expr   min    lq  mean median    uq max neval</span></span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt;       rpost 365.0 389.0 409.0  399.0 423.0 594   100</span></span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp  36.2  39.9  43.2   41.9  44.8  86   100</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; Unit: relative</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt;        expr  min   lq mean median   uq  max neval</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt;       rpost 10.2 10.2 9.81   10.1 10.1 3.95   100</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp  1.0  1.0 1.00    1.0  1.0 1.00   100</span></span>
 <span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="fu">options</span>(<span class="at">microbenchmark.unit =</span> <span class="st">&quot;relative&quot;</span>)</span>
 <span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="fu">print</span>(res, <span class="at">signif =</span> <span class="dv">2</span>)</span>
 <span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt; Unit: relative</span></span>
-<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt;        expr min  lq mean median  uq max neval</span></span>
-<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co">#&gt;       rpost  10 9.8  9.5    9.5 9.4 6.9   100</span></span>
-<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp   1 1.0  1.0    1.0 1.0 1.0   100</span></span></code></pre></div>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt;        expr min lq mean median uq max neval</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co">#&gt;       rpost  10 10  9.8     10 10   4   100</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt;  rpost_rcpp   1  1  1.0      1  1   1   100</span></span></code></pre></div>
 <p>Again, a comparison with the function <code>posterior</code> in
 <strong>evdbayes</strong> is not shown, but <code>rpost</code> is slower
 and <code>rpost_rcpp</code> substantially faster than
