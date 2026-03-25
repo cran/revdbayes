@@ -35,11 +35,11 @@ if (got_microbenchmark) {
     rpost_rcpp = rpost_rcpp(n = n, model = "gev", prior = pn, 
                             data = portpirie)
   )
+  options(microbenchmark.unit = NULL)
+  print(res, signif = 3)
+  options(microbenchmark.unit = "relative")
+  print(res, signif = 2)
 }    
-options(microbenchmark.unit = NULL)
-print(res, signif = 3)
-options(microbenchmark.unit = "relative")
-print(res, signif = 2)
 
 ## -----------------------------------------------------------------------------
 # Informative prior set using revdbayes
@@ -52,11 +52,11 @@ if (got_microbenchmark) {
     rpost_rcpp = rpost_rcpp(n = n, model = "pp", prior = pr2, 
                             data = rainfall, thresh = 40, noy = 54)
   )
+  options(microbenchmark.unit = NULL)
+  print(res, signif = 3)
+  options(microbenchmark.unit = "relative")
+  print(res, signif = 2)
 }
-options(microbenchmark.unit = NULL)
-print(res, signif = 3)
-options(microbenchmark.unit = "relative")
-print(res, signif = 2)
 
 ## -----------------------------------------------------------------------------
 # GP model, user-defined prior
