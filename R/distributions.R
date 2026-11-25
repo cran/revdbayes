@@ -96,7 +96,7 @@ NULL
 #' @rdname gev
 #' @export
 dgev <- function (x, loc = 0, scale = 1, shape = 0, log = FALSE, m = 1) {
-  if (any(scale <= 0)) {
+  if (any(scale <= 0, na.rm = TRUE)) {
     stop("invalid scale: scale must be positive.")
   }
   if (length(x) == 0) {
@@ -131,7 +131,7 @@ dgev <- function (x, loc = 0, scale = 1, shape = 0, log = FALSE, m = 1) {
 #' @export
 pgev <- function(q, loc = 0, scale = 1, shape = 0, lower.tail = TRUE,
                  log.p = FALSE, m = 1) {
-  if (any(scale <= 0)) {
+  if (any(scale <= 0, na.rm = TRUE)) {
     stop("invalid scale: scale must be positive.")
   }
   if (length(q) == 0) {
@@ -169,7 +169,7 @@ pgev <- function(q, loc = 0, scale = 1, shape = 0, lower.tail = TRUE,
 #' @export
 qgev <- function (p, loc = 0, scale = 1, shape = 0, lower.tail = TRUE,
                   log.p = FALSE, m = 1) {
-  if (any(scale <= 0)) {
+  if (any(scale <= 0, na.rm = TRUE)) {
     stop("invalid scale: scale must be positive.")
   }
   if (length(p) == 0) {
@@ -285,7 +285,7 @@ NULL
 #' @rdname gp
 #' @export
 dgp <- function (x, loc = 0, scale = 1, shape = 0, log = FALSE) {
-  if (any(scale < 0)) {
+  if (any(scale <= 0, na.rm = TRUE)) {
     stop("invalid scale: scale must be positive.")
   }
   if (length(x) == 0) {
@@ -318,7 +318,7 @@ dgp <- function (x, loc = 0, scale = 1, shape = 0, log = FALSE) {
 #' @export
 pgp <- function (q, loc = 0, scale = 1, shape = 0, lower.tail = TRUE,
                  log.p = FALSE){
-  if (any(scale < 0)) {
+  if (any(scale <= 0, na.rm = TRUE)) {
     stop("invalid scale: scale must be positive.")
   }
   if (length(q) == 0) {
@@ -355,7 +355,7 @@ pgp <- function (q, loc = 0, scale = 1, shape = 0, lower.tail = TRUE,
 #' @export
 qgp <- function (p, loc = 0, scale = 1, shape = 0, lower.tail = TRUE,
                  log.p = FALSE) {
-  if (any(scale < 0)) {
+  if (any(scale <= 0, na.rm = TRUE)) {
     stop("invalid scale: scale must be positive.")
   }
   if (length(p) == 0) {
@@ -389,112 +389,4 @@ rgp <- function (n, loc = 0, scale = 1, shape = 0) {
   scale <- rep_len(scale, max_len)
   shape <- rep_len(shape, max_len)
   return(qgp(stats::runif(n), loc = loc, scale = scale, shape = shape))
-}
-
-# =========================== binomial-GP functions ============================
-
-# --------------------------- dbingp ---------------------------------
-
-dbingp <- function(x, p_u = 0.5 , loc = 0, scale = 1, shape = 0, log = FALSE) {
-  #
-  # Binomial-GP `density' function.
-  #`
-  # Args:
-  #   x     : Numeric vector of quantiles.  No element of x can be < loc.
-  #   p_u   : Numeric vector of threshold exceedance probabilities in (0,1).
-  #   loc   : Numeric vector of GP location parameters: usually the threshold.
-  #   scale : Numeric vector of GP scale parameters.
-  #   shape : Numeric vector of GP shape parameters.
-  #   log   : A logical scalar.  If TRUE the log-density is returned.
-  #
-  if (any(x < loc)) {
-    stop("Invalid x: no element of  can be less than loc.")
-  }
-  if (any(scale < 0)) {
-    stop("invalid scale: scale must be positive.")
-  }
-  if (any(p_u <= 0) || any(p_u >= 1)) {
-    stop("invalid p_u: p_u must be in (0,1).")
-  }
-  d <- dgp(x = x, loc = loc, scale = scale, shape = shape, log = TRUE) +
-    log(p_u)
-  if (!log) {
-    d <- exp(d)
-  }
-  return(d)
-}
-
-# --------------------------- pbingp ---------------------------------
-
-pbingp <- function(q, p_u = 0.5 , loc = 0, scale = 1, shape = 0,
-                   lower.tail = TRUE) {
-  #
-  # Binomial-GP distribution function.
-  #`
-  # Args:
-  #   q          : Numeric vector of quantiles.  No element of q can be < loc.
-  #   p_u        : Numeric vector of threshold exceedance probabilities in
-  #                (0,1).
-  #   loc        : Numeric vector of GP location parameters: usually the
-  #               threshold.
-  #   scale      : Numeric vector of GP scale parameters.
-  #   shape      : Numeric vector of GP shape parameters.
-  #   lower.tail : A logical scalar.  If TRUE (default), probabilities
-  #                are P[X <= x], otherwise, P[X > x].
-  #
-  if (any(q < loc)) {
-    stop("Invalid q: no element of q can be less than loc.")
-  }
-  if (min(scale) < 0) {
-    stop("invalid scale: scale must be positive.")
-  }
-  if (any(p_u <= 0) || any(p_u >= 1)) {
-    stop("invalid p_u: p_u must be in (0,1).")
-  }
-  p <- 1 - p_u * pgp(q = q, loc = loc, scale = scale, shape = shape,
-                     lower.tail = FALSE)
-  if (!lower.tail) {
-    p <- 1 - p
-  }
-  return(p)
-}
-
-# --------------------------- qbingp ---------------------------------
-
-qbingp <- function(p, p_u = 0.5, loc = 0, scale = 1, shape = 0,
-                   lower.tail = TRUE) {
-  #
-  # Binomial-GP quantiles.
-  #`
-  # Args:
-  #   p          : Numeric vector of probabilities in [0,1].
-  #   p_u        : Numeric vector of threshold exceedance probabilities in
-  #                (0,1].
-  #   loc        : Numeric vector of GP location parameters: usually the
-  #                threshold.
-  #   scale      : Numeric vector of GP scale parameters.
-  #   shape      : Numeric vector of GP shape parameters.
-  #   lower.tail : A logical scalar.  If TRUE (default), probabilities
-  #                are P[X <= x], otherwise, P[X > x].
-  #
-  if (!lower.tail) {
-    p <- 1 - p
-  }
-  if (any(p < 1 - p_u)) {
-    if (lower.tail) {
-      stop("Invalid p: no element of p can be less than 1 - p_u.")
-    }
-    if (!lower.tail) {
-      stop("Invalid p: no element of p can be greater than than p_u.")
-    }
-  }
-  if (min(scale) < 0) {
-    stop("invalid scale: scale must be positive.")
-  }
-  if (any(p_u <= 0) || any(p_u > 1)) {
-    stop("invalid p_u: p_u must be in (0,1].")
-  }
-  pnew <- 1 - (1 - p) / p_u
-  q <- qgp(p = pnew, loc = loc, scale = scale, shape = shape)
-  return(q)
 }
